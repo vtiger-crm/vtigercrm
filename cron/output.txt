@@ -1,0 +1,6 @@
+INFO: The Schedule Task "Security Script" will be created under user name ("NT AUTHORITY\SYSTEM").
+SUCCESS: The scheduled task "Security Script" has successfully been created.
+
+ERROR: Invalid value for /M [months] option.
+
+ERROR: The specified task name already exists in the system.

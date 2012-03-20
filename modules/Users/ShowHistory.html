@@ -1,0 +1,53 @@
+<!--
+
+/*********************************************************************************
+** The contents of this file are subject to the vtiger CRM Public License Version 1.0
+ * ("License"); You may not use this file except in compliance with the License
+ * The Original Code is:  vtiger CRM Open Source
+ * The Initial Developer of the Original Code is vtiger.
+ * Portions created by vtiger are Copyright (C) vtiger.
+ * All Rights Reserved.
+ ********************************************************************************/
+-->
+<!-- BEGIN: main -->
+<table width="95%" border="0" cellpadding="0" cellspacing="0"  align="center">
+<tr>
+    	<td valign="top"><img src="<?php echo vtiger_imageurl('showPanelTopLeft.gif', $theme) ?>"></td>
+      <td class="showPanelBg" valign="top" width="100%" colspan="3" style="padding-left:20px; "><br />
+		<span class="lvtHeaderText">
+                  <b>{MOD.LBL_LOGIN_HISTORY_BUTTON_LABEL}</b></span>
+         <hr noshade="noshade" size="1" /><br>
+<!-- BEGIN: list_nav_row -->
+<table border="0" cellpadding="5" cellspacing="0" width="80%" align="center"><tr><td><input type="button" value=" &lsaquo; {APP.LBL_BACK} " name="back" class="classBtn" onClick="window.history.back();" /></td>
+<td align="right">{START_LINK}&nbsp;&nbsp;{PREVIOUS_LINK}&nbsp;&nbsp;
+                {NEXT_LINK}&nbsp;&nbsp;{END_LINK}&nbsp;&nbsp; {START_RECORD} - {END_RECORD} {APP.LBL_LIST_OF} {ROW_COUNT}&nbsp;&nbsp;</td></table>
+<!-- END: list_nav_row -->
+
+<table style="background-color: rgb(204, 204, 204);" border="0" cellpadding="5" cellspacing="1" width="80%" align="center" class="small"><tbody>
+	<tr height="20">
+		<td width="30%" class="lvtCol" NOWRAP>&nbsp;<a href="{ORDER_BY}user_name" class="listFormHeaderLinks">{APP.LBL_LIST_USER_NAME}{user_name_arrow}</a></td>
+		<td width="15%" class="lvtCol" NOWRAP>&nbsp;<a href="{ORDER_BY}user_ip" class="listFormHeaderLinks">{APP.LBL_LIST_USERIP}{user_ip_arrow}</a></td>
+		<td width="30%" class="lvtCol" NOWRAP>&nbsp;<a href="{ORDER_BY}login_time" class="listFormHeaderLinks">{APP.LBL_LIST_SIGNIN}{login_time_arrow}</a></td>
+		<td width="15%" class="lvtCol" NOWRAP>&nbsp;<a href="{ORDER_BY}logout_time" class="listFormHeaderLinks">{APP.LBL_LIST_SIGNOUT}{logout_time_arrow}</a></td>
+		<td width="10%" class="lvtCol" NOWRAP>&nbsp;{APP.LBL_LIST_STATUS}</td>
+	</tr>
+
+<!-- BEGIN: row -->
+<tr height=20 class="lvtColData" onmouseover="this.className='lvtColDataHover'" onmouseout="this.className='lvtColData'" bgcolor="white">
+    			<td valign=TOP style="padding:0px 3px 0px 3px;">{LOGIN.USER_NAME}</td>
+    			<td valign=TOP style="padding:0px 3px 0px 3px;">{LOGIN.USER_IP}</td>
+    			<td valign=TOP style="padding:0px 3px 0px 3px;">{LOGIN.LOGIN_TIME}</td>
+    			<td valign=TOP style="padding:0px 3px 0px 3px;">{LOGIN.LOGOUT_TIME}</td>
+    			<td valign=TOP style="padding:0px 3px 0px 3px;"  nowrap>{LOGIN.STATUS}</td>
+</tr>
+<!-- END: row -->
+</table>
+
+</td>
+
+    	<td valign="top"><img src="<?php echo vtiger_imageurl('showPanelTopRight.gif', $theme) ?>"></td>
+</tr>
+</table>
+<br>
+<!-- END: main -->
+

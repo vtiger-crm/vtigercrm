@@ -1,0 +1,57 @@
+<!--*********************************************************************************
+** The contents of this file are subject to the vtiger CRM Public License Version 1.0
+ * ("License"); You may not use this file except in compliance with the License
+ * The Original Code is:  vtiger CRM Open Source
+ * The Initial Developer of the Original Code is vtiger.
+ * Portions created by vtiger are Copyright (C) vtiger.
+ * All Rights Reserved.
+*
+ ********************************************************************************/
+-->
+<!-- BEGIN: main -->
+<html>
+<script language="JavaScript" type="text/javascript" src="include/js/general.js"></script>
+<script type="text/javascript" language="JavaScript" src="modules/Rss/Rss.js">
+{JAVASCRIPT}
+</script>
+<head>
+<title></title>
+<!--meta http-equiv="Content-Type" content="text/html; charset=UTF-8"-->
+<link rel="stylesheet" type="text/css" href="{THEME_PATH}style.css"/>
+</head>
+<form name="NewRss" action="index.php" onsubmit="return verify_data(NewRss)">
+<input type="hidden" name="action" value="Popup">
+<input type="hidden" name="module" value="Rss">
+<body topmargin="5" leftmargin="5">
+<table width="100%" border=0 cellspacing=2 cellpadding=2 class="formOuterBorder">
+<tr>
+	<td colspan="2" class="formSecHeader">Add RSS Feed:</td>
+</tr>
+  <tr> 
+    <td nowrap="nowrap" class="dataLabel" width="15%">RSS Feed URL:</td>
+    <td nowrap><input type="text" name="rssurl" class="textField" style="width:100%"/></td>
+  </tr>
+  <tr> 
+    <td nowrap="nowrap" valign="top" class="dataLabel">Choose Category: </td>
+    <td nowrap> 
+      <select name="rsscategory" class="select" style="width:100%">
+        {RSS_CATEGORY}
+      </select> </td>
+  </tr>
+  <tr>
+  	<td class="dataLabel"></td>
+  	<td><input name="setstarred" type="checkbox" value="1"> Set as Starred</td>
+  </tr>
+</table>
+<table width="100%" border="0" cellpadding="5" cellspacing="5" class="buttonLayer">
+  <tr> 
+    <td align=center><input type="submit" name="Button"  value="Add" class="button" tabindex="5"> 
+      <input type='button' value="Cancel" class="button" onClick="window.close()"/> 
+    </td>
+  </tr>
+</table>
+<p></p>
+</body>
+</form>
+</html>
+<!-- END: main -->

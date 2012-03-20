@@ -1,0 +1,19 @@
+webmail todos:
+--------------
+1) Add attachment uploading code for emails added to vtiger -- Done 05-25-06 -- mmbrich
+2) Create "Add to Vtiger" link to "Quick View" -- Done 01-30-06 -- mmbrich
+3) BCC current_user on all outgoing emails -- Done 01-30-06 -- mmbrich
+4) Automatically import threads on mbox refresh
+5) Multiple email accounts
+6) Fix entity relationships so entites will show up in "Emails" module under "More Information" -- Done 05-24-06 -- vtiger
+7) Store the msg-id of the imported emails (for checking the thread and importing) -- not needed
+8) Add all needed tab relationships to the DB
+9) Generate a related list of some kind for webmails -- Done 01-30-06 -- mmbrich
+10) Enable the following relationships with an Emails entity:
+	a) HelpDesk
+	b) Vendor
+	c) Product
+	d) {Multiple} Other Emails (for thread relationships)
+	e) ??
+11) Enable radio boxes and massdelete funtion
+12) Figure out a way to AJAX'ify checks for new messages and automatically insert them in the table? -- Done 05-25-06 -- mmbrich

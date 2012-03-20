@@ -1,0 +1,182 @@
+<?php
+/*********************************************************************************
+  ** The contents of this file are subject to the vtiger CRM Public License Version 1.0
+   * ("License"); You may not use this file except in compliance with the License
+   * The Original Code is:  vtiger CRM Open Source
+   * The Initial Developer of the Original Code is vtiger.
+   * Portions created by vtiger are Copyright (C) vtiger.
+   * All Rights Reserved.
+  *
+ ********************************************************************************/
+
+require_once('config.inc.php');
+
+/** Verify the script call is from trusted place. */
+global $application_unique_key;
+if($_REQUEST['app_key'] != $application_unique_key) {
+	echo "Access denied!";
+	exit;
+}
+
+/**
+ * Check if instance of this service is already running?
+ */
+$svcname = $_REQUEST['service'];
+// We need to make sure the PIDfile name is unqique
+$servicePIDFile = "logs/$svcname-service.pid";
+
+if(file_exists($servicePIDFile)) {
+	echo "Service $svcname already running! Check $servicePIDFile";
+	exit;
+} else {
+	$servicePIDFp = fopen($servicePIDFile, 'a');
+}
+
+/**
+ * Turn-off PHP error reporting.
+ */
+try { error_reporting(0); } catch(Exception $e) { }
+
+require_once('include/utils/utils.php');
+require_once('include/logging.php');
+
+// Get the list of Invoice for which Recurring is enabled.
+
+global $adb, $log;
+$log =& LoggerManager::getLogger('RecurringInvoice');
+$log->debug("invoked RecurringInvoice");
+
+$sql="SELECT vtiger_salesorder.salesorderid, recurring_frequency, start_period, end_period, last_recurring_date,  
+		 payment_duration, invoice_status FROM vtiger_salesorder 
+		 INNER JOIN vtiger_crmentity ON vtiger_salesorder.salesorderid = vtiger_crmentity.crmid AND vtiger_crmentity.deleted = 0 
+		 INNER JOIN vtiger_invoice_recurring_info ON vtiger_salesorder.salesorderid = vtiger_invoice_recurring_info.salesorderid
+		 WHERE DATE_FORMAT(start_period,'%Y-%m-%d') <= '".date('Y-m-d')."' AND DATE_FORMAT(end_period,'%Y-%m-%d') >= '".date('Y-m-d')."'";
+$result = $adb->pquery($sql, array());
+
+$no_of_salesorder = $adb->num_rows($result);
+if($no_of_salesorder > 0) {
+	
+	for($i=0; $i<$no_of_salesorder;$i++) {
+		$salesorder_id = $adb->query_result($result, $i,'salesorderid');
+		$start_period = $adb->query_result($result, $i,'start_period');
+		$end_period = $adb->query_result($result, $i,'end_period');
+		$last_recurring_date = $adb->query_result($result, $i,'last_recurring_date');
+		$recurring_frequency = $adb->query_result($result, $i,'recurring_frequency');
+		if ($last_recurring_date == NULL  || $last_recurring_date == '' || $last_recurring_date == '0000-00-00') {		
+			$sy = date("Y", strtotime($start_period));
+			$sm = date("m", strtotime($start_period));
+			$sd = date("d", strtotime($start_period));
+			$last_recurring_date = date('Y-m-d', strtotime($sy.'-'.$sm.'-'.($sd-1))); // Set last recurring date to a day before the start period.
+		}
+		list($y, $m, $d) = explode('-', $last_recurring_date);
+		
+		if (strtolower($recurring_frequency) == 'daily') {
+			$next_recurring_date = date('Y-m-d', strtotime("+1 day", mktime(0, 0, 0, $m, $d, $y)));
+			if(strtotime($next_recurring_date) > strtotime($end_period) || strtotime($next_recurring_date) > strtotime(date('Y-m-d'))) {
+				continue;
+			}
+		}
+		if (strtolower($recurring_frequency) == 'weekly') {
+			$next_recurring_date = date('Y-m-d', strtotime("+1 week", mktime(0, 0, 0, $m, $d, $y)));
+			if(strtotime($next_recurring_date) > strtotime($end_period) || strtotime($next_recurring_date) > strtotime(date('Y-m-d'))) {
+				continue;
+			}			
+		}
+		if (strtolower($recurring_frequency) == 'monthly') {
+			$next_recurring_date = date('Y-m-d', strtotime("+1 month", mktime(0, 0, 0, $m, $d, $y)));
+			if(strtotime($next_recurring_date) > strtotime($end_period) || strtotime($next_recurring_date) > strtotime(date('Y-m-d'))) {
+				continue;
+			}			
+		}
+		if (strtolower($recurring_frequency) == 'quarterly') {
+			$next_recurring_date = date('Y-m-d', strtotime("+3 month", mktime(0, 0, 0, $m, $d, $y)));
+			if(strtotime($next_recurring_date) > strtotime($end_period) || strtotime($next_recurring_date) > strtotime(date('Y-m-d'))) {
+				continue;
+			}			
+		}
+		if (strtolower($recurring_frequency) == 'yearly') {
+			$next_recurring_date = date('Y-m-d', strtotime("+1 year", mktime(0, 0, 0, $m, $d, $y)));
+			if(strtotime($next_recurring_date) > strtotime($end_period) || strtotime($next_recurring_date) > strtotime(date('Y-m-d'))) {
+				continue;
+			}			
+		}
+				
+		createInvoice($salesorder_id);
+		$adb->pquery("UPDATE vtiger_invoice_recurring_info SET last_recurring_date=? WHERE salesorderid=?", array($next_recurring_date,$salesorder_id));
+	}
+}
+
+/* Function to create a new Invoice using the given Sales Order id */
+function createInvoice($salesorder_id) {
+	require_once('include/utils/utils.php');
+	require_once('modules/SalesOrder/SalesOrder.php');
+	require_once('modules/Invoice/Invoice.php');
+	require_once('modules/Users/Users.php');
+	
+	global $log, $adb;
+	global $current_user;
+	
+	// Payment duration in days
+	$payment_duration_values = Array(
+		'net 30 days' => '30',
+		'net 45 days' => '45',
+		'net 60 days' => '60'
+	);
+
+	if(!$current_user) {
+		$current_user = new Users();
+		$current_user->id = 1;
+		$current_user = $current_user->retrieve_entity_info($current_user->id, "Users");
+	}
+	$so_focus = new SalesOrder();
+	$so_focus->id = $salesorder_id;
+	$so_focus->retrieve_entity_info($salesorder_id,"SalesOrder");
+	foreach($so_focus->column_fields as $fieldname=>$value) {
+		$so_focus->column_fields[$fieldname] = decode_html($value);
+	}
+	
+	$focus = new Invoice();
+	// This will only fill in the basic columns from SO to Invoice and also Update the SO id in new Invoice
+	$focus = getConvertSoToInvoice($focus,$so_focus,$salesorder_id);
+	
+	// Pick up the Payment due date based on the Configuration in SO
+	$payment_duration = $so_focus->column_fields['payment_duration'];
+	$due_duration = $payment_duration_values[trim(strtolower($payment_duration))];
+	$durationinsec = mktime(0,0,0,date('m'),date('d')+$due_duration,date('Y'));
+	
+	// Cleanup focus object, to duplicate the Invoice.
+	$focus->id = '';
+	$focus->mode = '';
+	$focus->column_fields['invoicestatus'] = $so_focus->column_fields['invoicestatus'];
+	$focus->column_fields['invoicedate'] = date('Y-m-d');
+	$focus->column_fields['duedate'] = date('Y-m-d', $durationinsec);
+	
+	// Additional SO fields to copy -> Invoice field name mapped to equivalent SO field name
+	$invoice_so_fields = Array (
+		'txtAdjustment' => 'txtAdjustment',
+		'hdnSubTotal' => 'hdnSubTotal', 
+		'hdnGrandTotal' => 'hdnGrandTotal', 
+		'hdnTaxType' => 'hdnTaxType',
+		'hdnDiscountPercent' => 'hdnDiscountPercent',
+		'hdnDiscountAmount' => 'hdnDiscountAmount',
+		'hdnS_H_Amount' => 'hdnS_H_Amount',
+		'assigned_user_id' => 'assigned_user_id',
+		'currency_id' => 'currency_id',
+		'conversion_rate' => 'conversion_rate',
+	);	
+	foreach($invoice_so_fields as $invoice_field => $so_field) {
+		$focus->column_fields[$invoice_field] = $so_focus->column_fields[$so_field];
+	}	
+	$focus->_salesorderid = $salesorder_id; 
+	$focus->_recurring_mode = 'recurringinvoice_from_so'; 	
+	$focus->save("Invoice");
+}
+
+
+/** Close and remove the PID file. */
+if($servicePIDFp) {
+	fclose($servicePIDFp);
+	unlink($servicePIDFile);
+}
+
+?>

@@ -1,0 +1,8 @@
+#pkgvers               relpath                modified  unmodifiedok  extdepok  dowloadurl
+adodb-4.90             adodb                  true      false         unknown   http://prdownloads.sf.net/adodb/adodb490.tgz
+FCKeditor-2.2          include/fckeditor      true      unknown       unknown   http://prdownloads.sf.net/fckeditor/FCKeditor-2.2.gz.tar
+fpdf-1.53              include/fpdf           true      unknown       unknown   http://www.fpdf.org/en/dl.php?v=153&f=tgz
+Image_Canvas-0.3.0     include/Image          true      unknown       unknown   http://pear.php.net/get/Image_Canvas-0.3.0.tgz
+Image_Color-1.0.2      include/Image          true      unknown       unknown   http://pear.php.net/get/Image_Color-1.0.2.tgz
+Image_Graph-0.7.2      include/Image          true      unknown       unknown   http://pear.php.net/get/Image_Graph-0.7.2.tgz
+log4php-0.9            log4php                false     true          unknown   http://www.vxr.it/log4php/log4php-0.9.tar.gz       

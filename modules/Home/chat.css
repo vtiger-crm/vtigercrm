@@ -1,0 +1,232 @@
+/*
+	Copyright 2005 Rolando Gonzalez (rolosworld@gmail.com)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
+/*
+    table.chat  // don't set width or height
+    thead.chat
+    tfoot.chat
+    tbody.chat
+    tr.chathea
+    tr.chatfoot
+    tr.chatbody
+    td.chathead
+    td.chathead1
+    td.chathead2
+    td.chatfoot
+    td.chatfoot1
+    td.chatfoot2
+    td.chatbody
+    td.chatbody1 // don't set width or height
+    td.chatbody2
+
+    td.chatbox  // don't set width or height or overflow
+    td.chaticon
+    td.chattopic
+    td.chathide
+    td.chatclose
+
+    div.cumsg
+    div.csmsg
+    span.cunick
+*/
+*{
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 8pt;
+}
+
+table.chat,table.pchat{
+  empty-cells:show;
+}
+table.chat{
+  position:absolute;
+}
+thead.chat{
+  cursor:move;
+}
+td.chathead,td.chathead2,td.pchathead,td.pchathead2{
+  width:5px;
+  height:38px;
+  padding:0px 5px 0px 0px;
+}
+td.chathead1,td.pchathead1{
+  background-image:url(imgs/box_T.gif);
+  width:100%;
+}
+td.chathead,td.pchathead{
+  background-image:url(imgs/box_TL.gif);
+}
+td.chathead2,td.pchathead2{
+  background-image:url(imgs/box_TR.gif);
+}
+
+td.chaticon{
+  background-image:url(imgs/2tbarPrivateChat.gif);
+}
+td.chattopic{ 
+  background-image:url(imgs/2tbarPublicChat.gif);
+  background-repeat:no-repeat;
+  background-position:center left;
+  padding:0px 10px 0px 30px;
+  width:100%;
+}
+
+td.chattopic1{ 
+  padding:0px 10px 0px 5px;
+  width:100%;
+  text-align:left;
+}
+span.chatTopicNick{ font-weight:900; }
+td.chathide,td.chatclose{
+  cursor:pointer;
+}
+td.chathide{
+  background-image:url(imgs/btn_hide.gif);
+}
+td.chatclose{
+  background-image:url(imgs/btn_close.gif);
+}
+td.chaticon,td.chathide,td.chatclose{
+  height:36px;
+  width:36px;
+  padding:31px 31px 5px 0px;
+  background-repeat:no-repeat;
+  background-position:center center;
+}
+
+td.chatbody,td.chatbody2,td.pchatbody,td.pchatbody2{
+  width:5px;
+  padding:0px 5px 0px 0px;
+}
+td.chatbody,td.pchatbody{
+  background-image:url(imgs/box_ML.gif);
+}
+td.chatbody1,td.pchatbody1{
+  background-image:url(imgs/box_M.gif);
+  padding:5px 5px 5px 5px;
+  vertical-align:top;
+}
+td.chatbody2,td.pchatbody2{
+  background-image:url(imgs/box_MR.gif);
+}
+
+td.chatfoot,td.chatfoot2,td.pchatfoot,td.pchatfoot2{
+  width:5px;
+  height:60px;
+  padding:60px 5px 0px 0px;
+}
+td.chatfoot1,td.pchatfoot1{
+  background-image:url(imgs/bx_B.gif);
+}
+td.chatfoot,td.pchatfoot{
+  background-image:url(imgs/box_BL.gif);
+}
+td.chatfoot2,td.pchatfoot2{
+  background-image:url(imgs/box_BR.gif);
+}
+
+
+
+div.chatbox{
+  background-color: #FFFFFF;
+  border: 1px solid #938F86;
+  color:#000000;
+  vertical-align:top;
+}
+
+/* UList */
+span.cunick{
+  color:green;
+}
+div.cumsg,div.csmsg{
+  color:#0000ff;
+  margin:2px 2px 4px 2px;
+}
+div.csmsg{
+  color:#FF0000;
+}
+
+a.chat{
+  background-image:url(themes/images/user_icon.gif);
+  background-position:center left;
+  background-repeat:no-repeat;
+  color:#000000;
+  text-decoration:none;
+  display:block;
+  width:100px;
+  height:20px;
+  background-color:#FFFFFF; 
+  padding:10px 5px 5px 30px;
+  vertical-align:middle;
+}
+a.chat:hover{
+  background-color:#DFD9CD;
+}
+
+span{
+	padding:0px;
+	margin:0px;
+}
+
+/* input */
+form.cinput{
+  display:inline;
+}
+input.cinput{
+  background-color: #FFFFFF;
+  border: 1px solid #938F86;
+  width: 100%;
+  height:20px;
+  font-size:12px;
+  padding:2px 2px 2px 2px;
+  font-weight:bold;
+  color:#333333;
+}
+table.cinput{
+  width:100%;
+}
+tr.cinput{
+
+}
+td.cinput{
+  width:100%;
+}
+td.ckeyb{
+  width:32px;
+  height:29px;
+  padding:29px 32px 5px 5px;
+  background-repeat:no-repeat;
+  background-position:center center;
+}
+td.csubmit{
+  cursor:pointer;
+  background-image:url(imgs/btn_send.gif);
+  width:63px;
+  height:32px;
+  padding:32px 63px 5px 5px;
+  background-repeat:no-repeat;
+  background-position:center center;
+}
+
+
+span.sysb{font-weight:900;}
+.chatuserlist{
+	font-size:14px;
+	text-align:left;
+	color:white;
+	background-color:#898475;
+}

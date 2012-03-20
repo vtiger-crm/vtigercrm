@@ -1,0 +1,108 @@
+/*********************************************************************************
+** The contents of this file are subject to the vtiger CRM Public License Version 1.0
+* ("License"); You may not use this file except in compliance with the License
+* The Original Code is:  vtiger CRM Open Source
+* The Initial Developer of the Original Code is vtiger.
+* Portions created by vtiger are Copyright (C) vtiger.
+* All Rights Reserved.
+********************************************************************************/
+/* CSS Document */
+
+
+
+body{
+  margin:0px 0px 0px 0px;
+  font-family:Arial, Helvetica, sans-serif;
+  font-size:12px;
+  text-decoration:none;  
+}
+.settingsUI {	
+	text-align:left;
+	background-color:#E9EDFB;	
+	border:2px solid #5280FF;
+}
+.detailedViewTextBox {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #000000;
+	border:1px solid #bababa;
+	padding-left:5px;
+	width:90%;
+	background-color: #ffffff;
+}
+a {
+	text-decoration:none;
+	color: #0000FF;	
+}
+
+a:hover {
+	text-decoration:underline;
+	
+}
+.link {
+  color: #07337A;
+}
+.link:hover {
+  color: #000;
+}
+.MatrixLayer1{
+	border:2px solid #D8DDEF;
+	background-color:#EFF1F9;
+	
+	position:relative;
+	visibility:visible;
+	/*margin:9px;
+	height:280px;*/
+}
+.MatrixLayer2{
+	border:2px solid #D8DDEF;
+	background-color:#FFF;
+	width:100%;
+	position:relative;
+	visibility:visible;
+	/*margin:9px;
+	height:280px;*/
+}
+.secHeadlistview{
+  height: 20px;  
+  padding-left: 5px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  color: #000;   
+}
+.tableHeadBg{
+  background-color:#C9E0F0;  
+  height:25px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size:11px;
+  color:#000066;       
+}
+.lvtColData {
+	background-color:#ffffff;
+	font: normal 12px Arial, Helvetica, sans-serif;
+	color:#000;
+}
+.lvtColDataHover {
+	background-color:#EFF1F9;
+	font: normal 12px Arial, Helvetica, sans-serif;
+	color:#000;
+}
+.small3{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #000000;
+	line-height:20px;
+	text-align:justify;
+	padding:3px;
+}
+
+.buttonok {
+	background-color: #BAD1F6;
+	border:2px solid #8EB6F5;
+	font: bold 11px Arial, Helvetica, sans-serif;
+	color:#000;	
+}
+
+
+

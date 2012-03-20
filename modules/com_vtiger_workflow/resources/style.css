@@ -1,0 +1,80 @@
+/*+**********************************************************************************
+ * The contents of this file are subject to the vtiger CRM Public License Version 1.0
+ * ("License"); You may not use this file except in compliance with the License
+ * The Original Code is:  vtiger CRM Open Source
+ * The Initial Developer of the Original Code is vtiger.
+ * Portions created by vtiger are Copyright (C) vtiger.
+ * All Rights Reserved.
+ ************************************************************************************/
+
+.popup_content{
+	padding: 0.5em;
+	margin:0.5em;
+	background-color: white;
+}
+
+/* From http://www.quirksmode.org/css/forms.html*/
+.form_label .form_input{
+	display: block;
+	/*width: 150px;*/
+	float: left;
+	margin-bottom: 10px;
+}
+
+.form_input{
+    width: 500px;
+}
+
+.form_label {
+	text-align: right;
+	width: 75px;
+	padding-right: 20px;
+}
+
+.form_br {
+	clear: left;
+}
+
+.value{
+	display: inline-block;
+	width: 120px;
+}
+
+.operation{
+	width: 150px;
+}
+
+.link{
+	text-decoration: underline
+}
+.link:hover{
+	cursor:pointer;
+}
+
+#select_date_days{
+	width:50px;
+}
+
+.box{
+	background-color: white;
+	border: 1px solid black;
+}
+
+.box_cel{
+	display: inline-block;
+	width: 2em;
+	height:2em;
+	margin: 5px;
+}
+
+.row_selected{
+		color:white;
+		background-color:black;
+}
+
+/* similar to .small class defined themes/softed/style.css */ 
+.fieldname, .operation, .value, .form_input, .time_field, .timepicker {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	color: #000000;
+}

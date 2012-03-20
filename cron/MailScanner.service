@@ -1,0 +1,125 @@
+<?php
+/*********************************************************************************
+ ** The contents of this file are subject to the vtiger CRM Public License Version 1.0
+ * ("License"); You may not use this file except in compliance with the License
+ * The Original Code is:  vtiger CRM Open Source
+ * The Initial Developer of the Original Code is vtiger.
+ * Portions created by vtiger are Copyright (C) vtiger.
+ * All Rights Reserved.
+ *
+ ********************************************************************************/
+
+require_once('config.inc.php');
+
+/** Verify the script call is from trusted place. */
+global $application_unique_key;
+if($_REQUEST['app_key'] != $application_unique_key) {
+	echo "Access denied!";
+	exit;
+}
+
+/**
+ * Check if instance of this service is already running?
+ */
+$svcname = $_REQUEST['service'];
+// We need to make sure the PIDfile name is unqique
+$servicePIDFile = "logs/$svcname-". $_REQUEST['scannername']. '-service.pid';
+
+if(file_exists($servicePIDFile)) {
+	echo "Service $svcname already running! Check $servicePIDFile";
+	exit;
+} else {
+	$servicePIDFp = fopen($servicePIDFile, 'a');
+}
+
+/**
+ * Turn-off PHP error reporting.
+ */
+try { error_reporting(0); } catch (Exception $e) { }
+
+require_once('include/utils/utils.php');
+require_once('include/logging.php');
+require_once('include/database/PearDatabase.php');
+
+require_once('modules/Settings/MailScanner/core/MailScannerInfo.php');
+require_once('modules/Settings/MailScanner/core/MailBox.php');
+require_once('modules/Settings/MailScanner/core/MailScanner.php');
+
+//Added as sometimes the php.ini file used for command line php and
+//for Apache php is different.
+require_once('include/install/language/en_us.lang.php');
+if(!function_exists('imap_open')) {
+	echo $installationStrings['LBL_NO'].' '.$installationStrings['LBL_IMAP_SUPPORT'];
+} elseif(!function_exists('openssl_encrypt')) {
+	echo $installationStrings['LBL_NO'].' '.$installationStrings['LBL_OPENSSL_SUPPORT'];
+}
+
+/**
+ * Helper function for triggering the scan.
+ */
+function service_MailScanner_performScanNow($scannerinfo, $debug) {
+	/** If the scanner is not enabled, stop. */
+	if($scannerinfo->isvalid) { 
+		echo "Scanning " . $scannerinfo->server . " in progress\n";
+
+		/** Start the scanning. */
+		$scanner = new Vtiger_MailScanner($scannerinfo);
+		$scanner->debug = $debug;
+		$scanner->performScanNow();
+		
+		echo "\nScanning " . $scannerinfo->server . " completed\n";
+		
+	} else {
+		echo "Failed! [{$scannerinfo->scannername}] is not enabled for scanning!";
+	}
+}
+
+/** 
+ * Execution of this is based on number of emails and connection to mailserver.
+ * So setting infinite timeout.
+ */
+@set_time_limit(0);
+
+/** Turn-off this if not required. */
+$debug = true;
+
+/** Pick up the mail scanner for scanning. */
+if(isset($_REQUEST['scannername'])) {
+	
+	// Target scannername specified?	
+	$scannername = $_REQUEST['scannername'];
+	$scannerinfo = new Vtiger_MailScannerInfo($scannername);
+	
+	service_MailScanner_performScanNow($scannerinfo, $debug);
+	
+} else {
+	
+	// Scan all the configured mailscanners?
+	
+	$scannerinfos = Vtiger_MailScannerInfo::listAll();
+	if(empty($scannerinfos)) {
+		
+		echo "No mailbox configured for scanning!";
+		
+	} else {
+		foreach($scannerinfos as $scannerinfo) {
+			service_MailScanner_performScanNow($scannerinfo, $debug);
+		}
+	}	
+}
+
+echo "Scanning " . $scannerinfo->server . " in progress\n";
+
+/** Start the scanning. */
+$scanner = new Vtiger_MailScanner($scannerinfo);
+$scanner->debug = $debug;
+$scanner->performScanNow();
+
+echo "\nScanning " . $scannerinfo->server . " completed\n";
+
+/** Close and remove the PID file. */
+if($servicePIDFp) {
+	fclose($servicePIDFp);
+	unlink($servicePIDFile);
+}
+?>

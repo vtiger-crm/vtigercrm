@@ -1,0 +1,331 @@
+/*********************************************************************************
+ * The contents of this file are subject to the Mozilla Public License Version 1.1
+ * ("License"); You may not use this file except in compliance with the 
+ * License. You may obtain a copy of the License at http://www.mozilla.org/MPL
+ * Software distributed under the License is distributed on an  "AS IS"  basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+ * the specific language governing rights and limitations under the License.
+ * The Original Code is: SugarCRM Open Source
+ * The Initial Developer of the Original Code is SugarCRM, Inc.
+ * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.;
+ * All Rights Reserved.
+ * Contributor(s): ______________________________________.
+ ********************************************************************************/
+/*********************************************************************************
+ * $Header: /advent/projects/wesat/vtiger_crm/sugarcrm/install/install.css,v 1.5 2004/08/26 11:44:30 saraj Exp $
+ * Description:  Defines the stylesheet used for the application installation.
+ ********************************************************************************/
+/* Install - Configuration Wizard */
+.cwPageBg {
+	background-color:#cccccc;
+	background-image:url(images/pageBackground.gif);
+	background-repeat:repeat-x;
+}
+.cwHeadBg {
+	-moz-border-radius-topleft:15px;
+	background-image:url(images/topHeadBg.gif);
+	background-repeat:repeat-x;
+	
+}
+.cwfooterBg {
+	-moz-border-radius-bottomleft:15px;
+	-moz-border-radius-bottomright:15px;
+	background-repeat:repeat-x;
+	
+}
+.cwHeadBg1 {
+	background-image:url(images/topHeadBg.gif);
+	background-repeat:repeat-x;
+	-moz-border-radius-topright:15px;
+	
+}
+.cwContentDisplay{
+	background-color:#ffffff;
+}
+.cwSelectedTab {
+	background-color:#ffffff;
+}
+.cwUnSelectedTab {
+	background-color:#1B9AE3;
+	color:#ffffff;
+}
+
+.txtBox{
+	width:85%;
+	border:1px solid #666666;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:11px;
+}
+
+.small {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	line-height: 14px;
+}
+
+td{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:11px;
+}
+
+.header{
+	-moz-border-radius-bottomleft:5px;
+	-moz-border-radius-bottomright:5px;
+	-moz-border-radius-topleft:5px;
+	-moz-border-radius-topright:5px;
+	background-color:#000000;
+	background-image:url('include/install/images/header_1.gif');
+	border:1px outset #CCCCCC;
+	color:black;
+	height:5em;
+	line-height:6em;
+	padding:1px 4px;
+}
+
+.level2{
+	-moz-border-radius-bottomleft:5px;
+	-moz-border-radius-bottomright:5px;
+	-moz-border-radius-topleft:5px;
+	-moz-border-radius-topright:5px;
+	background-color:#DEDEDE;
+	border:1px outset #CCCCCC;
+	color:black;
+	font-size:20px;
+	line-height:1.4em;
+	padding:1px 4px;
+}
+
+.level1{
+	background-color:white;
+}
+
+tr{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:12px;
+}
+
+.header{
+	-moz-border-radius-bottomleft:5px;
+	-moz-border-radius-bottomright:5px;
+	-moz-border-radius-topleft:5px;
+	-moz-border-radius-topright:5px;
+	background-color:#000000;
+	background-image:url('include/install/images/header_1.gif');
+	border:1px outset #CCCCCC;
+	color:black;
+	height:5em;
+	line-height:6em;
+	padding:1px 4px;
+}
+
+.level2{
+	-moz-border-radius-bottomleft:5px;
+	-moz-border-radius-bottomright:5px;
+	-moz-border-radius-topleft:5px;
+	-moz-border-radius-topright:5px;
+	background-color:#DEDEDE;
+	border:1px outset #CCCCCC;
+	color:black;
+	font-size:20px;
+	line-height:1.4em;
+	padding:1px 4px;
+}
+
+.level1{
+	background-color:white;
+}
+
+table 
+.level0{
+	background-color:#FFFFFF;
+}
+
+.level2{
+	-moz-border-radius-bottomleft:5px;
+	-moz-border-radius-bottomright:5px;
+	-moz-border-radius-topleft:5px;
+	-moz-border-radius-topright:5px;
+	background-color:#DEDEDE;
+	border:1px outset #CCCCCC;
+	color:black;
+	padding:1px 4px;
+}
+
+.level1{
+	-moz-border-radius-bottomleft:5px;
+	-moz-border-radius-bottomright:5px;
+	-moz-border-radius-topleft:5px;
+	-moz-border-radius-topright:5px;
+	background-color:#EEEEEE;
+	border:1px solid #CCCCCC;
+	align:right;
+}
+
+.level3{
+	-moz-border-radius-bottomleft:.8em;
+	-moz-border-radius-bottomright:.8em;
+	-moz-border-radius-topleft:.8em;
+	-moz-border-radius-topright:.8em;
+	background-color:#E7E7E7;
+	border:1px solid #CCCCCC;
+	font-size:20px;
+	line-height:1.4em;
+	padding:1px 4px;
+}
+
+.licence{
+	height:375px;
+	padding:5px;
+	width:95%;
+}
+
+.veil, .veil_new { 
+	Filter: Alpha(opacity = 50);
+	-moz-opacity: 0.5;
+	opacity: 0.5; 
+}
+
+.contentDisplay{
+	-moz-border-radius-bottomleft:1em;
+	-moz-border-radius-bottomright:1em;
+	-moz-border-radius-topleft:1em;
+	-moz-border-radius-topright:1em;
+	background-color:#E1E1FD;
+	border:1px dashed #000000;
+	font-size: 12px;
+}
+
+.leftAbsPopup{
+	position: absolute;
+	right: 25%;
+	top: 10%;
+	background-color: #b7b7b7;
+	border: 2px solid #777;
+	width: 65em;
+}
+  
+.floatRightTiny{
+   width: 1em;
+   float: right;
+   font-size: 16px;
+   border: 1px solid black;
+   background-color: #b7b7b7;
+  }
+
+.floatRightTinyOn{
+   width: 1em;
+   float: right;
+   font-size: 16px;
+   border: 1px solid black;
+   background-color: #070707;
+}
+
+.floatRightTiny a{
+   text-decoration: none;
+   color: black;
+}
+
+.floatRightTinyOn a{
+	text-decoration: none;
+	color: white;
+}
+
+.leftAbsPopup textarea{
+	height:40em;
+	width: 54em;
+	border:1px solid #dadada;
+}
+
+.posLayPopup {
+	border:2px solid #ddd;
+	background:#fffff5 url(../../themes/softed/images/layerPopupBg.gif) ;
+	position:absolute;
+	width: 40em;
+	padding-left: 0.5em;
+	padding-bottom: 0.5em;
+}
+
+.cellBackground {
+	background-color: #E7E7E7;
+}
+
+.textCenter {
+	text-align: center;
+}
+
+.higherLineHeight {
+	line-height: 20px;
+}
+
+.mediumLineHeight {
+	line-height: 16px;
+}
+
+.paddingPoint5em {
+	padding: .5em;
+}
+
+.redColor {
+	color: red;
+}
+
+.smallFont {
+	font-size: small;
+}
+
+.fixedSmallHeight {
+	height: 250px;
+}
+
+.button {
+	background-image:url(images/cwButton.gif);
+	width:80px;
+	height:35px;
+	font-weight:bold;
+	border:0px;
+	font-size:12px;
+	cursor:pointer;
+	font-family:Helvetica; 
+}
+
+.refreshButton {
+	background-image:url(images/checkAgain.png);
+	width:130px;
+	height:25px;
+	font-weight:bold;
+	border:0px;
+	cursor:pointer;
+	color:blue;
+}
+
+.bigHeading {
+	color: #8AB738;
+	font-family: Verdana; 
+	font-size: x-large;
+	font-weight: bold;
+}
+
+.paddingTop {
+	padding-top: 1.5em;
+}
+
+#unhealthyTablesList {
+	border : 1px solid black;
+}
+
+#unhealthyTablesList td {
+	border : 1px solid black;
+	border-left: 0px;
+	border-top: 0px;
+}
+
+#dbMirrorCopy {
+	font-size: 12px;
+}
+
+#dbMirrorCopy .floatRightTiny, #dbMirrorCopy .floatRightTinyOn,
+#responsePopupContainer .floatRightTiny, #responsePopupContainer .floatRightTinyOn {
+	background: none;
+	border: 0;
+	padding-top: 0.2em;
+}

@@ -1,0 +1,35 @@
+Arial,arial.ttf
+Arial Bold,arialbd.ttf
+Arial Bold Italic,arialbi.ttf
+Arial Italic,ariali.ttf
+Courier New,cour.ttf
+Courier New Bold,courbd.ttf
+Courier New Bold Italic,courbi.ttf
+Courier New Italic,couri.ttf
+Garamond,gara.ttf
+Garamond Bold,garabd.ttf
+Garamond Italic,garait.ttf
+Gothic,gothic.ttf
+Gothic Bold,gothicb.ttf
+Gothic Bold Italic,gothicbi.ttf
+Gothic Italic,gothici.ttf
+Sans Serif,micross.ttf
+Reference Sans Serif,refsan.ttf
+Times New Roman,times.ttf
+Times New Roman Bold,timesbd.ttf
+Times New Roman Bold Italic,timesbi.ttf
+Times New Roman Italic,timesi.ttf
+Vera,Vera.ttf
+Vera Bold,VeraBd.ttf
+Vera Italic,VeraIt.ttf
+Vera Bold Italic,VeraBI.ttf
+Vera Mono,VeraMono.ttf
+Vera Bold,VeraMoBd.ttf
+Vera Italic,VeraMoIt.ttf
+Vera Bold Italic,VeraMoBI.ttf
+Vera Serif,VeraSe.ttf
+Vera Serif Bold,VeraSeBd.ttf
+Verdana,verdana.ttf
+Verdana Bold,verdanab.ttf
+Verdana Bold Italic,verdanaz.ttf
+Verdana Italic,verdanai.ttf
