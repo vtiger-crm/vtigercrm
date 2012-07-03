@@ -22,10 +22,7 @@ $local_log =& LoggerManager::getLogger('index');
 global $log,$adb;
 $focus = new Leads();
 global $current_user;
-$currencyid=fetchCurrency($current_user->id);
-$rate_symbol = getCurrencySymbolandCRate($currencyid);
-$rate = $rate_symbol['rate'];
-$curr_symbol=$rate_symbol['symbol'];
+
 //added to fix 4600
 $search=vtlib_purify($_REQUEST['search_url']);
 
@@ -50,10 +47,6 @@ foreach($focus->column_fields as $fieldname => $val)
         $log->info("the value is ".$value);
         $focus->column_fields[$fieldname] = $value;
     }
-}
-if(isset($_REQUEST['annualrevenue'])) {
-    $value = convertToDollar($_REQUEST['annualrevenue'],$rate);
-    $focus->column_fields['annualrevenue'] = $value;
 }
 
 if($_REQUEST['assigntype'] == 'U') {

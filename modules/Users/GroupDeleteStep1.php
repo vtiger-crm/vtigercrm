@@ -23,7 +23,7 @@ $output ='<div id="DeleteLay" class="layerPopup" style="width:400px;">
 <form name="deleteGroupForm" action="index.php" onsubmit="VtigerJS_DialogBox.block();">
 <input type="hidden" name="module" value="Users">
 <input type="hidden" name="action" value="DeleteGroup">
-<input type="hidden" name="delete_group_id" value="'.$delete_group_id.'">	
+<input type="hidden" name="delete_group_id" value="'.$delete_group_id.'">
 <table border=0 cellspacing=0 cellpadding=5 width=100% class=layerHeadingULine>
 <tr>
 	<td class=layerPopupHeading " align="left">'.$mod_strings['LBL_DELETE_GROUP'].'</td>
@@ -41,49 +41,42 @@ $output ='<div id="DeleteLay" class="layerPopup" style="width:400px;">
 	<tr>
 		<td align="left" class="cellLabel small" nowrap><b>'.$mod_strings['LBL_TRANSFER_GROUP'].'</b></td>
 		<td align="left" class="cellText small">';
-		global $adb;	
+		global $adb;
 		$sql = "select groupid,groupname from vtiger_groups";
 		$result = $adb->pquery($sql, array());
 		$num_groups = $adb->num_rows($result);
-	
-		$sql1 = "select id,user_name from vtiger_users where deleted=0";
+
+		$sql1 = "select * from vtiger_users where deleted=0";
 		$result1= $adb->pquery($sql1, array());
 		$num_users = $adb->num_rows($result1);
-	
+
 
 		$output.= '<input name="assigntype" checked value="U" onclick="toggleAssignType(this.value)" type="radio">&nbsp;User';
 		if($num_groups > 1)
 		{
 			$output .= '<input name="assigntype"  value="T" onclick="toggleAssignType(this.value)" type="radio">&nbsp;Group';
-		}	
-	
+		}
+
 		$output .= '<span id="assign_user" style="display: block;">';
 
-		$output .= '<select class="select" name="transfer_user_id">';
-	
+		$output .= '<select class="small" name="transfer_user_id">';
+
 
 		for($i=0;$i<$num_users;$i++)
 		{
-			$user_name=$adb->query_result($result1,$i,"user_name");
 			$user_id=$adb->query_result($result1,$i,"id");
-			
-			if(strlen($user_name)>20)
-			{
-				$user_name=substr($user_name,0,20)."...";
-			}
-								
-	    		$output.='<option value="'.$user_id.'">'.$user_name.'</option>';
-		}	
-	
+	    	$output.='<option value="'.$user_id.'">'.  getFullNameFromQResult($result1, $i, 'Users').'</option>';
+		}
+
 		$output .='</select></span>';
 
 		if($num_groups > 1)
-		{	
+		{
 			$output .= '<span id="assign_team" style="display: none;">';
-	
+
 
 			$output.='<select class="select" name="transfer_group_id">';
-	
+
 			$temprow = $adb->fetch_array($result);
 			do
 			{
@@ -96,10 +89,10 @@ $output ='<div id="DeleteLay" class="layerPopup" style="width:400px;">
 						$group_name=substr($group_name,0,20)."...";
 					}
     					$output.='<option value="'.$group_id.'">'.$group_name.'</option>';
-	    			}	
+	    			}
 			}while($temprow = $adb->fetch_array($result));
 			$output.='</select></span>';
-		}	
+		}
 
 		$output.='</td>
 	</tr>

@@ -23,7 +23,7 @@ $profileName='';
 $profileDescription='';
 
 if(!empty($profileId)) {
-	if(!profileExists($profileId)) {
+	if(!profileExists($profileId) || !is_numeric($profileId)) {
 		die(getTranslatedString('ERR_INVALID_PROFILE_ID', $currentModule));
 	}
 } elseif($_REQUEST['mode'] !='create') {
@@ -89,12 +89,13 @@ else
 
 $smarty->assign("PROFILE_DESCRIPTION", $profileDescription);
 
-if(isset($_REQUEST['mode']) && $_REQUEST['mode'] != '')
-	$smarty->assign("MODE",vtlib_purify($_REQUEST['mode']));
+if(isset($_REQUEST['mode']) && $_REQUEST['mode'] != '') {
+	$mode = vtlib_purify($_REQUEST['mode']);
+	$smarty->assign("MODE", $mode);
+}
 
 
 //Initially setting the secondary selected vtiger_tab
-$mode=$_REQUEST['mode'];
 if($mode == 'create')
 {
 	$smarty->assign("ACTION",'SaveProfile');
@@ -150,7 +151,7 @@ if($mode == 'view')
 	foreach($act_perr_arry as $tabid=>$action_array)
 	{
 		$stand = array();
-		$entity_name = getTabname($tabid);
+		$entity_name = getTabModuleName($tabid);
 		//Create/Edit Permission
 		$tab_create_per_id = $action_array['1'];
 		$tab_create_per = getDisplayValue($tab_create_per_id,$tabid,'1');
@@ -174,7 +175,7 @@ if($mode == 'edit')
 	foreach($act_perr_arry as $tabid=>$action_array)
 	{
 		$stand = array();
-		$entity_name = getTabname($tabid);
+		$entity_name = getTabModuleName($tabid);
 		//Create/Edit Permission
 		$tab_create_per_id = $action_array['1'];
 		$tab_create_per = getDisplayOutput($tab_create_per_id,$tabid,'1');
@@ -200,7 +201,7 @@ if($mode == 'create')
 		foreach($act_perr_arry as $tabid=>$action_array)
 		{
 			$stand = array();
-			$entity_name = getTabname($tabid);
+			$entity_name = getTabModuleName($tabid);
 			//Create/Edit Permission
 			$tab_create_per_id = $action_array['1'];
 			$tab_create_per = getDisplayOutput($tab_create_per_id,$tabid,'1');
@@ -224,7 +225,7 @@ if($mode == 'create')
 		foreach($act_perr_arry as $tabid=>$action_array)
 		{
 			$stand = array();
-			$entity_name = getTabname($tabid);
+			$entity_name = getTabModuleName($tabid);
 			//Create/Edit Permission
 			$tab_create_per_id = $action_array['1'];
 			$tab_create_per = getDisplayOutput(0,$tabid,'1');
@@ -255,7 +256,7 @@ if($mode == 'view')
 	foreach($tab_perr_array as $tabid=>$tab_perr)
 	{
 		$tab=array();
-		$entity_name = getTabname($tabid);
+		$entity_name = getTabModuleName($tabid);
 		$tab_allow_per_id = $tab_perr_array[$tabid];
 		$tab_allow_per = getDisplayValue($tab_allow_per_id,$tabid,'');	
 		$tab[]=$entity_name;
@@ -270,7 +271,7 @@ if($mode == 'edit')
 	foreach($tab_perr_array as $tabid=>$tab_perr)
 	{
 		$tab=array();
-		$entity_name = getTabname($tabid);
+		$entity_name = getTabModuleName($tabid);
 		$tab_allow_per_id = $tab_perr_array[$tabid];
 		$tab_allow_per = getDisplayOutput($tab_allow_per_id,$tabid,'');	
 		$tab[]=$entity_name;
@@ -287,7 +288,7 @@ if($mode == 'create')
 		foreach($tab_perr_array as $tabid=>$tab_perr)
 		{
 			$tab=array();
-			$entity_name = getTabname($tabid);
+			$entity_name = getTabModuleName($tabid);
 			$tab_allow_per_id = $tab_perr_array[$tabid];
 			$tab_allow_per = getDisplayOutput($tab_allow_per_id,$tabid,'');	
 			$tab[]=$entity_name;
@@ -302,7 +303,7 @@ if($mode == 'create')
 		foreach($tab_perr_array as $tabid=>$tab_perr)
 		{
 			$tab=array();
-			$entity_name = getTabname($tabid);
+			$entity_name = getTabModuleName($tabid);
 			$tab_allow_per_id = $tab_perr_array[$tabid];
 			$tab_allow_per = getDisplayOutput(0,$tabid,'');	
 			$tab[]=$entity_name;
@@ -321,7 +322,7 @@ if($mode == 'view')
 	foreach($act_utility_arry as $tabid=>$action_array)
 	{
 		$util=array();
-		$entity_name = getTabname($tabid);
+		$entity_name = getTabModuleName($tabid);
 		$no_of_actions=sizeof($action_array);
 		foreach($action_array as $action_id=>$act_per)
 		{
@@ -342,7 +343,7 @@ elseif($mode == 'edit')
 	foreach($act_utility_arry as $tabid=>$action_array)
 	{
 		$util=array();
-		$entity_name = getTabname($tabid);
+		$entity_name = getTabModuleName($tabid);
 		$no_of_actions=sizeof($action_array);
 		foreach($action_array as $action_id=>$act_per)
 		{
@@ -365,7 +366,7 @@ elseif($mode == 'create')
 		foreach($act_utility_arry as $tabid=>$action_array)
 		{
 			$util=array();
-			$entity_name = getTabname($tabid);
+			$entity_name = getTabModuleName($tabid);
 			$no_of_actions=sizeof($action_array);
 			foreach($action_array as $action_id=>$act_per)
 			{
@@ -386,7 +387,7 @@ elseif($mode == 'create')
 		foreach($act_utility_arry as $tabid=>$action_array)
 		{
 			$util=array();
-			$entity_name = getTabname($tabid);
+			$entity_name = getTabModuleName($tabid);
 			$no_of_actions=sizeof($action_array);
 			foreach($action_array as $action_id=>$act_per)
 			{
@@ -407,7 +408,7 @@ elseif($mode == 'create')
 $smarty->assign("UTILITIES_PRIV",$privilege_util);		
 
 //Field privileges		
-$modArr=getFieldModuleAccessArray();
+$modArr=getModuleAccessArray();
 
 
 $no_of_mod=sizeof($modArr);
@@ -418,8 +419,7 @@ for($i=0;$i<$no_of_mod; $i++)
 	$privilege_fld[]=$fldModule;
 	next($modArr);
 }
-$smarty->assign("PRI_FIELD_LIST",$privilege_fld);	
-$smarty->assign("MODE",$mode);
+$smarty->assign("PRI_FIELD_LIST",$privilege_fld);
 
 $disable_field_array = Array();
 $sql_disablefield = "select * from vtiger_def_org_field";
@@ -446,7 +446,12 @@ if($mode=='view')
 			$field=array();
 			if($fieldListResult[$module_name][$j][1] == 0)
 			{
-				$visible = "<img src='".vtiger_imageurl('prvPrfSelectedTick.gif', $theme)."'>";
+				if($fieldListResult[$module_name][$j][3] == 1) {
+					$visible = "<img src='".vtiger_imageurl('locked.png', $theme)."'>";
+				} else {
+					$visible = "<img src='".vtiger_imageurl('unlocked.png', $theme)."'>";
+				}
+				//$visible = "<img src='".vtiger_imageurl('prvPrfSelectedTick.gif', $theme)."'>";
 			}
 			else
 			{
@@ -486,7 +491,9 @@ elseif($mode=='edit')
 			$mandatory = '';
 			$readonly = '';
 			$field=array();
-			if($fieldListResult[$module_name][$j][3] == 0)
+			$fieldAccessMandatory = false;
+			$fieldAccessRestricted = false;
+			if($fieldListResult[$module_name][$j][1] == 0)
 			{
 				$visible = "checked";
 			}
@@ -499,12 +506,14 @@ elseif($mode=='edit')
 				$mandatory = '<font color="red">*</font>';
 				$readonly = 'disabled';
 				$visible = "checked";
+				$fieldAccessMandatory = true;
 			}
 			if($disable_field_array[$fieldListResult[$module_name][$j][4]] == 1)
 			{
 				$mandatory = '<font color="blue">*</font>';
 				$readonly = 'disabled';
 				$visible = "";
+				$fieldAccessRestricted = true;
 			}
 			
 			if($language_strings[$fldLabel] != '')
@@ -513,6 +522,28 @@ elseif($mode=='edit')
 				$field[]=$mandatory.' '.$fldLabel;
 							
 			$field[]='<input id="'.$module_id.'_field_'.$fieldListResult[$module_name][$j][4].'" onClick="selectUnselect(this);" type="checkbox" name="'.$fieldListResult[$module_name][$j][4].'" '.$visible.' '.$readonly.'>';
+			
+			// Check for Read-Only or Read-Write Access for the field.
+			$fieldReadOnlyAccess = $fieldListResult[$module_name][$j][3];
+			if($fieldReadOnlyAccess == 1) {
+				$display_locked = "inline";
+				$display_unlocked = "none";
+			} else {
+				$display_locked = "none";
+				$display_unlocked = "inline";				
+			}	
+			if(!$fieldAccessMandatory && !$fieldAccessRestricted) {
+				$field[] = '<input type="hidden" id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'" name="'.$fieldListResult[$module_name][$j][4].'_readonly" value="'.$fieldReadOnlyAccess.'" />' .
+						'<a href="javascript:void(0);" onclick="toogleAccess(\''.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'\');">' .
+						'<img id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'_unlocked" src="'.vtiger_imageurl('unlocked.png', $theme).'" style="display:'.$display_unlocked.'" border="0">' .
+						'<img id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'_locked" src="'.vtiger_imageurl('locked.png', $theme).'" style="display:'.$display_locked.'" border="0"></a>';
+			} elseif($fieldAccessMandatory) {
+				$field[] = '<input type="hidden" id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'" name="'.$fieldListResult[$module_name][$j][4].'_readonly" value="0" />' .
+							'<img src="'.vtiger_imageurl('blank.gif', $theme).'" style="display:inline" border="0">';
+			} else {
+				$field[] = '<input type="hidden" id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'" name="'.$fieldListResult[$module_name][$j][4].'_readonly" value="'.$fieldReadOnlyAccess.'" />' .
+							'<img src="'.vtiger_imageurl('blank.gif', $theme).'" style="display:inline" border="0">';
+			}
 			$field_module[]=$field;
 		}
 		$privilege_field[$module_id] = array_chunk($field_module,3);
@@ -542,12 +573,15 @@ elseif($mode=='create')
 				$field=array();
 
 				
+				$fieldAccessMandatory = false;
+				$fieldAccessRestricted = false;
 				if($fieldtype[1] == "M")
 				{
 					$mandatory = '<font color="red">*</font>';
 					$readonly = 'disabled';
+					$fieldAccessMandatory = true;
 				}	
-				if($fieldListResult[$module_name][$j][3] == 0)
+				if($fieldListResult[$module_name][$j][1] == 0)
 				{
 					$visible = 'checked';
 				}
@@ -560,12 +594,35 @@ elseif($mode=='create')
 					$mandatory = '<font color="blue">*</font>';
 					$readonly = 'disabled';
 					$visible = "";
+					$fieldAccessRestricted = true;
 				}
 				if($language_strings[$fldLabel] != '')
 					$field[]=$mandatory.' '.$language_strings[$fldLabel];
 				else
 					$field[]=$mandatory.' '.$fldLabel;
 				$field[]='<input type="checkbox" id="'.$module_id.'_field_'.$fieldListResult[$module_name][$j][4].'" onClick="selectUnselect(this);" name="'.$fieldListResult[$module_name][$j][4].'" '.$visible.' '.$readonly.'>';
+							
+				// Check for Read-Only or Read-Write Access for the field.
+				$fieldReadOnlyAccess = $fieldListResult[$module_name][$j][3];
+				if($fieldReadOnlyAccess == 1) {
+					$display_locked = "inline";
+					$display_unlocked = "none";
+				} else {
+					$display_locked = "none";
+					$display_unlocked = "inline";				
+				}	
+				if(!$fieldAccessMandatory && !$fieldAccessRestricted) {
+					$field[] = '<input type="hidden" id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'" name="'.$fieldListResult[$module_name][$j][4].'_readonly" value="'.$fieldReadOnlyAccess.'" />' .
+							'<a href="javascript:void(0);" onclick="toogleAccess(\''.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'\');">' .
+							'<img id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'_unlocked" src="'.vtiger_imageurl('unlocked.png', $theme).'" style="display:'.$display_unlocked.'" border="0">' .
+							'<img id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'_locked" src="'.vtiger_imageurl('locked.png', $theme).'" style="display:'.$display_locked.'" border="0"></a>';
+				} elseif($fieldAccessMandatory) {
+					$field[] = '<input type="hidden" id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'" name="'.$fieldListResult[$module_name][$j][4].'_readonly" value="0" />' .
+							'<img src="'.vtiger_imageurl('blank.gif', $theme).'" style="display:inline" border="0">';
+				} else {
+					$field[] = '<input type="hidden" id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'" name="'.$fieldListResult[$module_name][$j][4].'_readonly" value="'.$fieldReadOnlyAccess.'" />' .
+							'<img src="'.vtiger_imageurl('blank.gif', $theme).'" style="display:inline" border="0">';
+				}
 				$field_module[]=$field;
 			}
 			$privilege_field[$module_id] = array_chunk($field_module,3);
@@ -592,11 +649,13 @@ elseif($mode=='create')
 				$readonly = '';
 				$field=array();
 
-				
+				$fieldAccessMandatory = false;
+				$fieldAccessRestricted = false;				
 				if($fieldtype[1] == "M")
 				{
 					$mandatory = '<font color="red">*</font>';
 					$readonly = 'disabled';
+					$fieldAccessMandatory = true;
 				}	
 				
 				if($disable_field_array[$fieldListResult[$module_name][$j][4]] == 1)
@@ -604,6 +663,7 @@ elseif($mode=='create')
 					$mandatory = '<font color="blue">*</font>';
 					$readonly = 'disabled';
 					$visible = "";
+					$fieldAccessRestricted = true;
 				}else
 				{
 					$visible = "checked";
@@ -613,6 +673,28 @@ elseif($mode=='create')
 				else
 					$field[]=$mandatory.' '.$fldLabel;
 				$field[]='<input type="checkbox" id="'.$module_id.'_field_'.$fieldListResult[$module_name][$j][4].'"  onClick="selectUnselect(this);" name="'.$fieldListResult[$module_name][$j][4].'" '.$visible.' '.$readonly.'>';
+				
+				// Check for Read-Only or Read-Write Access for the field.
+				$fieldReadOnlyAccess = $fieldListResult[$module_name][$j][3];
+				if($fieldReadOnlyAccess == 1) {
+					$display_locked = "inline";
+					$display_unlocked = "none";
+				} else {
+					$display_locked = "none";
+					$display_unlocked = "inline";				
+				}	
+				if(!$fieldAccessMandatory && !$fieldAccessRestricted) {
+					$field[] = '<input type="hidden" id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'" name="'.$fieldListResult[$module_name][$j][4].'_readonly" value="'.$fieldReadOnlyAccess.'" />' .
+							'<a href="javascript:void(0);" onclick="toogleAccess(\''.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'\');">' .
+							'<img id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'_unlocked" src="'.vtiger_imageurl('unlocked.png', $theme).'" style="display:'.$display_unlocked.'" border="0">' .
+							'<img id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'_locked" src="'.vtiger_imageurl('locked.png', $theme).'" style="display:'.$display_locked.'" border="0"></a>';
+				} elseif($fieldAccessMandatory) {
+					$field[] = '<input type="hidden" id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'" name="'.$fieldListResult[$module_name][$j][4].'_readonly" value="0" />' .
+							'<img src="'.vtiger_imageurl('blank.gif', $theme).'" style="display:inline" border="0">';
+				} else {
+					$field[] = '<input type="hidden" id="'.$module_id.'_readonly_'.$fieldListResult[$module_name][$j][4].'" name="'.$fieldListResult[$module_name][$j][4].'_readonly" value="'.$fieldReadOnlyAccess.'" />' .
+							'<img src="'.vtiger_imageurl('blank.gif', $theme).'" style="display:inline" border="0">';
+				}
 				$field_module[]=$field;
 			}
 			$privilege_field[$module_id] = array_chunk($field_module,3);

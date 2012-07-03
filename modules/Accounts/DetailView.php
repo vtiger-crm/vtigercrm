@@ -89,11 +89,26 @@ if(isPermitted("Accounts","EditView",$_REQUEST['record']) == 'yes')
 if(isPermitted("Accounts","Delete",$_REQUEST['record']) == 'yes')
 	$smarty->assign("DELETE","permitted");
 
-if(isPermitted("Emails","EditView",'') == 'yes') 
-{ 
-	$smarty->assign("SENDMAILBUTTON","permitted"); 
-	$smarty->assign("EMAIL1", $focus->column_fields['email1']); 
-	$smarty->assign("EMAIL2", $focus->column_fields['email2']); 
+if(isPermitted("Emails","EditView",'') == 'yes') {
+	$vtwsObject = VtigerWebserviceObject::fromName($adb, $currentModule);
+	$vtwsCRMObjectMeta = new VtigerCRMObjectMeta($vtwsObject, $current_user);
+	$emailFields = $vtwsCRMObjectMeta->getEmailFields();
+
+	$smarty->assign("SENDMAILBUTTON","permitted");
+	$emails=array();
+	foreach($emailFields as $key => $value){
+		$emails[]=$value;
+	}
+	$smarty->assign("EMAILS", $emails);
+	$cond="LTrim('%s') !=''";
+	$condition=array();
+	foreach($emails as $key => $value){
+		$condition[]=sprintf($cond,$value);
+	}
+	$condition_str=implode("||",$condition);
+	$js="if(".$condition_str."){fnvshobj(this,'sendmail_cont');sendmail('".$currentModule."',".$_REQUEST['record'].");}else{OpenCompose('','create');}";
+
+	$smarty->assign('JS',$js);
 } 
 
 if(isPermitted("Accounts","Merge",'') == 'yes')

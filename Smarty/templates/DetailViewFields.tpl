@@ -24,24 +24,28 @@
 				{*elseif $keyid eq '71' || $keyid eq '72'}  <!--CurrencySymbol-->
 					{$keycursymb*}
 				{/if}
-				<span id ="dtlview_{$label}">{$keyval}</span>
-				
-                {if $keyid eq '71' && $keyfldname eq 'unit_price'}	
-                	{if $PRICE_DETAILS|@count > 0}				
+				{if $keyid eq 11 && $USE_ASTERISK eq 'true'}
+                    <span id="dtlview_{$label}"><a href='javascript:;' onclick='startCall("{$keyval}", "{$ID}")'>{$keyval}</a></span>
+				{else}
+					<span id="dtlview_{$label}">{$keyval}</span>
+				{/if}
+
+                {if $keyid eq '71' && $keyfldname eq 'unit_price'}
+                	{if $PRICE_DETAILS|@count > 0}
 						<span id="multiple_currencies" width="38%" style="align:right;">
 							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0);" onclick="toggleShowHide('currency_class','multiple_currencies');">{$APP.LBL_MORE_CURRENCIES} &raquo;</a>
 						</span>
-						
-						<div id="currency_class" class="multiCurrencyDetailUI">					
+
+						<div id="currency_class" class="multiCurrencyDetailUI">
 							<table width="100%" height="100%" class="small" cellpadding="5">
-							<tr class="detailedViewHeader">							
+							<tr class="detailedViewHeader">
 								<th colspan="2">
 									<b>{$MOD.LBL_PRODUCT_PRICES}</b>
 								</th>
 								<th align="right">
 									<img border="0" style="cursor: pointer;" onclick="toggleShowHide('multiple_currencies','currency_class');" src="{'close.gif'|@vtiger_imageurl:$THEME}"/>
 								</th>
-							</tr>							
+							</tr>
 							<tr class="detailedViewHeader">
 								<th>{$APP.LBL_CURRENCY}</th>
 								<th colspan="2">{$APP.LBL_PRICE}</th>
@@ -95,21 +99,24 @@
 				{/foreach}
 				{$selected_val|replace:"\n":"<br>&nbsp;&nbsp;"}
 			</td>
+		{elseif $keyid eq '14'}<!--Time-->
+			<td width=25% class="dvtCellInfo" align="left">&nbsp;{$keyval}
+			</td>
 		{elseif $keyid eq '17'} <!--WebSite-->
-			<td width=25% class="dvtCellInfo" align="left">&nbsp;<a href="http://{$keyval}" target="_blank">{$keyval}</a>
+			<td width=25% class="dvtCellInfo" align="left">&nbsp;<a href="{$keyval}" target="_blank">{$keyval}</a>
 			</td>
 		{elseif $keyid eq '85'}<!--Skype-->
 			<td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}">
 				&nbsp;<img src="{'skype.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_SKYPE}" title="{$APP.LBL_SKYPE}" LANGUAGE=javascript align="absmiddle"></img>
 				<span id="dtlview_{$label}"><a href="skype:{$keyval}?call">{$keyval}</a></span>
-			</td>	
+			</td>
 		{elseif $keyid eq '19' || $keyid eq '20'} <!--TextArea/Description-->
 			{if $label eq $MOD.LBL_ADD_COMMENT}
 				{assign var=keyval value=''}
 			{/if}
 			<td width=100% class="dvtCellInfo" align="left">&nbsp;
 				<!--To give hyperlink to URL-->
-				{$keyval|regex_replace:"/(^|[\n ])([\w]+?:\/\/.*?[^ \"\n\r\t<]*)/":"\\1<a href=\"\\2\" target=\"_blank\">\\2</a>"|regex_replace:"/(^|[\n ])((www|ftp)\.[\w\-]+\.[\w\-.\~]+(?:\/[^ \"\t\n\r<]*)?)/":"\\1<a href=\"http://\\2\" target=\"_blank\">\\2</a>"|regex_replace:"/(^|[\n ])([a-z0-9&\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)*[\w]+)/i":"\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>"|regex_replace:"/,\"|\.\"|\)\"|\)\.\"|\.\)\"/":"\""|replace:"\n":"<br>&nbsp;"}                   
+				{$keyval|regex_replace:"/(^|[\n ])([\w]+?:\/\/.*?[^ \"\n\r\t<]*)/":"\\1<a href=\"\\2\" target=\"_blank\">\\2</a>"|regex_replace:"/(^|[\n ])((www|ftp)\.[\w\-]+\.[\w\-.\~]+(?:\/[^ \"\t\n\r<]*)?)/":"\\1<a href=\"http://\\2\" target=\"_blank\">\\2</a>"|regex_replace:"/(^|[\n ])([a-z0-9&\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)*[\w]+)/i":"\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>"|regex_replace:"/,\"|\.\"|\)\"|\)\.\"|\.\)\"/":"\""|replace:"\n":"<br>&nbsp;"}
 			</td>
 		{elseif $keyid eq '21' || $keyid eq '24' || $keyid eq '22'} <!--TextArea/Street-->
 			<td width=25% class="dvtCellInfo" align="left">&nbsp;<span id ="dtlview_{$label}">{$keyval}</span>
@@ -125,16 +132,16 @@
 	            {if $keyseclink eq ''}
 	                {$keyval}
 	            {else}
-	               	<a href="{$keyseclink.0}">{$keyval}</a>         
+	               	<a href="{$keyseclink.0}">{$keyval}</a>
 	            {/if}
-				&nbsp;            
+				&nbsp;
             </td>
-		{elseif $keyid eq '56'} <!--CheckBox--> 
+		{elseif $keyid eq '56'} <!--CheckBox-->
 			<td width=25% class="dvtCellInfo" align="left">{$keyval}&nbsp;
-			</td>     
+			</td>
 		{elseif $keyid eq 83}<!-- Handle the Tax in Inventory -->
 				<td align="right" class="dvtCellLabel">
-					{$APP.LBL_VAT} {$APP.COVERED_PERCENTAGE}							
+					{$APP.LBL_VAT} {$APP.COVERED_PERCENTAGE}
 				</td>
 				<td class="dvtCellInfo" align="left">&nbsp;
 					{$VAT_TAX}
@@ -144,10 +151,10 @@
 			<tr>
 				<td align="right" class="dvtCellLabel">
 					{$APP.LBL_SALES} {$APP.LBL_TAX} {$APP.COVERED_PERCENTAGE}
-				</td> 
+				</td>
 				<td class="dvtCellInfo" align="left">&nbsp;
 					{$SALES_TAX}
-				</td>	
+				</td>
 				<td colspan="2" class="dvtCellInfo">&nbsp;</td>
 			</tr>
 			<tr>
@@ -156,10 +163,10 @@
 				</td>
 				<td class="dvtCellInfo" align="left" >&nbsp;
 					{$SERVICE_TAX}
-				</td>	
+				</td>
 
 		{elseif $keyid eq 69}<!-- for Image Reflection -->
 			<td align="left" width=25%">&nbsp;{$keyval}</td>
-		{else}									
+		{else}
 			<td class="dvtCellInfo" align="left" width=25%">&nbsp;{$keyval}</td>
 		{/if}

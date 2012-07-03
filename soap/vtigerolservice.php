@@ -333,7 +333,7 @@ function AddMessageToContact($username,$session,$contactid,$msgdtls)
 			$email_body = str_replace("'", "''", $msgdtl['body']);
 			$email_body = str_replace('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'," ", $email_body);
 	        $email_subject = str_replace("'", "''",$msgdtl['subject']);
-	        $date_sent = getDisplayDate($msgdtl['datesent']);
+	        $date_sent = DateTimeField::convertToUserFormat($msgdtl['datesent']);
 	        
 	        $email->column_fields[subject] = $email_subject;
 	        $email->column_fields[assigned_user_id] = $user_id;
@@ -652,7 +652,7 @@ function AddContacts($username,$session,$cntdtls)
     			   $contact->column_fields[lastname]=$cntrow["firstname"]." ".$cntrow["middlename"]." ".$cntrow["lastname"];
           		}
     
-    			$contact->column_fields[birthday]= in_array('birthday',$permitted_lists) ? getDisplayDate($cntrow["birthdate"]) : "";
+    			$contact->column_fields[birthday]= in_array('birthday',$permitted_lists) ? DateTimeField::convertToUserFormat($cntrow["birthdate"]) : "";
     			$contact->column_fields[email]=in_array('email',$permitted_lists) ? $cntrow["emailaddress"] : "";
     			$contact->column_fields[title]=in_array('title',$permitted_lists) ? $cntrow["jobtitle"] : "";
     			$contact->column_fields[department]=in_array('department',$permitted_lists) ? $cntrow["department"] : "";
@@ -740,7 +740,7 @@ function UpdateContacts($username,$session,$cntdtls)
 				$contact->column_fields[lastname]=$cntrow["firstname"]." ".$cntrow["middlename"]." ".$cntrow["lastname"];
       			}
       
-			$contact->column_fields[birthday]= in_array('birthday',$permitted_lists) ? getDisplayDate($cntrow["birthdate"]) : "";
+			$contact->column_fields[birthday]= in_array('birthday',$permitted_lists) ? DateTimeField::convertToUserFormat($cntrow["birthdate"]) : "";
 			$contact->column_fields[email]= in_array('email',$permitted_lists) ? $cntrow["emailaddress"] : "";
 			$contact->column_fields[title]= in_array('title',$permitted_lists) ? $cntrow["jobtitle"] : "";
 			$contact->column_fields[department]= in_array('department',$permitted_lists) ? $cntrow["department"] : "";
@@ -983,8 +983,8 @@ function AddTasks($username,$session,$taskdtls)
 			}
 
 			$task->column_fields[subject] = in_array('subject',$permitted_lists) ? $taskrow["subject"] : "";
-			$task->column_fields[date_start]= in_array('date_start',$permitted_lists) ? getDisplayDate($taskrow["startdate"]) : "";
-			$task->column_fields[due_date]= in_array('due_date',$permitted_lists) ? getDisplayDate($taskrow["duedate"]) : "";         
+			$task->column_fields[date_start]= in_array('date_start',$permitted_lists) ? DateTimeField::convertToUserFormat($taskrow["startdate"]) : "";
+			$task->column_fields[due_date]= in_array('due_date',$permitted_lists) ? DateTimeField::convertToUserFormat($taskrow["duedate"]) : "";
 			$task->column_fields[taskstatus]= in_array('taskstatus',$permitted_lists) ? $taskrow["status"] : "";
 			$task->column_fields[taskpriority]= in_array('taskpriority',$permitted_lists) ? $taskrow["priority"] : "";
 			$task->column_fields[description]= in_array('description',$permitted_lists) ? $taskrow["description"] : "";
@@ -1070,8 +1070,8 @@ function UpdateTasks($username,$session,$taskdtls)
 		
 			$task->retrieve_entity_info($taskrow["id"],"Calendar");
 			$task->column_fields[subject] = in_array('subject',$permitted_lists) ? $taskrow["subject"] : "";
-			$task->column_fields[date_start] = in_array('date_start',$permitted_lists) ? getDisplayDate($taskrow["startdate"]) : "";
-			$task->column_fields[due_date] = in_array('due_date',$permitted_lists) ? getDisplayDate($taskrow["duedate"]) : "";         
+			$task->column_fields[date_start] = in_array('date_start',$permitted_lists) ? DateTimeField::convertToUserFormat($taskrow["startdate"]) : "";
+			$task->column_fields[due_date] = in_array('due_date',$permitted_lists) ? DateTimeField::convertToUserFormat($taskrow["duedate"]) : "";
 			$task->column_fields[taskstatus] = in_array('taskstatus',$permitted_lists) ? $taskrow["status"] : "";
 			$task->column_fields[taskpriority] = in_array('taskpriority',$permitted_lists) ? $taskrow["priority"] : "";
 			$task->column_fields[description] = in_array('description',$permitted_lists) ? $taskrow["description"] : "";
@@ -1225,8 +1225,8 @@ function AddClndr($username,$session,$clndrdtls)
 			}*/
 
 			$clndr->column_fields[subject] = in_array('subject',$permitted_lists) ? $clndrow["subject"] : "";
-			$clndr->column_fields[date_start]= in_array('date_start',$permitted_lists) ? getDisplayDate(trim($astartdtm[0])) : "";
-			$clndr->column_fields[due_date]= in_array('due_date',$permitted_lists) ? getDisplayDate(trim($aduedtm[0])) : ""; 
+			$clndr->column_fields[date_start]= in_array('date_start',$permitted_lists) ? DateTimeField::convertToUserFormat(trim($astartdtm[0])) : "";
+			$clndr->column_fields[due_date]= in_array('due_date',$permitted_lists) ? DateTimeField::convertToUserFormat(trim($aduedtm[0])) : "";
 			$clndr->column_fields[time_start]= in_array('time_start',$permitted_lists) ? $stimestart : "";
 			$clndr->column_fields[time_end]= in_array('time_end',$permitted_lists) ? $stimeend : "";
 			//$clndr->column_fields[duration_hours]= in_array('duration_hours',$permitted_lists) ? $stimeduehr : "";        
@@ -1302,8 +1302,8 @@ function UpdateClndr($username,$session,$clndrdtls)
 
 			$clndr->retrieve_entity_info($clndrow["id"],"Calendar");
 			$clndr->column_fields[subject] = in_array('subject',$permitted_lists) ? $clndrow["subject"] : "";
-			$clndr->column_fields[date_start]= in_array('date_start',$permitted_lists) ? getDisplayDate(trim($astartdtm[0])) : "";
-			$clndr->column_fields[due_date]= in_array('due_date',$permitted_lists) ? getDisplayDate(trim($aduedtm[0])) : ""; 
+			$clndr->column_fields[date_start]= in_array('date_start',$permitted_lists) ? DateTimeField::convertToUserFormat(trim($astartdtm[0])) : "";
+			$clndr->column_fields[due_date]= in_array('due_date',$permitted_lists) ? DateTimeField::convertToUserFormat(trim($aduedtm[0])) : "";
 			$clndr->column_fields[time_start]= in_array('time_start',$permitted_lists) ? $stimestart : "";
 			$clndr->column_fields[time_end]= in_array('time_end',$permitted_lists) ? $stimeend : "";
 			//$clndr->column_fields[duration_hours]= in_array('duration_hours',$permitted_lists) ? $stimeduehr : "";       

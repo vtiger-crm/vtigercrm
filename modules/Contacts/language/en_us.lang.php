@@ -14,7 +14,7 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header: /advent/projects/wesat/vtiger_crm/sugarcrm/modules/Contacts/language/en_us.lang.php,v 1.14 2005/03/24 17:47:43 rank Exp $
- * Description:  Defines the English language pack
+ * Description:  Defines the English language pack for Contacts Module
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.
  * All Rights Reserved.
  * Contributor(s): ______________________________________..
@@ -36,7 +36,7 @@ $mod_strings = Array(
 'LBL_LIST_FIRST_NAME'=>'First Name',
 'LBL_LIST_CONTACT_NAME'=>'Contact Name',
 'LBL_LIST_TITLE'=>'Title',
-'LBL_LIST_ACCOUNT_NAME'=>'Account Name',
+'LBL_LIST_ACCOUNT_NAME'=>'Organization Name',
 'LBL_LIST_EMAIL_ADDRESS'=>'Email',
 'LBL_LIST_PHONE'=>'Phone',
 'LBL_LIST_CONTACT_ROLE'=>'Role',
@@ -65,7 +65,7 @@ $mod_strings = Array(
 'LBL_CUSTOM_INFORMATION'=>'Custom Information',
 'LBL_FIRST_NAME'=>'First Name:',
 'LBL_OFFICE_PHONE'=>'Office Phone:',
-'LBL_ACCOUNT_NAME'=>'Account Name:',
+'LBL_ACCOUNT_NAME'=>'Organization Name:',
 'LBL_ANY_PHONE'=>'Any Phone:',
 'LBL_PHONE'=>'Phone:',
 'LBL_LAST_NAME'=>'Last Name:',
@@ -99,7 +99,7 @@ $mod_strings = Array(
 'LBL_DESCRIPTION'=>'Description:',
 'LBL_CONTACT_ROLE'=>'Role:',
 'LBL_OPP_NAME'=>'Opportunity Name:',
-'LBL_DUPLICATE'=>'Potential Duplicate Contacts',
+'LBL_DUPLICATE'=>'Opportunities Duplicate Contacts',
 'MSG_DUPLICATE' => 'Creating this contact may vtiger_potentialy create a duplicate contact. You may either select a contact from the list below or you may click on Create New Contact to continue creating a new contact with the previously entered data.',
 
 'LNK_NEW_APPOINTMENT' => 'New Appointment',
@@ -118,8 +118,8 @@ $mod_strings = Array(
 
 
 //for v4 release added
-'LBL_NEW_POTENTIAL'=>'New Potential',
-'LBL_POTENTIAL_TITLE'=>'Potentials',
+'LBL_NEW_POTENTIAL'=>'New Opportunity',
+'LBL_POTENTIAL_TITLE'=>'Opportunities',
 
 'LBL_NEW_TASK'=>'New Task',
 'LBL_TASK_TITLE'=>'Tasks',
@@ -140,7 +140,7 @@ $mod_strings = Array(
 'Office Phone'=>'Office Phone',
 'Last Name'=>'Last Name',
 'Mobile'=>'Mobile',
-'Account Name'=>'Account Name',
+'Account Name'=>'Organization Name',
 'Home Phone'=>'Home Phone',
 'Lead Source'=>'Lead Source',
 'Other Phone'=>'Other Phone',
@@ -177,7 +177,7 @@ $mod_strings = Array(
 
 // Added vtiger_fields for Add Business Card
 'LBL_NEW_CONTACT'=>'New Contact',
-'LBL_NEW_ACCOUNT'=>'New Account',
+'LBL_NEW_ACCOUNT'=>'New Organization',
 'LBL_NOTE_SUBJECT'=>'Document Subject:',
 'LBL_NOTE'=>'Note:',
 'LBL_WEBSITE'=>'Website:',
@@ -242,8 +242,10 @@ $mod_strings = Array(
 
 // Module Sequence Numbering
 'Contact Id' => 'Contact Id',
+'Secondary Email'=>'Secondary Email',
 // END
 
+'Contacts ID'=>'Contacts ID',
 );
 
 ?>

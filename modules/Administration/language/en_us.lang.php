@@ -14,15 +14,15 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header: /advent/projects/wesat/vtiger_crm/sugarcrm/modules/Administration/language/en_us.lang.php,v 1.3 2005/01/25 05:54:44 jack Exp $
- * Description:  Defines the English language pack for the Account module.
+ * Description:  Defines the English language pack for the Administration module.
  ********************************************************************************/
  
 $mod_strings = Array(
 'LBL_MODULE_NAME'=>'Administration',
 'LBL_MODULE_TITLE'=>'Administration: Home',
 
-'LBL_NEW_FORM_TITLE'=>'New Account',
-'ERR_DELETE_RECORD'=>"A record number must be specified to delete the account.",
+'LBL_NEW_FORM_TITLE'=>'New Organization',
+'ERR_DELETE_RECORD'=>"A record number must be specified to delete the organization.",
 );
 
 ?>

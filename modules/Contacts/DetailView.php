@@ -101,9 +101,25 @@ if(isPermitted("Emails","EditView",'') == 'yes')
 	//Added to pass the parents list as hidden for Emails -- 09-11-2005
 	$parent_email = getEmailParentsList('Contacts',$_REQUEST['record'], $focus);
 	$smarty->assign("HIDDEN_PARENTS_LIST",$parent_email);
+	$vtwsObject = VtigerWebserviceObject::fromName($adb, $currentModule);
+	$vtwsCRMObjectMeta = new VtigerCRMObjectMeta($vtwsObject, $current_user);
+	$emailFields = $vtwsCRMObjectMeta->getEmailFields();
+
 	$smarty->assign("SENDMAILBUTTON","permitted");
-	$smarty->assign("EMAIL1",$focus->column_fields['email']);
-	$smarty->assign("EMAIL2",$focus->column_fields['yahooid']);
+	$emails=array();
+	foreach($emailFields as $key => $value) {
+		$emails[]=$value;
+	}
+	$smarty->assign("EMAILS", $emails);
+	$cond="LTrim('%s') !=''";
+	$condition=array();
+	foreach($emails as $key => $value) {
+		$condition[]=sprintf($cond,$value);
+	}
+	$condition_str=implode("||",$condition);
+	$js="if(".$condition_str."){fnvshobj(this,'sendmail_cont');sendmail('".$currentModule."',".$_REQUEST['record'].");}else{OpenCompose('','create');}";
+
+	$smarty->assign('JS',$js);
 
 }
 

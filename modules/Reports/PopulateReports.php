@@ -50,20 +50,20 @@ $reportmodules = Array(Array('primarymodule'=>'Contacts','secondarymodule'=>'Acc
 $selectcolumns = Array(Array('vtiger_contactdetails:firstname:Contacts_First_Name:firstname:V',
                              'vtiger_contactdetails:lastname:Contacts_Last_Name:lastname:V',
                              'vtiger_contactsubdetails:leadsource:Contacts_Lead_Source:leadsource:V',
-                             'vtiger_accountContacts:accountname:Contacts_Account_Name:account_id:V',
+                             'vtiger_contactdetails:accountid:Contacts_Account_Name:account_id:V',
 			     'vtiger_account:industry:Accounts_industry:industry:V',
 			     'vtiger_contactdetails:email:Contacts_Email:email:E'),
 
 		       Array('vtiger_contactdetails:firstname:Contacts_First_Name:firstname:V',
                              'vtiger_contactdetails:lastname:Contacts_Last_Name:lastname:V',
                              'vtiger_contactsubdetails:leadsource:Contacts_Lead_Source:leadsource:V',
-                             'vtiger_accountContacts:accountname:Contacts_Account_Name:account_id:V',
+                             'vtiger_contactdetails:accountid:Contacts_Account_Name:account_id:V',
                              'vtiger_account:industry:Accounts_industry:industry:V',
                              'vtiger_contactdetails:email:Contacts_Email:email:E'),
 
 		       Array('vtiger_contactdetails:firstname:Contacts_First_Name:firstname:V',
                              'vtiger_contactdetails:lastname:Contacts_Last_Name:lastname:V',
-                             'vtiger_accountContacts:accountname:Contacts_Account_Name:account_id:V',
+                             'vtiger_contactdetails:accountid:Contacts_Account_Name:account_id:V',
                              'vtiger_contactdetails:email:Contacts_Email:email:E',
                              'vtiger_potential:potentialname:Potentials_Potential_Name:potentialname:V',
                              'vtiger_potential:sales_stage:Potentials_Sales_Stage:sales_stage:V'),
@@ -86,7 +86,7 @@ $selectcolumns = Array(Array('vtiger_contactdetails:firstname:Contacts_First_Nam
                              'vtiger_potential:potentialtype:Potentials_Type:opportunity_type:V',
                              'vtiger_potential:leadsource:Potentials_Lead_Source:leadsource:V',
                              'vtiger_potential:sales_stage:Potentials_Sales_Stage:sales_stage:V'),
-  
+
 		       Array('vtiger_potential:potentialname:Potentials_Potential_Name:potentialname:V',
                              'vtiger_potential:amount:Potentials_Amount:amount:N',
                              'vtiger_potential:potentialtype:Potentials_Type:opportunity_type:V',
@@ -125,7 +125,7 @@ $selectcolumns = Array(Array('vtiger_contactdetails:firstname:Contacts_First_Nam
                              'vtiger_troubletickets:status:HelpDesk_Status:ticketstatus:V',
                              'vtiger_troubletickets:category:HelpDesk_Category:ticketcategories:V',
                              'vtiger_usersHelpDesk:user_name:HelpDesk_Assigned_To:assigned_user_id:V'),
-		      
+
  		       Array('vtiger_products:productname:Products_Product_Name:productname:V',
                              'vtiger_products:productcode:Products_Product_Code:productcode:V',
                              'vtiger_products:discontinued:Products_Product_Active:discontinued:V',
@@ -144,14 +144,14 @@ $selectcolumns = Array(Array('vtiger_contactdetails:firstname:Contacts_First_Nam
 		       Array('vtiger_quotes:subject:Quotes_Subject:subject:V',
                              'vtiger_potentialRelQuotes:potentialname:Quotes_Potential_Name:potential_id:I',
                              'vtiger_quotes:quotestage:Quotes_Quote_Stage:quotestage:V',
-                             'vtiger_contactdetailsQuotes:lastname:Quotes_Contact_Name:contact_id:V',
+                             'vtiger_quotes:contactid:Quotes_Contact_Name:contact_id:V',
                              'vtiger_usersRel1:user_name:Quotes_Inventory_Manager:assigned_user_id1:I',
                              'vtiger_accountQuotes:accountname:Quotes_Account_Name:account_id:I'),
 
 		       Array('vtiger_quotes:subject:Quotes_Subject:subject:V',
                              'vtiger_potentialRelQuotes:potentialname:Quotes_Potential_Name:potential_id:I',
                              'vtiger_quotes:quotestage:Quotes_Quote_Stage:quotestage:V',
-                             'vtiger_contactdetailsQuotes:lastname:Quotes_Contact_Name:contact_id:V',	
+                             'vtiger_quotes:contactid:Quotes_Contact_Name:contact_id:V',
                              'vtiger_usersRel1:user_name:Quotes_Inventory_Manager:assigned_user_id1:I',
                              'vtiger_accountQuotes:accountname:Quotes_Account_Name:account_id:I',
 			     'vtiger_quotes:carrier:Quotes_Carrier:carrier:V',
@@ -186,7 +186,7 @@ $selectcolumns = Array(Array('vtiger_contactdetails:firstname:Contacts_First_Nam
 			     'vtiger_quotesSalesOrder:subject:SalesOrder_Quote_Name:quote_id:I',
 			     'vtiger_contactdetailsSalesOrder:lastname:SalesOrder_Contact_Name:contact_id:I',
 			     'vtiger_salesorder:duedate:SalesOrder_Due_Date:duedate:D',
-			     'vtiger_salesorder:carrier:SalesOrder_Carrier:carrier:V',                  
+			     'vtiger_salesorder:carrier:SalesOrder_Carrier:carrier:V',
 			     'vtiger_salesorder:sostatus:SalesOrder_Status:sostatus:V',
 			     'vtiger_accountSalesOrder:accountname:SalesOrder_Account_Name:account_id:I',
 			     'vtiger_salesorder:salescommission:SalesOrder_Sales_Commission:salescommission:N',
@@ -317,7 +317,7 @@ $reports = Array(Array('reportname'=>'Contacts by Accounts',
                        'description'=>'Invoice Detailed Report',
                        'reporttype'=>'tabular',
 		       'sortid'=>'','stdfilterid'=>'','advfilterid'=>''),
-		 
+
 		 Array('reportname'=>'SalesOrder Detailed Report',
                        'reportfolder'=>'SalesOrder Reports',
                        'description'=>'SalesOrder Detailed Report',
@@ -368,13 +368,13 @@ $stdfilters = Array(Array('columnname'=>'vtiger_crmentity:modifiedtime:modifiedt
 
 $advfilters = Array(
                       Array(
-                            Array('columnname'=>'vtiger_accountContacts:accountname:Contacts_Account_Name:account_id:V',
+                            Array('columnname'=>'vtiger_contactdetails:accountid:Contacts_Account_Name:account_id:V',
                                   'comparator'=>'n',
                                   'value'=>''
                                  )
                            ),
 		      Array(
-                            Array('columnname'=>'vtiger_accountContacts:accountname:Contacts_Account_Name:account_id:V',
+                            Array('columnname'=>'vtiger_contactdetails:accountid:Contacts_Account_Name:account_id:V',
                                   'comparator'=>'e',
                                   'value'=>''
                                  )
@@ -424,7 +424,7 @@ foreach($reports as $key=>$report)
         insertReports($queryid,$reportid[$report['reportfolder']],$report['reportname'],$report['description'],$report['reporttype']);
         insertSelectColumns($queryid,$selectcolumns[$key]);
         insertReportModules($queryid,$reportmodules[$key]['primarymodule'],$reportmodules[$key]['secondarymodule']);
-	
+
 	if(isset($stdfilters[$report['stdfilterid']]))
 	{
 		$i = $report['stdfilterid'];
@@ -455,7 +455,7 @@ function PopulateReportFolder($fldrname,$fldrdescription)
 	$result = $adb->pquery($sql, $params);
 }
 
-/** Function to add an entry in selestquery vtiger_table 
+/** Function to add an entry in selestquery vtiger_table
  *
  */
 
@@ -473,8 +473,8 @@ function insertSelectQuery()
 }
 
 /** Function to store the vtiger_field names selected for a vtiger_report to a database
- *  
- *  
+ *
+ *
  */
 
 function insertSelectColumns($queryid,$columnname)
@@ -485,7 +485,7 @@ function insertSelectColumns($queryid,$columnname)
 		for($i=0;$i < count($columnname);$i++)
 		{
 			$icolumnsql = "insert into vtiger_selectcolumn (QUERYID,COLUMNINDEX,COLUMNNAME) values (?,?,?)";
-			$icolumnsqlresult = $adb->pquery($icolumnsql, array($queryid, $i, $columnname[$i]));	
+			$icolumnsqlresult = $adb->pquery($icolumnsql, array($queryid, $i, $columnname[$i]));
 		}
 	}
 }

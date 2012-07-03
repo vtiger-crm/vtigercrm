@@ -11,35 +11,30 @@
 
 /**	Function to get the list of tickets for the currently loggedin user
 **/
- 
+
 function getMyTickets($maxval,$calCnt)
 {
 	global $log;
 	$log->debug("Entering getMyTickets() method ...");
-	global $current_user;
-	global $theme;
-	global $current_language;
-	global $adb;
+	global $current_user, $current_language, $adb;
 	$current_module_strings = return_module_language($current_language, 'HelpDesk');
-	$theme_path="themes/".$theme."/";
-	$image_path="themes/images/";
 
 	$search_query  = "SELECT vtiger_troubletickets.*, vtiger_crmentity.*
-		FROM vtiger_troubletickets 
-		INNER JOIN vtiger_crmentity on vtiger_crmentity.crmid = vtiger_troubletickets.ticketid 
+		FROM vtiger_troubletickets
+		INNER JOIN vtiger_crmentity on vtiger_crmentity.crmid = vtiger_troubletickets.ticketid
 		INNER JOIN vtiger_users on vtiger_users.id = vtiger_crmentity.smownerid
 		where vtiger_crmentity.smownerid = ? and vtiger_crmentity.deleted = 0 and ".
 		"vtiger_troubletickets.ticketid > 0 and vtiger_troubletickets.status <> 'Closed' ".
 		"AND vtiger_crmentity.setype='HelpDesk' ORDER BY createdtime DESC";
 
 	$search_query .= " LIMIT 0," . $adb->sql_escape_string($maxval);
-	
-	
+
+
 	if($calCnt == 'calculateCnt') {
 		$list_result_rows = $adb->pquery(mkCountQuery($search_query), array($current_user->id));
 		return $adb->query_result($list_result_rows, 0, 'count');
 	}
-	
+
 	$tktresult = $adb->pquery($search_query, array($current_user->id));
 	if($adb->num_rows($tktresult))
 	{
@@ -75,11 +70,28 @@ function getMyTickets($maxval,$calCnt)
 			$value[]=$parent_name;
 			$entries[$ticketid]=$value;
 		}
-		
-		$search_qry = "&query=true&Fields0=ticketstatus&Condition0=n&Srch_value0=closed&Fields1=assigned_user_id&Condition1=e&Srch_value1=".$current_user->column_fields['user_name']."&searchtype=advance&search_cnt=2&matchtype=all";
-		
+
+		$advft_criteria_groups = array('1' => array('groupcondition' => null));
+		$advft_criteria = array(
+			array (
+				'groupid' => 1,
+				'columnname' => 'vtiger_troubletickets:status:ticketstatus:HelpDesk_Status:V',
+				'comparator' => 'n',
+				'value' => 'Closed',
+				'columncondition' => 'and'
+			),
+			array (
+				'groupid' => 1,
+				'columnname' => 'vtiger_crmentity:smownerid:assigned_user_id:HelpDesk_Assigned_To:V',
+				'comparator' => 'e',
+				'value' => getFullNameFromArray('Users', $current_user->column_fields),
+				'columncondition' => null
+			)
+		);
+		$search_qry = '&advft_criteria='.Zend_Json::encode($advft_criteria).'&advft_criteria_groups='.Zend_Json::encode($advft_criteria_groups).'&searchtype=advance&query=true';
+
 		$values=Array('ModuleName'=>'HelpDesk','Title'=>$title,'Header'=>$header,'Entries'=>$entries,'search_qry'=>$search_qry);
-		if ( ($display_empty_home_blocks && $noofrows == 0 ) || ($noofrows>0) )	
+		if ( ($noofrows == 0 ) || ($noofrows>0) )
 		{
 			$log->debug("Exiting getMyTickets method ...");
 			return $values;
@@ -97,7 +109,7 @@ function getParentLink($parent_id)
 	global $log;
 	$log->debug("Entering getParentLink(".$parent_id.") method ...");
 	global $adb;
-	
+
 	// Static caching
 	static $__cache_listtickets_parentlink = Array();
 	if(isset($__cache_listtickets_parentlink[$parent_id])) {
@@ -124,7 +136,7 @@ function getParentLink($parent_id)
 
 	// Add to cache
 	$__cache_listtickets_parentlink[$parent_id] = $parent_name;
-	
+
 	$log->debug("Exiting getParentLink method ...");
 	return $parent_name;
 }

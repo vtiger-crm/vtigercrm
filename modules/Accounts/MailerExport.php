@@ -59,7 +59,7 @@ function getStdContactFlds(&$queryFields, $adb, $valueArray)
 	{
     $myData = $adb->fetchByAssoc ($result);
     $queryFields[] = Array('columnname'=>$myData['columnname']
-      ,'uitype'=>'56','fieldlabel'=>$mod_strings[$myData['fieldlabel']]
+      ,'uitype'=>'56','fieldlabel'=>getTranslatedString($myData['fieldlabel'], 'Contacts')
       ,'value'=> $valueArray);
   }
 }
@@ -153,32 +153,38 @@ else
      
 	if(count($fields) > 0)
 		$where .= getExpWhereClause($fields,$types);
-	 $exquery[0] = "SELECT crmentity.crmid, contactdetails.contactid,
+	 $exquery[0] = "SELECT vtiger_crmentity.crmid, contactdetails.contactid,
 	   contactdetails.salutation, contactdetails.firstname,
 	   contactdetails.lastname, contactdetails.email  FROM vtiger_account
-	   INNER JOIN vtiger_crmentity crmentity on crmentity.crmid=vtiger_account.accountid
+	   INNER JOIN vtiger_crmentity on vtiger_crmentity.crmid=vtiger_account.accountid
 	   INNER JOIN vtiger_accountbillads ON vtiger_account.accountid=vtiger_accountbillads.accountaddressid
 	   INNER JOIN vtiger_accountshipads ON vtiger_account.accountid=vtiger_accountshipads.accountaddressid
 	   INNER JOIN vtiger_accountscf ON vtiger_account.accountid = vtiger_accountscf.accountid
 	   INNER JOIN vtiger_contactdetails contactdetails ON vtiger_account.accountid = contactdetails.accountid
+	   INNER JOIN vtiger_crmentity contactdetails_crmentity ON contactdetails.contactid = contactdetails_crmentity.crmid
 	   INNER JOIN vtiger_contactscf contactscf ON contactscf.contactid = contactdetails.contactid
-	   WHERE crmentity.deleted=0 AND contactdetails.email != '' ".$where;
+	   LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid=vtiger_users.id
+	   LEFT JOIN vtiger_groups ON vtiger_crmentity.smownerid=vtiger_groups.groupid
+	   WHERE vtiger_crmentity.deleted=0 AND contactdetails_crmentity.deleted=0 AND contactdetails.email != '' ".$where;
 
 	 if (strlen ($exportWhere))
 	      $exquery[0] .= " AND ".$exportWhere;
 
    if ($export_type == "emailplus")
    {     
-		  $exquery[1] = "SELECT crmentity.crmid, contactdetails.contactid,
+		  $exquery[1] = "SELECT vtiger_crmentity.crmid, contactdetails.contactid,
 		    contactdetails.salutation, contactdetails.firstname,
 		    contactdetails.lastname, vtiger_account.email1  FROM vtiger_account
-		    INNER JOIN vtiger_crmentity crmentity ON crmentity.crmid=vtiger_account.accountid
+		    INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid=vtiger_account.accountid
 		    INNER JOIN vtiger_accountbillads ON vtiger_account.accountid=vtiger_accountbillads.accountaddressid
 		    INNER JOIN vtiger_accountshipads ON vtiger_account.accountid=vtiger_accountshipads.accountaddressid
 		    INNER JOIN vtiger_accountscf ON vtiger_account.accountid = vtiger_accountscf.accountid
 		    INNER JOIN vtiger_contactdetails contactdetails ON vtiger_account.accountid = contactdetails.accountid
+			INNER JOIN vtiger_crmentity contactdetails_crmentity ON contactdetails.contactid = contactdetails_crmentity.crmid
 		    INNER JOIN vtiger_contactscf contactscf ON contactscf.contactid = contactdetails.contactid
-		    WHERE crmentity.deleted=0
+	   LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid=vtiger_users.id
+	   LEFT JOIN vtiger_groups ON vtiger_crmentity.smownerid=vtiger_groups.groupid
+		    WHERE vtiger_crmentity.deleted=0 AND contactdetails_crmentity.deleted=0
 		    AND contactdetails.email = '' AND vtiger_account.email1 != '' ".$where;
 
      		if (strlen ($exportWhere))
@@ -190,7 +196,7 @@ else
 		$where = '';
 		if(count($fields) > 0)
 		  $where .= getExpWhereClause($fields,$types);
-	  $exquery[0] = "select crmentity.crmid, contactdetails.contactid,
+	  $exquery[0] = "select vtiger_crmentity.crmid, contactdetails.contactid,
 	    contactdetails.salutation, contactdetails.firstname,
 	    contactdetails.lastname, contactdetails.email, vtiger_account.accountname,"
 	      ." vtiger_account.phone, vtiger_account.website, vtiger_accountshipads.ship_street,"
@@ -200,13 +206,16 @@ else
 	      ." vtiger_accountbillads.bill_street, vtiger_accountbillads.bill_code,"
 	      ." vtiger_accountbillads.bill_city, vtiger_accountbillads.bill_state,"
 	      ." vtiger_accountbillads.bill_country"
-	      ." FROM vtiger_account INNER JOIN vtiger_crmentity crmentity ON crmentity.crmid=vtiger_account.accountid"
+	      ." FROM vtiger_account INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid=vtiger_account.accountid"
 	      ." LEFT JOIN vtiger_accountbillads ON vtiger_account.accountid=vtiger_accountbillads.accountaddressid"
 	      ." LEFT JOIN vtiger_accountshipads ON vtiger_account.accountid=vtiger_accountshipads.accountaddressid"
 	      ." INNER JOIN vtiger_accountscf ON vtiger_account.accountid = vtiger_accountscf.accountid"
 	      ." INNER JOIN vtiger_contactdetails contactdetails ON vtiger_account.accountid = contactdetails.accountid"
-	      ." INNER JOIN vtiger_contactscf contactscf ON contactscf.contactid = contactdetails.contactid"
-	      ." WHERE crmentity.deleted=0 ".$where;
+		." INNER JOIN vtiger_crmentity contactdetails_crmentity ON contactdetails.contactid = contactdetails_crmentity.crmid"
+	      ." INNER JOIN vtiger_contactscf contactscf ON contactscf.contactid = contactdetails.contactid
+	   LEFT JOIN vtiger_users ON vtiger_crmentity.smownerid=vtiger_users.id
+	   LEFT JOIN vtiger_groups ON vtiger_crmentity.smownerid=vtiger_groups.groupid"
+	      ." WHERE vtiger_crmentity.deleted=0 AND contactdetails_crmentity.deleted=0 ".$where;
 
 	  if (strlen ($exportWhere))
 	      $exquery[0] .= " AND ".$exportWhere;

@@ -21,7 +21,7 @@
 <div id="view">
 	{include file='com_vtiger_workflow/ModuleTitle.tpl'}
 	<form name="new_task" id="new_task_form" method="post" onsubmit="VtigerJS_DialogBox.block();">
-	
+
 		<table class="tableHeading" width="100%" border="0" cellspacing="0" cellpadding="5">
 			<tr>
 				<td class="big" nowrap="nowrap">
@@ -33,7 +33,7 @@
 				</td>
 			</tr>
 		</table>
-	
+
 		<table border="0" cellpadding="5" cellspacing="0" width="100%">
 			<tr>
 				<td class="dvtCellLabel" align=right width=15% nowrap="nowrap"><b><font color="red">*</font> {$MOD.LBL_TASK_TITLE}</b></td>
@@ -52,34 +52,34 @@
 					<select name="active" class="small">
 						<option value="true">{$MOD.LBL_ACTIVE}</option>
 						<option value="false" {if not $task->active}selected{/if}>{$MOD.LBL_INACTIVE}</option>
-					</select> 
+					</select>
 				</td>
 			</tr>
 		</table>
-		
+
 		<table border="0" cellpadding="5" cellspacing="0" width="100%" class="small">
 		<tr>
-			<td width='15%' nowrap="nowrap"><input type="checkbox" name="check_select_date" value="" id="check_select_date" {if $trigger neq null}checked{/if}> 
+			<td width='15%' nowrap="nowrap"><input type="checkbox" name="check_select_date" value="" id="check_select_date" {if $trigger neq null}checked{/if}>
 			<b>{$MOD.MSG_EXECUTE_TASK_DELAY}</b></td>
 			<td>
-				<div id="select_date" style="display:none;">
-					<input type="text" name="select_date_days" value="{$trigger.days}" id="select_date_days" class="small"> days 
+				<div id="select_date" {if $trigger eq null}style="display:none;"{/if}>
+					<input type="text" name="select_date_days" value="{$trigger.days}" id="select_date_days" class="small"> days
 					<select name="select_date_direction" class="small">
 						<option {if $trigger.direction eq 'after'}selected{/if} value='after'>{$MOD.LBL_AFTER}</option>
-						<option {if $trigger.direction eq 'after'}selected{/if} value='before'>{$MOD.LBL_BEFORE}</option>
-					</select> 
+						<option {if $trigger.direction eq 'before'}selected{/if} value='before'>{$MOD.LBL_BEFORE}</option>
+					</select>
 					<select name="select_date_field" class="small">
 		{foreach key=name item=label from=$dateFields}
-						<option value='{$name}' {if $trigger->name eq $name}selected{/if}>
+						<option value='{$name}' {if $trigger.field eq $name}selected{/if}>
 							{$label}
 						</option>
 		{/foreach}
-					</select>					
-				</div>				
+					</select>
+				</div>
 			</td>
 		</tr>
 		</table>
-		
+
 		<table class="tableHeading" border="0"  width="100%" cellspacing="0" cellpadding="5">
 			<tr>
 				<td class="big" nowrap="nowrap">

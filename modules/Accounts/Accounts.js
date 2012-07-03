@@ -167,11 +167,6 @@ function searchMapLocation(addressType)
 			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('bill_street')]))
 	                        mapParameter = document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('bill_street')]).innerHTML+' ';
 		}
-                if(fieldname.indexOf('bill_pobox') > -1)
-		{
-			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('bill_pobox')]))
-                        	mapParameter = mapParameter + document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('bill_pobox')]).innerHTML+' ';
-		}
                 if(fieldname.indexOf('bill_city') > -1)
 		{
 			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('bill_city')]))
@@ -199,11 +194,6 @@ function searchMapLocation(addressType)
 		{
 			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('ship_street')]))
                         	mapParameter = document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('ship_street')]).innerHTML+' ';
-		}
-                if(fieldname.indexOf('ship_pobox') > -1)
-		{
-			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('ship_pobox')]))
-                        	mapParameter = mapParameter + document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('ship_pobox')]).innerHTML+' ';
 		}
                 if(fieldname.indexOf('ship_city') > -1)
 		{

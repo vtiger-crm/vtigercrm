@@ -65,11 +65,10 @@ if(isset($_REQUEST["record"]) == false || $_REQUEST["record"]=='')
         $BLOCKCRITERIA = $oReport->getSelectedStdFilterCriteria($oReport->stdselectedfilter);
 		$report_std_filter->assign("BLOCKCRITERIA_STD",$BLOCKCRITERIA);
 
-	if(isset($oReport->startdate) && isset($oReport->enddate))
-	{
-		$report_std_filter->assign("STARTDATE_STD",getDisplayDate($oReport->startdate));
-                $report_std_filter->assign("ENDDATE_STD",getDisplayDate($oReport->enddate));
-	}else{
+	if(isset($oReport->startdate) && isset($oReport->enddate)) {
+		$report_std_filter->assign("STARTDATE_STD", DateTimeField::convertToUserFormat($oReport->startdate));
+		$report_std_filter->assign("ENDDATE_STD", DateTimeField::convertToUserFormat($oReport->enddate));
+	} else {
 		$report_std_filter->assign("STARTDATE_STD",$oReport->startdate);
 		$report_std_filter->assign("ENDDATE_STD",$oReport->enddate);
 	}	

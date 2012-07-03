@@ -17,15 +17,16 @@
  * Description: TODO:  To be written.
  ********************************************************************************/
 
-global $theme;
+global $theme, $currentModule;
 $theme_path="themes/".$theme."/";
 $image_path=$theme_path."images/";
 
-if(isset($_REQUEST['mailconnect']))
-{
-	 echo '<center><font color=red><b>'.$mod_strings['LBL_MAIL_CONNECT_ERROR_INFO'].'</b></color></center><br>';
-}
+$parentTab = getParentTab();
 
-include ('modules/Webmails/ListView.php'); 
+echo "<br/><b>". getTranslatedString('LBL_INSTEAD_OF_WEBMAILS_USE', $currentModule).
+		" <a href='index.php?module=MailManager&action=index&parenttab=".$parentTab."'>".getTranslatedString('MailManager', 'MailManager')."</a>.<br/>".
+		getTranslatedString('LBL_PLEASE_CLICK_HERE_TO_GO_TO', $currentModule) .
+		" <a href='index.php?module=Emails&action=index&parenttab=".$parentTab."'>".getTranslatedString('Emails', 'Emails')."</a> ".
+		getTranslatedString('LBL_MODULE', $currentModule) ."</b>";
 
 ?>

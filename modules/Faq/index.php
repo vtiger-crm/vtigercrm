@@ -11,7 +11,7 @@
 global $theme;
 $theme_path="themes/".$theme."/";
 $image_path=$theme_path."images/";
-checkFileAccess('modules/'.$_REQUEST['module'].'/ListView.php');
+checkFileAccessForInclusion('modules/'.$_REQUEST['module'].'/ListView.php');
 require_once('modules/'.$_REQUEST['module'].'/ListView.php');
 
 ?>

@@ -19,16 +19,23 @@ $image_path=$theme_path."images/";
 $visible = vtlib_purify($_REQUEST['visible']);
 $disable = vtlib_purify($_REQUEST['disable']);
 $label = getTranslatedString(vtlib_purify($_REQUEST['label']));
-require_once($theme_path.'layout_utils.php');
+require_once('modules/Vtiger/layout_utils.php');
+
+$fieldModule = vtlib_purify($_REQUEST['fld_module']);
+$fieldId = vtlib_purify($_REQUEST['fieldid']);
+
+if(empty($fieldModule) || empyt($fieldId)) {
+	exit;
+}
 
 $output  .= '<div class="layerPopup" style="position:relative; display:block">' .
 		'	<form action="index.php" method="post" name="fieldinfoform" onsubmit="VtigerJS_DialogBox.block();"> 
 			<input type="hidden" name="module" value="Settings">
 	  		<input type="hidden" name="action" value="SettingsAjax">
-	  		<input type="hidden" name="fld_module" value="'.vtlib_purify($_REQUEST['fld_module']).'">
+	  		<input type="hidden" name="fld_module" value="'.$fieldModule.'">
 	  		<input type="hidden" name="parenttab" value="Settings">
           	<input type="hidden" name="file" value="UpdateMandatoryFields">
- 			<input type="hidden" name="fieldid" value="'.vtlib_purify($_REQUEST['fieldid']).'">
+ 			<input type="hidden" name="fieldid" value="'.$fieldId.'">
  			<table width="100%" border="0" cellpadding="5" cellspacing="0" class="layerHeadingULine">
 				<tr>
 					<td width="95%" align="left" class="layerPopupHeading">'.$label.'</td>

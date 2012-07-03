@@ -11,43 +11,84 @@
 
 document.write("<script type='text/javascript' src='include/js/Mail.js'></"+"script>");
 document.write("<script type='text/javascript' src='include/js/Merge.js'></"+"script>");
-function verify_data(form) {
-	if(! form.createpotential.checked == true){
-        if (trim(form.potential_name.value) == ""){
-            alert(alert_arr.OPPORTUNITYNAME_CANNOT_BE_EMPTY);
-			return false;	
-		}
-		
-		if(form.closingdate_mandatory != null && form.closingdate_mandatory.value == '*'){
-			if (form.closedate.value == ""){
-	        	alert(alert_arr.CLOSEDATE_CANNOT_BE_EMPTY);
-				return false;	
-			}
-		}
-		if (form.closedate.value != "" ){
-			var x = dateValidate('closedate','Potential Close Date','DATE');
-			if(!x){
-				return false;
-			}
-		}
-			
-				
-		
-		if(form.amount_mandatory.value == '*'){
-			if (form.potential_amount.value == ""){
-	            alert(alert_arr.AMOUNT_CANNOT_BE_EMPTY);
-				return false;					
-			}
-		}	
-		intval= intValidate('potential_amount','Potential Amount');
-		if(!intval){
+function verifyConvertLeadData(form) {
+	var convertForm=document.ConvertLead;
+	var no_ele=convertForm.length;
+	
+	if((form.select_account!=null)&&(form.select_contact!=null)){
+		if(!(form.select_account.checked || form.select_contact.checked)){
+			alert(alert_arr["ERR_SELECT_EITHER"]);
 			return false;
 		}
 	}
-	else{	
-		return true;
+	else if(form.select_account!=null){
+		if(!form.select_account.checked){
+			alert(alert_arr["ERR_SELECT_ACCOUNT"]);
+			return false;
+		}
 	}
-	
+	else if(form.select_contact!=null){
+		if(!form.select_contact.checked){
+			alert(alert_arr["ERR_SELECT_CONTACT"]);
+			return false;
+		}
+	}
+
+	if(form.select_account!=null && form.select_account.checked){
+		for(i=0;i<no_ele;i++){
+			if((convertForm[i].getAttribute('module')=='Accounts') && (convertForm[i].getAttribute('record')=='true')){
+				if(convertForm[i].value==''){
+					alert(alert_arr["ERR_MANDATORY_FIELD_VALUE"])
+					return false;
+				}
+			}
+		}
+	}
+	if(form.select_potential!=null && form.select_potential.checked){
+		for(i=0;i<no_ele;i++){
+			if((convertForm[i].getAttribute('module')=='Potentials') && (convertForm[i].getAttribute('record')=='true')){
+				if(convertForm[i].value==''){
+					alert(alert_arr["ERR_MANDATORY_FIELD_VALUE"])
+					return false;
+				}
+			}
+		}
+		if(form.jscal_field_closedate!=null && form.jscal_field_closedate.value!=''){
+			if(!dateValidate('closingdate',alert_arr['LBL_CLOSE_DATE'],'date')){
+				return false;
+			}
+		}
+		if(form.amount.value!=null && isNaN(form.amount.value)){
+			alert(alert_arr["ERR_POTENTIAL_AMOUNT"]);
+			return false;
+		}
+	}
+	if(form.select_contact!=null && form.select_contact.checked){
+		for(i=0;i<no_ele;i++){
+			if((convertForm[i].getAttribute('module')=='Contacts') && (convertForm[i].getAttribute('record')=='true')){
+				if(convertForm[i].value==''){
+					alert(alert_arr["ERR_MANDATORY_FIELD_VALUE"])
+					return false;
+				}
+			}
+		}
+		var emailpattern=/^[a-zA-Z0-9]+([!"#$%&'()*+,./:;<=>?@\^_`{|}~-]?[a-zA-Z0-9])*@[a-zA-Z0-9]+([\_\-\.]?[a-zA-Z0-9]+)*\.([\-\_]?[a-zA-Z0-9])+(\.?[a-zA-Z0-9]+)?$/;
+		if(form.email.value!=''){
+			if(!patternValidate('email',alert_arr['LBL_EMAIL'],'email')){
+				return false;
+			}
+		}
+	}
+
+	if(document.getElementById('transfertoacc').checked && !form.select_account.checked){
+		alert(alert_arr["ERR_TRANSFER_TO_ACC"]);
+		return false;
+	}
+	if(document.getElementById('transfertocon').checked && !form.select_contact.checked){
+		alert(alert_arr["ERR_TRANSFER_TO_CON"]);
+		return false;
+	}
+	return true;
 }
 
 function togglePotFields(form)
@@ -74,30 +115,30 @@ function togglePotFields(form)
 
 function set_return(product_id, product_name) {
 	if(document.getElementById('from_link').value != '') {
-        window.opener.document.QcEditView.parent_name.value = product_name;
-        window.opener.document.QcEditView.parent_id.value = product_id;
+		window.opener.document.QcEditView.parent_name.value = product_name;
+		window.opener.document.QcEditView.parent_id.value = product_id;
 	} else {
-        window.opener.document.EditView.parent_name.value = product_name;
-        window.opener.document.EditView.parent_id.value = product_id;
-}
+		window.opener.document.EditView.parent_name.value = product_name;
+		window.opener.document.EditView.parent_id.value = product_id;
+	}
 }
 
 function set_return_todo(product_id, product_name) {
 	if(document.getElementById('from_link').value != '') {
-        window.opener.document.QcEditView.task_parent_name.value = product_name;
-        window.opener.document.QcEditView.task_parent_id.value = product_id;
+		window.opener.document.QcEditView.task_parent_name.value = product_name;
+		window.opener.document.QcEditView.task_parent_id.value = product_id;
 	} else {
-        window.opener.document.createTodo.task_parent_name.value = product_name;
-        window.opener.document.createTodo.task_parent_id.value = product_id;
+		window.opener.document.createTodo.task_parent_name.value = product_name;
+		window.opener.document.createTodo.task_parent_id.value = product_id;
 	}
 }
 
 function set_return_specific(product_id, product_name) {
-        //Used for DetailView, Removed 'EditView' formname hardcoding
-        var fldName = getOpenerObj("lead_name");
-        var fldId = getOpenerObj("lead_id");
-        fldName.value = product_name;
-        fldId.value = product_id;
+	//Used for DetailView, Removed 'EditView' formname hardcoding
+	var fldName = getOpenerObj("lead_name");
+	var fldId = getOpenerObj("lead_id");
+	fldName.value = product_name;
+	fldId.value = product_id;
 }
 function add_data_to_relatedlist(entity_id,recordid) {
 	
@@ -105,24 +146,19 @@ function add_data_to_relatedlist(entity_id,recordid) {
 }
 //added by rdhital/Raju for emails
 function submitform(id){
-		document.massdelete.entityid.value=id;
-		document.massdelete.submit();
+	document.massdelete.entityid.value=id;
+	document.massdelete.submit();
 }	
 
 function searchMapLocation(addressType)
 {
-        var mapParameter = '';
-        if (addressType == 'Main')
-        {
+	var mapParameter = '';
+	if (addressType == 'Main')
+	{
 		if(fieldname.indexOf('lane') > -1)
 		{
 			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('lane')]))
-	                        mapParameter = document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('lane')]).innerHTML+' ';
-		}
-		if(fieldname.indexOf('pobox') > -1)
-		{
-			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('pobox')]))
-				mapParameter = mapParameter + document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('pobox')]).innerHTML+' ';
+				mapParameter = document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('lane')]).innerHTML+' ';
 		}
 		if(fieldname.indexOf('city') > -1)
 		{
@@ -142,11 +178,25 @@ function searchMapLocation(addressType)
 		if(fieldname.indexOf('code') > -1)
 		{
 			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('code')]))
-	                        mapParameter = mapParameter + document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('code')]).innerHTML+' ';
+				mapParameter = mapParameter + document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('code')]).innerHTML+' ';
 		}
-        }
+	}
 	mapParameter = removeHTMLFormatting(mapParameter);
-        window.open('http://maps.google.com/maps?q='+mapParameter,'goolemap','height=450,width=700,resizable=no,titlebar,location,top=200,left=250');
+	window.open('http://maps.google.com/maps?q='+mapParameter,'goolemap','height=450,width=700,resizable=no,titlebar,location,top=200,left=250');
 }
 
 
+function selectTransferTo(module){
+	if(module=='Accounts'){
+		if(document.getElementById('transfertoacc').checked){
+			$('account_block').style.display="block";
+			document.getElementById('select_account').checked="checked";
+		}
+	}
+	if(module=='Contacts'){
+		if(document.getElementById('transfertocon').checked){
+			$('contact_block').style.display="block";
+			document.getElementById('select_contact').checked="checked";
+		}
+	}
+}

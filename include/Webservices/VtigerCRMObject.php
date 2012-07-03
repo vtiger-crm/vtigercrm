@@ -63,14 +63,20 @@ class VtigerCRMObject{
 	
 	private function getObjectTypeId($objectName){
 		
-		global $adb;
+		// Use getTabid API
+		$tid = getTabid($objectName);
+
+		if($tid === false) {
+			global $adb;
 		
-		$sql = "select * from vtiger_tab where name=?;";
-		$params = array($objectName);
-		$result = $adb->pquery($sql, $params);
-		$data1 = $adb->fetchByAssoc($result,1,false);
+			$sql = "select * from vtiger_tab where name=?;";
+			$params = array($objectName);
+			$result = $adb->pquery($sql, $params);
+			$data1 = $adb->fetchByAssoc($result,1,false);
 		
-		$tid = $data1["tabid"];
+			$tid = $data1["tabid"];
+		}
+		// END
 		
 		return $tid;
 		
@@ -149,7 +155,12 @@ class VtigerCRMObject{
 			$this->instance->column_fields[$k] = $v;
 		}
 
-		$adb->startTransaction();
+		//added to fix the issue of utf8 characters
+		foreach($this->instance->column_fields as $key=>$value){
+			$this->instance->column_fields[$key] = decode_html($value);
+		}
+
+                $adb->startTransaction();
 		$this->instance->mode = "edit";
 		$this->instance->Save($this->getTabName());
 		$error = $adb->hasFailedTransaction();

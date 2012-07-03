@@ -9,13 +9,13 @@
  *
  ********************************************************************************/
 include_once 'modules/SalesOrder/SalesOrderPDFController.php';
-
 $controller = new Vtiger_SalesOrderPDFController($currentModule);
 $controller->loadRecord(vtlib_purify($_REQUEST['record']));
 
 $filenameid = $_REQUEST['record'];
+$salesorder_no = getModuleSequenceNumber($currentModule,vtlib_purify($_REQUEST['record']));
 if(empty($filenameid)) $filenameid = time();
-$filepath="storage/SalesOrder_$filenameid.pdf";
+$filepath="storage/SalesOrder_".$salesorder_no.".pdf";
 //added file name to make it work in IE, also forces the download giving the user the option to save
 $controller->Output($filepath,'F');
 

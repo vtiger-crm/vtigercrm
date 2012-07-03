@@ -30,7 +30,7 @@
 
  * $Header: /advent/projects/custprojects/vtigercrm/vtigersupport/vtiger_crm/modules/Settings/language/en_us.lang.php,v 1.2 2007/07/06 09:55:40 rajeshkannan Exp $
 
- * Description:  Defines the English language pack
+ * Description:  Defines the English language pack for Settings
 
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.
 
@@ -91,11 +91,11 @@ $mod_strings = Array(
 
 'LEADCUSTOMFIELDS'=>'Lead Custom Fields',
 
-'ACCOUNTCUSTOMFIELDS'=>'Account Custom Fields',
+'ACCOUNTCUSTOMFIELDS'=>'Organization Custom Fields',
 
 'CONTACTCUSTOMFIELDS'=>'Contact Custom Fields',
 
-'OPPORTUNITYCUSTOMFIELDS'=>'Potential Custom Fields',
+'OPPORTUNITYCUSTOMFIELDS'=>'Opportunity Custom Fields',
 
 'HELPDESKCUSTOMFIELDS'=>'Helpdesk Custom Fields',
 
@@ -112,11 +112,11 @@ $mod_strings = Array(
 
 'EDITLEADPICKLISTVALUES'=>'Edit Lead Picklist ',
 
-'EDITACCOUNTPICKLISTVALUES'=>'Edit Account Picklist ',
+'EDITACCOUNTPICKLISTVALUES'=>'Edit Organization Picklist ',
 
 'EDITCONTACTPICKLISTVALUES'=>'Edit Contact Picklist ',
 
-'EDITOPPORTUNITYPICKLISTVALUES'=>'Edit Potential Picklist ',
+'EDITOPPORTUNITYPICKLISTVALUES'=>'Edit Opportunity Picklist ',
 
 'EDITHELPDESKPICKLISTVALUES'=>'Edit HelpDesk Picklist ',
 
@@ -148,11 +148,11 @@ $mod_strings = Array(
 
 'Leads'=>'Lead',
 
-'Accounts'=>'Account',
+'Accounts'=>'Organization',
 
 'Contacts'=>'Contact',
 
-'Potentials'=>'Potential',
+'Potentials'=>'Opportunity',
 
 'HelpDesk'=>'HelpDesk',
 
@@ -161,10 +161,6 @@ $mod_strings = Array(
 'Events'=>'Event',
 
 'Activities'=>'Task',
-
-
-
-
 
 'CustomFields'=>' Custom Fields',
 
@@ -201,7 +197,7 @@ $mod_strings = Array(
 
 'LBL_PROVIDE_FIELD_INFORMATION'=>'Provide Field Information: ',
 
-'LBL_SELECT_FIELD_TYPE'=>'Select Field Type: ', 
+'LBL_SELECT_FIELD_TYPE'=>'Select Field Type: ',
 
 'LBL_PROVIDE_FIELD_DETAILS'=>'Provide Field Details: ',
 
@@ -253,7 +249,7 @@ $mod_strings = Array(
 
 'Skype'=>'Skype',
 
-
+'Time'=>'Time',
 
 //added for patch2
 
@@ -386,11 +382,11 @@ $mod_strings = Array(
 //<<<<<<<<<<end>>>>>>>>>>>>>
 'LBL_LEAD_FIELD_ACCESS'=>'Lead Field Access',
 
-'LBL_ACCOUNT_FIELD_ACCESS'=>'Account Field Access',
+'LBL_ACCOUNT_FIELD_ACCESS'=>'Organization Field Access',
 
 'LBL_CONTACT_FIELD_ACCESS'=>'Contact Field Access',
 
-'LBL_OPPORTUNITY_FIELD_ACCESS'=>'Potential Field Access',
+'LBL_OPPORTUNITY_FIELD_ACCESS'=>'Opportunity Field Access',
 
 'LBL_HELPDESK_FIELD_ACCESS'=>'HelpDesk Field Access',
 
@@ -486,7 +482,7 @@ $mod_strings = Array(
 
 'LBL_RATING'=>'Rating',
 
-'LBL_ACCOUNT_TYPE'=>'Account Type',
+'LBL_ACCOUNT_TYPE'=>'Organization Type',
 
 'LBL_BUSINESS_TYPE'=>'Business Type',
 
@@ -609,11 +605,11 @@ $mod_strings = Array(
 //For Custom Fields
 'LBL_LEAD_MAP_CUSTOM_FIELD'=>'Mapping Lead Custom Fields',
 'leadCustomFieldDescription'=>'Map each of your organizations lead custom fields to each of your custom account
-,contact, or potential fields. These mappings will be used when you convert leads',
+,contact, or Opportunity fields. These mappings will be used when you convert leads',
 'LBL_MAPPING_INFO'=>'Mapping Information',
-'LBL_ACCOUNT_FIELD'=>'Account Custom Field',
+'LBL_ACCOUNT_FIELD'=>'Organization Custom Field',
 'LBL_CONTACT_FIELD'=>'Contact Custom Field',
-'LBL_POTENTIAL_FIELD'=>'Potential Custom Field',
+'LBL_POTENTIAL_FIELD'=>'Opportunity Custom Field',
 'CUSTOMFIELDMAPPING'=>'Custom Field Mapping',
 'LBL_FIELD_MAPPING'=>'Field Mapping',
 'LBL_LEAD_FIELD'=>'Lead Custom Field',
@@ -687,7 +683,7 @@ $mod_strings = Array(
 'LBL_SELECT_CRM_MODULE'=>'Select CRM Module',
 'LBL_TAX_SETTINGS'=>'Tax Calculations',
 'LBL_INVENTORY_TAX_CONFIG'=>'Inventory Tax Configuration',
-'LBL_CUSTOM_MAPP_INFO'=>'Only in Leads module you can map the fields with Accounts, Contacts, and Potentials.',
+'LBL_CUSTOM_MAPP_INFO'=>'Only in Leads module you can map the fields with Organizations, Contacts, and Opportunities.',
 'LBL_MAPPING_OTHER_MODULES'=>'Mapping with other Modules',
 'LBL_CUSTOM_FILED_IN'=>'Custom Fields in ',
 'LBL_ROLE_HIERARCHY_TREE'=>'Roles & Hierarchy Tree',
@@ -705,7 +701,7 @@ $mod_strings = Array(
 'LBL_BASE_CURRENCY'=>'Base Currency - ',
 'LBL_DELETE_CURRENCY'=>'Delete Currency',
 
-//Added for singlepane view in modules 
+//Added for singlepane view in modules
 
 'LBL_DEFAULT_DETAIL_VIEW'=>'Default Detail View',
 'LBL_DEFAULT_MODULE_VIEW'=>'Default Module View',
@@ -745,7 +741,7 @@ $mod_strings = Array(
 'LBL_NAME'=>'Name',
 'LBL_PERSONAL'=>'Personal',
 'LBL_PUBLIC'=>'Public',
-'LBL_ACCOUNT_FIELDS'=>'Account Fields',
+'LBL_ACCOUNT_FIELDS'=>'Organization Fields',
 'LBL_CONTACT_FIELDS'=>'Contact Fields',
 'LBL_LEAD_FIELDS'=>'Lead Fields',
 'LBL_USER_FIELDS'=>'User Fields',
@@ -841,7 +837,7 @@ $mod_strings = Array(
 'LBL_USR_CAN_ACCESS'=>'Users can ',
 'LBL_USR_OTHERS'=>' other users ',
 'LBL_USR_CANNOT_ACCESS'=>'Users cannot access other users ',
- 
+
 'LBL_ORG_SHARING_PRIVILEGES'=>'Organisation Sharing  Privileges',
 'LBL_EDIT_PERMISSIONS'=>'Edit Permissions',
 'LBL_SAVE_PERMISSIONS'=>'Save Permissions',
@@ -849,10 +845,13 @@ $mod_strings = Array(
 'LBL_EDIT_CREATE_ONLY'=>'Public: Read, Create/Edit',
 'LBL_READ_CREATE_EDIT_DEL'=>'Public: Read, Create/Edit, Delete',
 'LBL_PRIVATE'=>'Private',
- 
+
 'Public: Read Only'=>'Public: Read Only',
+
 'Public: Read, Create/Edit'=>'Public: Read, Create/Edit',
+
 'Public: Read, Create/Edit, Delete'=>'Public: Read, Create/Edit, Delete',
+
 'Private'=>'Private',
 'Hide Details'=>'Hide Details',
 'Hide Details and Add Events'=>'Hide Details and Add Events',
@@ -1031,7 +1030,7 @@ $mod_strings = Array(
 'LBL_ADD'=>'Add',
 
 'LBL_CONTACT'=>'Contact',
-'LBL_ACCOUNT'=>'Account',
+'LBL_ACCOUNT'=>'Organization',
 
 'LBL_FROM_CAPS'=>'FROM',
 'LBL_TO_CAPS'=>'TO',
@@ -1177,8 +1176,8 @@ $mod_strings = Array(
 'ARRANGE_RELATEDLIST' => 'Arrange RelatedList',
 'CUSTOMFIELD_MAPPING' => 'CustomField Mapping',
 'LBL_MAPPED_FIELDS' => 'Mapped Fields',
-'LEADS_CUSTOM_FIELD_MAPPING_DESCRIPTION' => 'Map Your Leads Customfields with Accounts,Contacts and Potentials',
-'LEADS_CUSTOM_FIELD_MAPPING'=> 'Leads CustomField Mapping',
+'LEADS_CUSTOM_FIELD_MAPPING_DESCRIPTION' => 'Map Your Leads Customfields with Organizations,Contacts and Opportunities',
+'LEADS_CUSTOM_FIELD_MAPPING'=> 'Leads Field Mapping',
 'LBL_CALENDER_CUSTOMFIELDS' => 'Calendar Custom Fields',
 'LBL_CALENDER_CUSTOMFIELDS_DESCRIPTION' => 'You can Create Custom Fields for Calendar',
 'LBL_GO_BACK'=>'Go Back',
@@ -1202,5 +1201,63 @@ $mod_strings = Array(
 'LBL_ADD_CUSTOMFIELD' => 'Add Custom Field',
 
 'ERR_INVALID_PROFILE_ID' => 'Invalid Profile Id. Please specify valid Profile Id',
+
+// Customization
+'LBL_PUBLISHER' => 'Publisher',
+'LBL_PUBLISHED_ON' => 'Published On',
+'LBL_LICENSE'   => 'License',
+'LBL_EXTENSION_FILE_DOWNLOAD_FAILED' => 'Failed to download the extension package!',
+'LBL_DEFAULT'=>'By default, SMTP account settings for the outgoing server are configured to od1.vtiger.com mail server. To avoid outgoing emails getting filtered out by spam filters on your recipient ISP mail server, we recommend you implement one of the following.',
+'LBL_OPTIONS1'=>'Send emails from your mail server<br>
+				- Enter the SMTP account details (Server Name, User Name, Password) for the same account as entered in the FROM email address.',
+'LBL_OPTIONS2'=>"Add od1.vtiger.com server as a authorized sender for your domain.<br>
+				- If you prefer to retain the vtiger server as the outgoing server, we recommend that you configure your domain's SPF record to include the vtiger server as a valid sender for your domain.
+				  For additonal instruction on setting up SPF record, please email od-support@vtiger.com .",
+'LBL_ALREADY_EXISTS' => 'Already Exists',
+'LBL_EXTENSION_INCOMPATIBLE' => 'Extension Incompatible',
+'LBL_INSTALL' => 'Install',
+'LBL_DEFAULT_SETTINGS_BUTTON_TITLE' => 'Reset To Default',
+'LBL_CONFIRM_DEFAULT_SETTINGS' => 'Are you sure that you want to change the server details to the default server values',
+'EXISTING_DEFAULT_VALUES' => 'The server details are already set to the default values',
+'LBL_NOTE' => 'Note:',
+'LBL_HIDE' => 'Hide Details',
+'LBL_SHOW' => 'Show Details',
+// END
+'LBL_USER_ADDITION_INFO'=>"To add a new user, please click on
+			   <span style='font-style:italic;color:blue;'>Settings Icon -> On Demand Admin -> Add User </span>",
+
+'LBL_READ_ONLY_ACCESS_MSG' => 'Read-Only Access',
+'LBL_READ_WRITE_ACCESS_MSG' => 'Read-Write Access',
+
+'LBL_DEFAULT_VALUE' => 'Default Value',
+
+'LBL_DESCRIPTION_Public: Read Only'=>'Users can Read Only other users ',
+'LBL_DESCRIPTION_Public: Read, Create/Edit'=>'Users can Read, Create/Edit other users ',
+'LBL_DESCRIPTION_Public: Read, Create/Edit, Delete'=>'Users can Read, Create/Edit, Delete other users ',
+
+// For Dependency picklist
+'LBL_PICKLIST_DEPENDENCY_SETUP' => 'Picklist Dependency Setup',
+'LBL_PICKLIST_DEPENDENCY_DESCRIPTION' => 'Setup Dependency between Picklist values in each module',
+
+'Settings' => 'Settings',
+'LBL_ERR_TAX_LABEL_ALREADY_EXISTS' => 'This tax is already available.',
+'LBL_ERR_SOME_TAX_LABELS_ALREADY_EXISTS' => 'Some tax labels are already available, hence not saved.',
+'LBL_EDIT_COMPANY_INFO' => "To edit company details, please click on
+			   <span style='font-style:italic;color:blue;'>Settings Icon > On Demand Admin > Company </span>",
+
+'Configuration Editor'=>'Configuration Editor',
+
+'ModTracker' => 'ModTracker',
+'LBL_MODTRACKER_DESCRIPTION' => 'Select modules for tracking',
+
+'LBL_MENUS_TO_SHOW'=>'Select modules to be displayed on main menu',
+'LBL_MENU_DESC'=>'Customize Menu Sequence',
+'LBL_MENU_EDITOR'=>'Menu Editor',
+'LBL_MENUS_TO_SHOW_DESCRIPTION' => 'You can use arrows to order the items in the menu. The top 10 items appear on the main menu and the rest are displayed under the <b><i>More</i></b> dropdown',
+'LBL_ALL_MODULES' => 'All Modules',
+'LBL_SELECTED_MODULES' => 'Selected Modules',
+
+'LBL_CRM_SETTINGS' => 'CRM Settings',
+
 );
 ?>

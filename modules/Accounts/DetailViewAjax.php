@@ -56,11 +56,7 @@ if($ajaxaction == "DETAILVIEW")
 				echo ":#:ERR".$mod_strings['LBL_ACCOUNT_EXIST'];
 				return false;
 			}
-	     }
-	     if($fieldname == 'annual_revenue')//annual revenue converted to dollar value while saving
-	     {
-		     $modObj->column_fields[$fieldname] = getConvertedPrice($fieldvalue);
-	     }	     
+	     }   
 	     $modObj->id = $crmid;
   	     $modObj->mode = "edit";
        	 $modObj->save("Accounts");

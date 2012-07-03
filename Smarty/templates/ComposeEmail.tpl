@@ -85,7 +85,7 @@
 	</td>
    </tr>
 	<tr>
-	{if 'ccmail'|@emails_checkFieldVisiblityPermission eq '0'}   
+	{if 'ccmail'|@emails_checkFieldVisiblityPermission:'readwrite' eq '0'}   
    	<td class="mailSubHeader" style="padding: 5px;" align="right">{$MOD.LBL_CC}</td>
 	<td class="cellText" style="padding: 5px;">
 		<input name="ccmail" id ="cc_name" class="txtBox" type="text" value="{$CC_MAIL}" style="width:99%">&nbsp;
@@ -96,7 +96,7 @@
 	{/if}
    <td valign="top" class="cellLabel" rowspan="4"><div id="attach_cont" class="addEventInnerBox" style="overflow:auto;height:100px;width:100%;position:relative;left:0px;top:0px;"></div>
    	</tr>
-   {if 'bccmail'|@emails_checkFieldVisiblityPermission eq '0'}   
+   {if 'bccmail'|@emails_checkFieldVisiblityPermission:'readwrite' eq '0'}   
    	<tr>
 	<td class="mailSubHeader" style="padding: 5px;" align="right">{$MOD.LBL_BCC}</td>
 	<td class="cellText" style="padding: 5px;">
@@ -121,9 +121,10 @@
 		<!--<input name="{$elements.2.0}"  type="file" class="small txtBox" value="" size="78"/>-->
 		<input name="del_file_list" type="hidden" value="">
 					<div id="files_list" style="border: 1px solid grey; width: 500px; padding: 5px; background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: x-small">{$APP.Files_Maximum_6}
-						<input id="my_file_element" type="file" name="{$elements.2.0}" tabindex="7" onchange="validateFilename(this);">
+						<input id="my_file_element" type="file" name="{$elements.2.0}" tabindex="7" onchange="validateFilename(this)" >
 						<input type="hidden" name="{$elements.2.0}_hidden" value="" />
-																	</div>
+                        <span id="limitmsg" style= "color:red; display:'';">{'LBL_MAX_SIZE'|@getTranslatedString:$MODULE} {$UPLOADSIZE}{'LBL_FILESIZEIN_MB'|@getTranslatedString:$MODULE}</span>
+                	</div>
 					<script>
 						var multi_selector = new MultiSelector( document.getElementById( 'files_list' ), 6 );
 						multi_selector.count = 0

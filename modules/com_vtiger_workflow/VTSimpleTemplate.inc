@@ -8,17 +8,17 @@
  * All Rights Reserved.
  ************************************************************************************/
 class VTSimpleTemplate{
-	
+
 	function __construct($templateString){
 		$this->template = $templateString;
 	}
-	
+
 	function render($entityCache, $entityId){
 		$this->cache = $entityCache;
 		$this->parent = $this->cache->forId($entityId);
 		return $this->parseTemplate();
 	}
-	
+
 	private function matchHandler($match){
 		preg_match('/\((\w+) : \(([_\w]+)\) (\w+)\)/', $match[1], $matches);
 		if(count($matches)==0){
@@ -41,11 +41,11 @@ class VTSimpleTemplate{
 					$entity = $this->cache->forId($referenceId);
 					if($referenceModule==="Users" && $entity->getModuleName()=="Groups"){
 						list($groupEntityId, $groupId) = vtws_getIdComponents($referenceId);
-						
+
 						require_once('include/utils/GetGroupUsers.php');
 						$ggu = new GetGroupUsers();
 						$ggu->getAllUsersInGroup($groupId);
-						
+
 						$users = $ggu->group_users;
 						$parts = Array();
 						foreach($users as $userId){
@@ -57,7 +57,8 @@ class VTSimpleTemplate{
 							}
 						}
 						$result = implode(",", $parts);
-					}if($entity->getModuleName()===$referenceModule){
+
+					} elseif($entity->getModuleName()===$referenceModule){
 						$data = $entity->getData();
 						if($this->useValue($data, $fieldname)){
 							$result = $data[$fieldname];
@@ -70,8 +71,8 @@ class VTSimpleTemplate{
 				}
 			}
 		}
-		return $result;						
-		
+		return $result;
+
 	}
 
 	protected function useValue($data, $fieldname) {
@@ -79,13 +80,32 @@ class VTSimpleTemplate{
 	}
 
 	function parseTemplate(){
-		return preg_replace_callback('/\\$(\w+|\((\w+) : \(([_\w]+)\) (\w+)\))\s*,?/', array($this,"matchHandler"), $this->template);
+		return preg_replace_callback('/\\$(\w+|\((\w+) : \(([_\w]+)\) (\w+)\)),?/', array($this,"matchHandler"), $this->template);
 	}
-	
+
 	function getMetaValue($fieldname){
+		require_once 'config.inc.php';
+		global $site_URL, $PORTAL_URL, $current_user;
 		switch($fieldname){
-			case 'date': return getNewDisplayDate();
-			case 'time': return date('h-i-s');
+			case 'date'					:	return getNewDisplayDate();
+			case 'time'					:	return date('h:i:s');
+			case 'dbtimezone'			:	return DateTimeField::getDBTimeZone();
+			case 'crmdetailviewurl'		:	$wsId = $this->parent->getId();
+											$parts = explode('x', $wsId);
+											$recordId = $parts[1];
+											$moduleName = $this->parent->getModuleName();
+											return $site_URL.'/index.php?action=DetailView&module='.$moduleName.'&record='.$recordId;
+			case 'portaldetailviewurl'	: 	$wsId = $this->parent->getId();
+											$parts = explode('x', $wsId);
+											$recordId = $parts[1];
+											$moduleName = $this->parent->getModuleName();
+											$recorIdName='id';
+											if($moduleName == 'HelpDesk') $recorIdName = 'ticketid';
+											if($moduleName == 'Faq') $recorIdName = 'faqid';
+											if($moduleName == 'Products') $recorIdName = 'productid';
+											return $PORTAL_URL.'/index.php?module='.$moduleName.'&action=index&'.$recorIdName.'='.$recordId.'&fun=detail';
+			case 'siteurl'				: return $site_URL;
+			case 'portalurl'			: return $PORTAL_URL;
 			default: '';
 		}
 	}

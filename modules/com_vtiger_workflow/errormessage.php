@@ -9,4 +9,4 @@
  ************************************************************************************/
 ?>
 <h1>Error</h1>
-<?=htmlentities($_REQUEST['message'])?>
+<?php echo htmlentities($_REQUEST['message'])?>

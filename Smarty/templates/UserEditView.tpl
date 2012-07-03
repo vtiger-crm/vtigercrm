@@ -47,11 +47,11 @@ function check_duplicate()
 							if(response.responseText.indexOf('SUCCESS') > -1)
 							{ldelim}
 							//	$('user_status').disabled = false;
-						                document.EditView.submit();
+								document.EditView.submit();
 							{rdelim}
 			       				else {ldelim}
-			       						VtigerJS_DialogBox.unblock();
-						                alert(response.responseText);
+			       					VtigerJS_DialogBox.unblock();
+									alert(response.responseText);
 						        {rdelim}
 			            {rdelim}
                 {rdelim}
@@ -62,6 +62,17 @@ function check_duplicate()
 {rdelim}
 
 </script>
+
+<!-- vtlib customization: Help information assocaited with the fields -->
+{if $FIELDHELPINFO}
+<script type='text/javascript'>
+{literal}var fieldhelpinfo = {}; {/literal}
+{foreach item=FIELDHELPVAL key=FIELDHELPKEY from=$FIELDHELPINFO}
+	fieldhelpinfo["{$FIELDHELPKEY}"] = "{$FIELDHELPVAL}";
+{/foreach}
+</script>
+{/if}
+<!-- END -->
 
 <br>
 <table align="center" border="0" cellpadding="0" cellspacing="0" width="98%">

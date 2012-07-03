@@ -29,12 +29,12 @@
 		<table border=0 cellspacing=0 cellpadding=0>
 			<tr>
 				<td style="padding-right:5px"><a href="javascript:;" onclick="gcurrepfolderid=0;fnvshobj(this,'reportLay');"><img src="{'reportsCreate.gif'|@vtiger_imageurl:$THEME}" alt="{$MOD.LBL_CREATE_REPORT}..." title="{$MOD.LBL_CREATE_REPORT}..." border=0></a></td>
-                        <td>&nbsp;</td>
-            <td style="padding-right:5px"><a href="javascript:;" onclick="createrepFolder(this,'orgLay');"><img src="{'reportsFolderCreate.gif'|@vtiger_imageurl:$THEME}" alt="{$MOD.Create_New_Folder}..." title="{$MOD.Create_New_Folder}..." border=0></a></td>
-                        <td>&nbsp;</td>
-            <td style="padding-right:5px"><a href="javascript:;" onclick="fnvshobj(this,'folderLay');"><img src="{'reportsMove.gif'|@vtiger_imageurl:$THEME}" alt="{$MOD.Move_Reports}..." title="{$MOD.Move_Reports}..." border=0></a></td>
-                        <td>&nbsp;</td>
-            <td style="padding-right:5px"><a href="javascript:;" onClick="massDeleteReport();"><img src="{'reportsDelete.gif'|@vtiger_imageurl:$THEME}" alt="{$MOD.LBL_DELETE_FOLDER}..." title="{$MOD.Delete_Report}..." border=0></a></td>
+				<td>&nbsp;</td>
+				<td style="padding-right:5px"><a href="javascript:;" onclick="createrepFolder(this,'orgLay');"><img src="{'reportsFolderCreate.gif'|@vtiger_imageurl:$THEME}" alt="{$MOD.Create_New_Folder}..." title="{$MOD.Create_New_Folder}..." border=0></a></td>
+				<td>&nbsp;</td>
+				<td style="padding-right:5px"><a href="javascript:;" onclick="fnvshobj(this,'folderLay');"><img src="{'reportsMove.gif'|@vtiger_imageurl:$THEME}" alt="{$MOD.Move_Reports}..." title="{$MOD.Move_Reports}..." border=0></a></td>
+				<td>&nbsp;</td>
+				<td style="padding-right:5px"><a href="javascript:;" onClick="massDeleteReport();"><img src="{'reportsDelete.gif'|@vtiger_imageurl:$THEME}" alt="{$MOD.LBL_DELETE_FOLDER}..." title="{$MOD.Delete_Report}..." border=0></a></td>
 			</tr>
 		</table>
 	</td>
@@ -53,18 +53,39 @@
 <!-- Reports Table Ends Here -->
 
 <!-- POPUP LAYER FOR CREATE NEW REPORT -->
-<div style="display: none; left: 193px; top: 106px;width:155px;" id="reportLay" onmouseout="fninvsh('reportLay')" onmouseover="fnvshNrm('reportLay')">
-<table bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0" width="100%">
-	<tbody><tr><td style="border-bottom: 1px solid rgb(204, 204, 204); padding: 5px;"><b>{$MOD.LBL_CREATE_NEW} :</b></td></tr>
+<div style="display: none; left: 193px; top: 106px;width:300px;" id="reportLay" class="layerPopup">
+	<table border=0 cellspacing=0 cellpadding=5 width=100% class=layerHeadingULine>
 	<tr>
-	<td>
-	{foreach item=modules key=modulename from=$REPT_MODULES}
-	<a href="javascript:CreateReport('{$modulename}');" class="drop_down">- {$modules}</a>
-	{/foreach}
-	</td>
+		<td class="genHeaderSmall" nowrap align="left" width="30%" id="cportatereor_info">{$MOD.LBL_CREATE_REPORT}</td>
+		<td align="right"><a href="javascript:;" onClick="fninvsh('reportLay');"><img src="{'close.gif'|@vtiger_imageurl:$THEME}" align="absmiddle" border="0"></a></td>
 	</tr>
-	</tbody>
-</table>
+	</table>
+	<table border=0 cellspacing=0 cellpadding=5 width=95% align=center>
+	<tr>
+		<td class="small">
+			<table border=0 cellspacing=0 cellpadding=5 width=100% align=center bgcolor=white>
+			<tr>
+				<td class="cellLabel small" align="right" nowrap><b>{$MOD.LBL_REPORT_MODULE} </b></td>
+				<td class="cellText small" align="left">
+					<select name="selectModuleElement" id="selectModuleElement" class="small">
+					{foreach item=modulelabel key=modulename from=$REPT_MODULES}
+						<option value="{$modulename}">{$modulelabel}</option>
+					{/foreach}
+					</select>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<table border=0 cellspacing=0 cellpadding=5 width=100% class="layerPopupTransport">
+	<tr>
+		<td class="small" align="center">
+		<input name="save" value=" &nbsp;{$APP.LBL_CREATE_BUTTON_LABEL}&nbsp; " class="crmbutton small create" onClick="CreateReport('selectModuleElement'); fninvsh('reportLay');" type="button">&nbsp;&nbsp;
+		<input name="cancel" value=" {$APP.LBL_CANCEL_BUTTON_LABEL} " class="crmbutton small cancel" onclick="fninvsh('reportLay');" type="button">
+		</td>
+	</tr>
+	</table>
 </div>
 <!-- END OF POPUP LAYER -->
 

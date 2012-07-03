@@ -72,7 +72,7 @@ $pdf->addTextBlock($app_strings["Billing Address"].":",$billText, $billPositions
 /*  ******** Begin Quote Data ************************ */
 // issue date block
 $issueBlock=array("80","35");
-$pdf->addRecBlock(getDisplayDate(date("Y-m-d")), $app_strings["Issue Date"],$issueBlock);
+$pdf->addRecBlock(DateTimeField::convertToUserFormat(date("Y-m-d")), $app_strings["Issue Date"],$issueBlock);
 
 // valid till block
 $dueBlock=array("80","50");

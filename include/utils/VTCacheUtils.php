@@ -249,6 +249,33 @@ class VTCacheUtils {
 	static function updateReport_SubordinateUsers($reportid, $userids) {
 		self::$_reportmodule_subordinateuserid_cache[$reportid] = $userids;
 	}
+
+	/** Report module information based on used. */
+	static $_reportmodule_scheduledinfoperuser_cache = array();
+	static function lookupReport_ScheduledInfo($userid, $reportid) {
+
+		if(isset(self::$_reportmodule_scheduledinfoperuser_cache[$userid])) {
+			if(isset(self::$_reportmodule_scheduledinfoperuser_cache[$userid][$reportid])) {
+				return self::$_reportmodule_scheduledinfoperuser_cache[$userid][$reportid];
+			}
+		}
+		return false;
+	}
+	static function updateReport_ScheduledInfo($userid, $reportid, $isScheduled, $scheduledFormat, $scheduledInterval, $scheduledRecipients, $scheduledTime) {
+		if(!isset(self::$_reportmodule_scheduledinfoperuser_cache[$userid])) {
+			self::$_reportmodule_scheduledinfoperuser_cache[$userid] = array();
+		}
+		if(!isset(self::$_reportmodule_scheduledinfoperuser_cache[$userid][$reportid])) {
+			self::$_reportmodule_scheduledinfoperuser_cache[$userid][$reportid] = array (
+				'reportid'				=> $reportid,
+				'isScheduled'			=> $isScheduled,
+				'scheduledFormat'		=> $scheduledFormat,
+				'scheduledInterval'		=> $scheduledInterval,
+				'scheduledRecipients'	=> $scheduledRecipients,
+				'scheduledTime'			=> $scheduledTime,
+			);
+		}
+	}
 }
 
 ?>

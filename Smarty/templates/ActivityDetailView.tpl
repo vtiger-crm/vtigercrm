@@ -282,7 +282,11 @@ function DeleteTag(id,recordid)
 						          		{assign var=keyval value=$custom_field.1}
 						          		{assign var=keyfldname value=$custom_field.0}
 						          		{assign var=keyoptions value=$custom_field.options}
-						          		<td class="cellLabel" align="right" width="20%"><b>{$keyfldname}</b></td>
+										{if $keyid eq '9'}
+											<td class="cellLabel" align="right" width="20%"><b>{$keyfldname} {$APP.COVERED_PERCENTAGE}</b></td>
+										{else}
+											<td class="cellLabel" align="right" width="20%"><b>{$keyfldname}</b></td>
+										{/if}
 						          		{include file="DetailViewFields.tpl"}
 						          		{if ($index+1)% 2 == 0}
 						          			</tr><tr>
@@ -377,15 +381,15 @@ function DeleteTag(id,recordid)
                                                                                         <td width="30%" align=right><b>{$MOD.LBL_ENABLE_REPEAT}</b></td>
                                                                                         <td width="70%" align=left>{$ACTIVITYDATA.recurringcheck}</td>
                                                                                 </tr>
-										{if $ACTIVITYDATA.recurringcheck != 'No'}
+										{if $ACTIVITYDATA.repeat_str neq ''}
 										<tr>
 											<td width="30%" align=right>&nbsp;</td>
 											<td>{$MOD.LBL_REPEATEVENT}&nbsp;{$ACTIVITYDATA.repeat_frequency}&nbsp;{$MOD[$ACTIVITYDATA.recurringtype]}</td>
 										</tr>
 										<tr>
-                                                                                        <td width="30%" align=right>&nbsp;</td>
-                                                                                        <td>{$ACTIVITYDATA.repeat_str}</td>
-                                                                                </tr>
+											<td width="30%" align=right>&nbsp;</td>
+											<td>{$ACTIVITYDATA.repeat_str}</td>
+										</tr>
 										{/if}
 									</table>
 									{/if}
@@ -403,10 +407,7 @@ function DeleteTag(id,recordid)
 											<td width="30%" valign="top" align=right><b>{$MOD.LBL_CONTACT_NAME}</b></td>	
 											<td width="70%" valign="top" align=left>
 											{foreach item=contactname key=cntid from=$CONTACTS}
-	                                        	{$contactname.0}
-	                                            {if $IS_PERMITTED_CNT_FNAME == '0'}
-	                                            	&nbsp;{$contactname.1}
-	                                            {/if}
+	                                        	{$contactname}
 	                                            <br>
                                             {/foreach}
 										</tr>
@@ -499,7 +500,11 @@ function DeleteTag(id,recordid)
 						          		{assign var=keyval value=$custom_field.1}
 						          		{assign var=keyfldname value=$custom_field.0}
 						          		{assign var=keyoptions value=$custom_field.options}
-						          		<td class="cellLabel" align="right" width="20%"><b>{$keyfldname}</b></td>
+										{if $keyid eq '9'}
+											<td class="cellLabel" align="right" width="20%"><b>{$keyfldname} {$APP.COVERED_PERCENTAGE}</b></td>
+										{else}
+											<td class="cellLabel" align="right" width="20%"><b>{$keyfldname}</b></td>
+										{/if}
 						          		{include file="DetailViewFields.tpl"}
 											{if ($index+1)% 2 == 0}
 												</tr><tr>
@@ -585,6 +590,7 @@ function DeleteTag(id,recordid)
 		{* vtlib customization: Custom links on the Detail view basic links *}
 			{if $CUSTOM_LINKS && $CUSTOM_LINKS.DETAILVIEWBASIC}
 				<table width="100%" border="0" cellpadding="5" cellspacing="0">
+				<tr><td align="left" class="genHeaderSmall">{$APP.LBL_ACTIONS}</td></tr>
 				{foreach item=CUSTOMLINK from=$CUSTOM_LINKS.DETAILVIEWBASIC}
 				<tr>
 					<td align="left" style="padding-left:10px;">
@@ -738,17 +744,20 @@ function DeleteTag(id,recordid)
 <script>
 function getTagCloud()
 {ldelim}
-new Ajax.Request(
-        'index.php',
-        {ldelim}queue: {ldelim}position: 'end', scope: 'command'{rdelim},
-        method: 'post',
-        postBody: 'module={$MODULE}&action={$MODULE}Ajax&file=TagCloud&ajxaction=GETTAGCLOUD&recordid={$ID}',
-        onComplete: function(response) {ldelim}
-                                $("tagfields").innerHTML=response.responseText;
-                                $("txtbox_tagfields").value ='';
+	var obj = $("tagfields");
+	if(obj != null && typeof(obj) != undefined) {ldelim}
+		new Ajax.Request(
+        	'index.php',
+        	{ldelim}queue: {ldelim}position: 'end', scope: 'command'{rdelim},
+        	method: 'post',
+        	postBody: 'module={$MODULE}&action={$MODULE}Ajax&file=TagCloud&ajxaction=GETTAGCLOUD&recordid={$ID}',
+        	onComplete: function(response) {ldelim}
+                        	$("tagfields").innerHTML=response.responseText;
+                            $("txtbox_tagfields").value ='';
                         {rdelim}
-        {rdelim}
-);
+        	{rdelim}
+		);
+	{rdelim}
 {rdelim}
 getTagCloud();
 </script>

@@ -14,8 +14,9 @@ $controller = new Vtiger_InvoicePDFController($currentModule);
 $controller->loadRecord(vtlib_purify($_REQUEST['record']));
 
 $filenameid = $_REQUEST['record'];
+$invoice_no = getModuleSequenceNumber($currentModule,vtlib_purify($_REQUEST['record']));
 if(empty($filenameid)) $filenameid = time();
-$filepath="storage/Invoice_$filenameid.pdf";
+$filepath="storage/Invoice_".$invoice_no.".pdf";
 //added file name to make it work in IE, also forces the download giving the user the option to save
 $controller->Output($filepath,'F');
 

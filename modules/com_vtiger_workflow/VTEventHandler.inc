@@ -9,8 +9,6 @@
  ************************************************************************************/
 require_once('include/events/SqlResultIterator.inc');
 require_once('VTWorkflowManager.inc');
-require_once('VTTaskManager.inc');
-require_once('VTTaskQueue.inc');
 require_once('VTEntityCache.inc');
 
 require_once 'include/Webservices/Utils.php';
@@ -28,100 +26,81 @@ require_once 'include/Webservices/EntityMeta.php';
 require_once 'include/Webservices/VtigerWebserviceObject.php';
 require_once('VTWorkflowUtils.php');
 
-	/*
-	* VTEventHandler 
-	*/
-	class VTWorkflowEventHandler extends VTEventHandler{
-		/**
-		 * Push tasks to the task queue if the conditions are true
-		 * @param $entityData A VTEntityData object representing the entity.
-		 */
-		function handleEvent($eventName, $entityData){
-			$util = new VTWorkflowUtils();
-			$user = $util->adminUser();
-			global $adb;
-			$isNew = $entityData->isNew();
-			$entityCache = new VTEntityCache($user);
-			$wsModuleName = $util->toWSModuleName($entityData);
-			$wsId = vtws_getWebserviceEntityId($wsModuleName, 
-											   $entityData->getId());
-			$entityData = $entityCache->forId($wsId);
-			$data = $entityData->getData();
-			$wfs = new VTWorkflowManager($adb);
-			$workflows = $wfs->getWorkflowsForModule($entityData->getModuleName());
-			$tm = new VTTaskManager($adb);
-			$taskQueue = new VTTaskQueue($adb);
-			
-			foreach($workflows as $workflow){
-				switch($workflow->executionCondition){
-					case VTWorkflowManager::$ON_FIRST_SAVE:{
-						if($isNew){
+/*
+ * VTEventHandler 
+ */
+
+class VTWorkflowEventHandler extends VTEventHandler {
+
+	/**
+	 * Push tasks to the task queue if the conditions are true
+	 * @param $entityData A VTEntityData object representing the entity.
+	 */
+	function handleEvent($eventName, $entityData) {
+		$util = new VTWorkflowUtils();
+		$user = $util->adminUser();
+		global $adb;
+		$isNew = $entityData->isNew();
+		$entityCache = new VTEntityCache($user);
+		$wsModuleName = $util->toWSModuleName($entityData);
+		$wsId = vtws_getWebserviceEntityId($wsModuleName,
+						$entityData->getId());
+		$entityData = $entityCache->forId($wsId);
+
+		$wfs = new VTWorkflowManager($adb);
+		$workflows = $wfs->getWorkflowsForModule($entityData->getModuleName());
+
+		foreach ($workflows as $workflow) {
+			if (!is_a($workflow, 'Workflow'))
+				continue;
+			switch ($workflow->executionCondition) {
+				case VTWorkflowManager::$ON_FIRST_SAVE: {
+						if ($isNew) {
 							$doEvaluate = true;
-						}else{
+						} else {
 							$doEvaluate = false;
 						}
 						break;
 					}
-					case VTWorkflowManager::$ONCE:{
+				case VTWorkflowManager::$ONCE: {
 						$entity_id = vtws_getIdComponents($entityData->getId());
 						$entity_id = $entity_id[1];
-						$result = $adb->pquery("SELECT * FROM com_vtiger_workflow_activatedonce 
-							WHERE entity_id=? and workflow_id=?", array($entity_id, $workflow->id));
-						
-						//Changes
-						$result2=$adb->pquery("SELECT * FROM com_vtiger_workflowtasks 
-										INNER JOIN com_vtiger_workflowtask_queue
-										ON com_vtiger_workflowtasks.task_id= com_vtiger_workflowtask_queue.task_id
-										WHERE workflow_id=? AND entity_id=?",
-										array($workflow->id,$entity_id));
-						
-						if($adb->num_rows($result)===0 && $adb->num_rows($result2)===0){
-							$doEvaluate = true;
-						}else{
+						if ($workflow->isCompletedForRecord($entity_id)) {
 							$doEvaluate = false;
+						} else {
+							$doEvaluate = true;
 						}
 						break;
 					}
-					case VTWorkflowManager::$ON_EVERY_SAVE:{
+				case VTWorkflowManager::$ON_EVERY_SAVE: {
 						$doEvaluate = true;
 						break;
 					}
-					case VTWorkflowManager::$ON_MODIFY:{
+				case VTWorkflowManager::$ON_MODIFY: {
 						$doEvaluate = !($isNew);
-					    break;
+						break;
 					}
-					default:{
-						throw new Exception("Should never come here! Execution Condition:".$workflow->executionCondition);
+                case VTWorkflowManager::$MANUAL: {
+						$doEvaluate = false;
+						break;
 					}
-					
-				}
-				if($doEvaluate && $workflow->evaluate($entityCache, $entityData->getId())){
-					if(VTWorkflowManager::$ONCE == $workflow->executionCondition) {
-						$entity_id = vtws_getIdComponents($entityData->getId());
-						$entity_id = $entity_id[1];						
-						$adb->pquery("INSERT INTO com_vtiger_workflow_activatedonce (entity_id, workflow_id)
-							VALUES (?,?)", array($entity_id, $workflow->id));
+				default: {
+						throw new Exception("Should never come here! Execution Condition:" . $workflow->executionCondition);
 					}
-					
-					$tasks = $tm->getTasksForWorkflow($workflow->id);
-					foreach($tasks as $task){
-						if($task->active) {
-							$trigger = $task->trigger;
-							if($trigger != null){
-								$delay = strtotime($data[$trigger['field']])+$trigger['days']*86400;
-							}else{
-								$delay = 0;
-							}
-							if($task->executeImmediately==true){
-								$task->doTask($entityData);
-							}else{
-								$taskQueue->queueTask($task->id,$entityData->getId(), $delay);
-							}
-						}
-					}
-				}
 			}
-			$util->revertUser();
+			if ($doEvaluate && $workflow->evaluate($entityCache, $entityData->getId())) {
+				if (VTWorkflowManager::$ONCE == $workflow->executionCondition) {
+					$entity_id = vtws_getIdComponents($entityData->getId());
+					$entity_id = $entity_id[1];
+					$workflow->markAsCompletedForRecord($entity_id);
+				}
+
+				$workflow->performTasks($entityData);
+			}
 		}
+		$util->revertUser();
 	}
+
+}
+
 ?>

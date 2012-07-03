@@ -19,7 +19,11 @@
 	<script language="JavaScript" type="text/javascript" src="include/js/{php} echo $_SESSION['authenticated_user_language'];{/php}.lang.js?{php} echo $_SESSION['vtiger_version'];{/php}"></script>
 	<script language="javascript" type="text/javascript" src="include/scriptaculous/prototype.js"></script>
 	<script language="JavaScript" type="text/javascript" src="modules/Reports/Reports.js"></script>
-{$DATE_FORMAT}
+	<script type="text/javascript">
+		var userDateFormat = "{$USER_DATE_FORMAT}";
+		var userCurrencySeparator = "{$USER_CURRENCY_SEPARATOR}";
+		var userDecimalSeparator = "{$USER_DECIMAL_FORMAT}";
+	</script>
 </head>
 <body topmargin="0" leftmargin="0" marginheight="0" marginwidth="0">
 <!-- Master Table -->
@@ -46,10 +50,10 @@
 			</tr>
 		</table>
 
-		<table width="100%" border="0" cellspacing="0" cellpadding="5" class="homePageMatrixHdr"> 
+		<table width="100%" border="0" cellspacing="0" cellpadding="5" class="homePageMatrixHdr">
 		<tr>
 		<td>
-					<table width="100%" border="0" cellspacing="0" cellpadding="0" > 
+					<table width="100%" border="0" cellspacing="0" cellpadding="0" >
 					<tr>
 					<td width="25%" valign="top">
 						<table width="100%" border="0" cellpadding="5" cellspacing="0" class="small">
@@ -61,6 +65,7 @@
 							<tr><td id="step4label" class="settingsTabList" style="padding-left:10px;">6. {$MOD.LBL_CALCULATIONS}</td></tr>
 							<tr><td id="step5label" class="settingsTabList" style="padding-left:10px;">7. {$MOD.LBL_FILTERS} </td></tr>
 							<tr><td id="step6label" class="settingsTabList" style="padding-left:10px;">8. {$MOD.LBL_SHARING} </td></tr>
+							<tr><td id="step7label" class="settingsTabList" style="padding-left:10px;">9. {$MOD.LBL_SCHEDULE_EMAIL} </td></tr>
 						</table>
 					</td>
 					<td width="75%" valign="top" bgcolor=white>
@@ -70,11 +75,11 @@
 							<tbody><tr>
 							<td colspan="2">
 									{php}include("modules/Reports/ReportType.php");{/php}
-							</td></tr>		
+							</td></tr>
 							</tbody>
 						</table>
-						</div>	
-	
+						</div>
+
 						<!-- Step 2 -->
 						<div id="step2" style="display:none;">
 						<table class="small" bgcolor="#ffffff" border="0" cellpadding="5" cellspacing="0" width="100%">
@@ -85,7 +90,7 @@
 							</tbody>
 						</table>
 						</div>
-	
+
 						<!-- Step 3 -->
 						<div id="step3" style="display:none;">
 						<table class="small" bgcolor="#ffffff" border="0" cellpadding="5" cellspacing="0" width="100%">
@@ -95,7 +100,7 @@
 							</td></tr>
 							</tbody>
 						</table>
-						</div>	
+						</div>
 
 						<!-- Step 4 -->
 						<div id="step4" style="display:none;">
@@ -106,8 +111,8 @@
 							</td></tr>
 							</tbody>
 						</table>
-						</div>	
-	
+						</div>
+
 						<!-- Step 5 -->
 						<div id="step5" style="display:none;">
 						<table class="small" bgcolor="#ffffff" border="0" cellpadding="5" cellspacing="0" width="100%">
@@ -117,8 +122,8 @@
 							</td></tr>
 							</tbody>
 						</table>
-						</div>	
-						
+						</div>
+
 						<div id="step6" style="display:none;">
 						<table class="small" bgcolor="#ffffff" border="0" cellpadding="5" cellspacing="0" width="100%">
 							<tbody><tr>
@@ -127,12 +132,23 @@
 							</td></tr>
 							</tbody>
 						</table>
-						</div>	
+						</div>
+
+						<!-- Step 7 -->
+						<div id="step7" style="display:none;">
+						<table class="small" bgcolor="#ffffff" border="0" cellpadding="5" cellspacing="0" width="100%">
+							<tbody><tr>
+							<td colspan="2">
+									{php}include("modules/Reports/ReportsScheduleEmail.php");{/php}
+							</td></tr>
+							</tbody>
+						</table>
+						</div>
 
 					</td>
 					</tr>
 					</table>
-				
+
 					<table width=100% cellspacing=0 cellpadding=0 class="reportCreateBottom">
 					<tr>
 						<td>&nbsp;</td>
@@ -144,7 +160,7 @@
 					</tr>
 					</table>
 		</td>
-		</tr></form>	
+		</tr></form>
 		</table>
 </td>
 </tr>
@@ -153,7 +169,7 @@
 </body>
 </html>
 <script>
-var finish_text = '  {$APP.LBL_FINISH}   ' 
+var finish_text = '  {$APP.LBL_FINISH}   '
 var next_text = '  {$APP.LNK_LIST_NEXT}  ';
 {literal}
 setObjects();

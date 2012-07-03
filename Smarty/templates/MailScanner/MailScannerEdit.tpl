@@ -236,10 +236,19 @@
 function mailscaneredit_validateform(form) {
 	var scannername = form.mailboxinfo_scannername;
 	if(scannername.value == '') {
+		alert(alert_arr.VALID_SCANNER_NAME);
 		scannername.focus();
 		return false;
-	}
-	return true;		
+	}else{		
+		var regex=/^[0-9A-Za-z]+$/; 
+		if(regex.test(scannername.value)){
+			return true;
+		}else {
+			alert(alert_arr.VALID_SCANNER_NAME);
+			scannername.focus();
+			return false;
+		}		
+	}			
 }
 </script>
 {/literal}

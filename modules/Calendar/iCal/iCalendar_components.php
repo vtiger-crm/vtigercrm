@@ -105,8 +105,8 @@ class iCalendar_component {
             return false;
         }
 
-        return true;        
-        
+        return true;
+
     }
 
     function add_component($component) {
@@ -162,7 +162,7 @@ class iCalendar_component {
 
         return true;
     }
-    
+
     function serialize() {
         // Check for validity of the object
         if(!$this->is_valid()) {
@@ -242,7 +242,7 @@ class iCalendar_component {
 					} else {
 						if(getFieldVisibilityPermission($modtype,$current_user->id,$component)=='0')
 							$activity[$component] = $ical_activity[$key];
-						else 
+						else
 							$activity[$component] = '';
 					}
 				}
@@ -251,7 +251,7 @@ class iCalendar_component {
 				$count = 0;
 				if($type == 'string'){
 					$values = explode('\\,',$temp);
-				} else if($type == 'datetime'){
+				} else if($type == 'datetime' && !empty($temp)){
 					$values = $this->strtodatetime($temp);
 				}
 				foreach($component as $index){
@@ -264,7 +264,7 @@ class iCalendar_component {
 						} else {
 							if(getFieldVisibilityPermission($modtype,$current_user->id,$index)=='0')
 								$activity[$index] = $values[$count];
-							else 
+							else
 								$activity[$index] = '';
 						}
 					}
@@ -315,7 +315,7 @@ class iCalendar extends iCalendar_component {
             'METHOD'      => RFC2445_OPTIONAL | RFC2445_ONCE,
             'PRODID'      => RFC2445_REQUIRED | RFC2445_ONCE,
             'VERSION'     => RFC2445_REQUIRED | RFC2445_ONCE,
-            RFC2445_XNAME => RFC2445_OPTIONAL 
+            RFC2445_XNAME => RFC2445_OPTIONAL
         );
 
         $this->valid_components = array(
@@ -348,9 +348,9 @@ class iCalendar_event extends iCalendar_component {
     var $field_mapping_arr = array(
     	'priority'=>'taskpriority'
     );
-    
+
     function construct() {
-        
+
         $this->valid_components = array('VALARM');
 
         $this->valid_properties = array(
@@ -396,14 +396,14 @@ class iCalendar_event extends iCalendar_component {
 
         parent::construct();
     }
-    
+
     function invariant_holds() {
         // DTEND and DURATION must not appear together
         if(isset($this->properties['DTEND']) && isset($this->properties['DURATION'])) {
             return false;
         }
 
-        
+
         if(isset($this->properties['DTEND']) && isset($this->properties['DTSTART'])) {
             // DTEND must be later than DTSTART
             // The standard is not clear on how to hande different value types though
@@ -420,7 +420,7 @@ class iCalendar_event extends iCalendar_component {
         }
         return true;
     }
-    
+
     function iCalendar_event_dtstamp($activity){
     	$components = gmdate('Ymd', strtotime($activity['date_start']." ".$activity['time_start']))."T".gmdate('His', strtotime($activity['date_start']." ".$activity['time_start']))."Z";
 		$this->add_property("DTSTAMP",$components);
@@ -435,7 +435,7 @@ class iCalendar_event extends iCalendar_component {
    			}
    		}
     	$components = str_replace('-', '', $activity['date_start']).'T'. $time . 'Z';
-		$this->add_property("DTSTART",$components);   	
+		$this->add_property("DTSTART",$components);
     	return true;
     }
 
@@ -447,7 +447,7 @@ class iCalendar_event extends iCalendar_component {
    			}
    		}
     	$components = str_replace('-', '', $activity['due_date']).'T'. $time . 'Z';
-		$this->add_property("DTEND",$components);   	
+		$this->add_property("DTEND",$components);
     	return true;
     }
 
@@ -465,7 +465,7 @@ class iCalendar_event extends iCalendar_component {
 		}
     	return true;
 	}
-	
+
 }
 
 class iCalendar_todo extends iCalendar_component {
@@ -532,7 +532,7 @@ class iCalendar_todo extends iCalendar_component {
     }
     function iCalendar_event_dtstamp($activity){
     	$components = gmdate('Ymd', strtotime($activity['date_start']." ".$activity['time_start']))."T".gmdate('His', strtotime($activity['date_start']." ".$activity['time_start']))."Z";
-		$this->add_property("DTSTAMP",$components);   	
+		$this->add_property("DTSTAMP",$components);
     	return true;
     }
 
@@ -544,13 +544,13 @@ class iCalendar_todo extends iCalendar_component {
    			}
    		}
     	$components = str_replace('-', '', $activity['date_start']).'T'. $time . 'Z';
-		$this->add_property("DTSTART",$components);   	
+		$this->add_property("DTSTART",$components);
     	return true;
     }
 
    function iCalendar_event_dtend($activity){
     	$components = str_replace('-', '', $activity['due_date']).'T000000Z';
-		$this->add_property("DUE",$components);   	
+		$this->add_property("DUE",$components);
     	return true;
     }
 }
@@ -569,7 +569,7 @@ class iCalendar_alarm extends iCalendar_component {
     var $mapping_arr = array(
     	'TRIGGER'	=>	array('component'=>'reminder_time', 'function'=>'iCalendar_event_trigger'),
     );
-    
+
     function construct() {
 
         $this->valid_components = array();
@@ -580,18 +580,18 @@ class iCalendar_alarm extends iCalendar_component {
             'X-WR-ALARMUID'   => RFC2445_OPTIONAL | RFC2445_ONCE,
              RFC2445_XNAME    => RFC2445_OPTIONAL
         );
-        
+
         parent::construct();
     }
 
    function iCalendar_event_trigger($activity){
     	$reminder_time = $activity['reminder_time'];
-    	if($reminder_time>60){ 
+    	if($reminder_time>60){
     		$reminder_time = round($reminder_time/60);
     		$reminder = $reminder_time.'H';
-    	}else { 
+    	}else {
     		$reminder = $reminder_time.'M';
-    	} 
+    	}
 	    $this->add_property('ACTION', 'DISPLAY');
 	    $this->add_property('TRIGGER', 'PT'.$reminder);
 	    $this->add_property('DESCRIPTION', 'Reminder');
@@ -616,7 +616,7 @@ class iCalendar_timezone extends iCalendar_component {
             'TZOFFSETTO'   => RFC2445_OPTIONAL | RFC2445_ONCE,
             'X-PROP'      => RFC2445_OPTIONAL
         );
-        
+
         parent::construct();
     }
 

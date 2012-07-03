@@ -52,6 +52,12 @@ if($ajaxaction == "DETAILVIEW")
 		}
 		$userObj->id = $userid;
 		$userObj->mode = "edit";
+		$userObj->homeorder_array[] = 'Tag Cloud';
+		$homeStuffOrder = $userObj->getHomeStuffOrder($userid);
+		foreach ($homeStuffOrder as $widget=>$visible) {
+			$_REQUEST[$widget] = $visible;
+		}
+		$_REQUEST['tagcloudview'] = $homeStuffOrder['Tag Cloud'];
 		$userObj->save("Users");
 		if($userObj->id != "")
 		{

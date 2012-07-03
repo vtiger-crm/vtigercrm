@@ -20,17 +20,17 @@ $searchurl = getBasic_Advance_SearchURL();
 $smarty->assign("SEARCH", $searchurl);
 //4600 ends
 
-if(isset($_REQUEST['record']) && $_REQUEST['record'] != '') 
+if(isset($_REQUEST['record']) && $_REQUEST['record'] != '')
 {
 	$focus->id = $_REQUEST['record'];
-	$focus->mode = 'edit'; 	
+	$focus->mode = 'edit';
 	$focus->retrieve_entity_info($_REQUEST['record'],"Vendors");
 	$focus->name = $focus->column_fields['vendorname'];
 }
-if(isset($_REQUEST['isDuplicate']) && $_REQUEST['isDuplicate'] == 'true') 
+if(isset($_REQUEST['isDuplicate']) && $_REQUEST['isDuplicate'] == 'true')
 {
 	$focus->id = "";
-    	$focus->mode = ''; 	
+    	$focus->mode = '';
 }
 if(empty($_REQUEST['record']) && $focus->mode != 'edit'){
 	setObjectValuesFromRequest($focus);
@@ -40,20 +40,8 @@ $theme_path="themes/".$theme."/";
 $image_path=$theme_path."images/";
 
 $disp_view = getView($focus->mode);
-if($disp_view == 'edit_view')
 	$smarty->assign("BLOCKS",getBlocks($currentModule,$disp_view,$mode,$focus->column_fields));
-else	
-{
-	$bas_block = getBlocks($currentModule,$disp_view,$mode,$focus->column_fields,'BAS');
-	$adv_block = getBlocks($currentModule,$disp_view,$mode,$focus->column_fields,'ADV');
 
-	$blocks['basicTab'] = $bas_block;
-	if(is_array($adv_block ))
-		$blocks['moreTab'] = $adv_block;
-
-	$smarty->assign("BLOCKS",$blocks);
-	$smarty->assign("BLOCKS_COUNT",count($blocks));
-}
 $smarty->assign("OP_MODE",$disp_view);
 
 $smarty->assign("MODULE",$currentModule);
@@ -78,6 +66,7 @@ if($focus->mode == 'edit')
 	$smarty->assign("UPDATEINFO",updateInfo($focus->id));
         $smarty->assign("MODE", $focus->mode);
 }
+$smarty->assign('CREATEMODE', vtlib_purify($_REQUEST['createmode']));
 
 if(isset($_REQUEST['return_module'])) $smarty->assign("RETURN_MODULE", vtlib_purify($_REQUEST['return_module']));
 if(isset($_REQUEST['return_action'])) $smarty->assign("RETURN_ACTION", vtlib_purify($_REQUEST['return_action']));
@@ -118,10 +107,13 @@ if($focus->mode != 'edit' && $mod_seq_field != null) {
 }
 // END
 
+$picklistDependencyDatasource = Vtiger_DependencyPicklist::getPicklistDependencyDatasource($currentModule);
+$smarty->assign("PICKIST_DEPENDENCY_DATASOURCE", Zend_Json::encode($picklistDependencyDatasource));
 
-if($focus->mode == 'edit')
+// Gather the help information associated with fields
+$smarty->assign('FIELDHELPINFO', vtlib_getFieldHelpInfo($currentModule));
+// END
+
 	$smarty->display('Inventory/InventoryEditView.tpl');
-else
-	$smarty->display('Inventory/InventoryCreateView.tpl');
 
 ?>

@@ -25,6 +25,7 @@ require("modules/Emails/class.phpmailer.php");
 require_once('include/logging.php');
 require("config.php");
 
+$current_user = Users::getActiveAdminUser();
 // Set the default sender email id
 global $HELPDESK_SUPPORT_EMAIL_ID;
 $from = $HELPDESK_SUPPORT_EMAIL_ID;
@@ -41,6 +42,8 @@ $log =& LoggerManager::getLogger('SendReminder');
 $log->debug(" invoked SendReminder ");
 
 // retrieve the translated strings.
+if(empty($current_language))
+	$current_language = 'en_us';
 $app_strings = return_application_language($current_language);
 
 //modified query for recurring events -Jag
@@ -54,7 +57,8 @@ if($adb->num_rows($result) >= 1)
 		$date_start = $result_set['date_start'];
 		$time_start = $result_set['time_start'];
 		$reminder_time = $result_set['reminder_time'];
-	        $curr_time = strtotime(date("Y-m-d H:i"))/60;
+		$date = new DateTimeField( null );
+		$curr_time = strtotime($date->getDisplayDateTimeValue())/60;
 		$activity_id = $result_set['activityid'];
 		$activitymode = ($result_set['activitytype'] == "Task")?"Task":"Events";
 		$parent_type = $result_set['setype']; 
@@ -76,10 +80,10 @@ if($adb->num_rows($result) >= 1)
 		{
 			$date_start = $result_set['recurringdate'];
 		}
-		//code included for recurring events by jaguar ends	
-
-	        $activity_time = strtotime(date("$date_start $time_start"))/60;
-
+		//code included for recurring events by jaguar ends
+		$date = new DateTimeField("$date_start $time_start");
+		$activity_time = strtotime($date->getDisplayDateTimeValue())/60;
+                
 		if (($activity_time - $curr_time) > 0 && ($activity_time - $curr_time) <= $reminder_time)
 		{
 			$log->debug(" InSide  REMINDER");
@@ -100,10 +104,15 @@ if($adb->num_rows($result) >= 1)
 			$sql = "select active,notificationsubject,notificationbody from vtiger_notificationscheduler where schedulednotificationid=8";
 			$result_main = $adb->pquery($sql, array());
 
-			$subject = $app_strings['Reminder'].$result_set['activitytype']." @ ".$result_set['date_start']." ".$result_set['time_start']."] ".$adb->query_result($result_main,0,'notificationsubject');
+			$subject = $app_strings['Reminder'].$result_set['activitytype']." @ ".
+						$result_set['date_start']." ".$result_set['time_start']."] (". DateTimeField::getDBTimeZone() .")".
+						$adb->query_result($result_main,0,'notificationsubject');
 
 			//Set the mail body/contents here
-			$contents = nl2br($adb->query_result($result_main,0,'notificationbody')) ."\n\n ".$app_strings['Subject']." : ".$activity_sub."\n ". $parent_content ." ".$app_strings['Date & Time']." : ".$date_start." ".$time_start."\n\n ".$app_strings['Visit_Link']." <a href='".$site_URL."/index.php?action=DetailView&module=Calendar&record=".$activity_id."&activity_mode=".$activitymode."'>".$app_strings['Click here']."</a>";
+			$contents = nl2br($adb->query_result($result_main,0,'notificationbody')) ."\n\n ".
+							$app_strings['Subject']." : ".$activity_sub."\n ". $parent_content ." ".
+							$app_strings['Date & Time']." : ".$date_start." ".$time_start."(". DateTimeField::getDBTimeZone() .")\n\n ".
+							$app_strings['Visit_Link']." <a href='".$site_URL."/index.php?action=DetailView&module=Calendar&record=".$activity_id."&activity_mode=".$activitymode."'>".$app_strings['Click here']."</a>";
 
 			if(count($to_addr) >=1)
 			{
@@ -236,7 +245,7 @@ function getParentMailId($returnmodule,$parentid)
         {
                 $mailid = $adb->query_result($res,0,'otheremail');
                 if($mailid == '')
-                        $mailid = $adb->query_result($res,0,'yahooid');
+                        $mailid = $adb->query_result($res,0,'secondaryemail');
         }
 	return $mailid;
 }

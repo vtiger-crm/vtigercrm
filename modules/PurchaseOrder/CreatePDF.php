@@ -9,10 +9,9 @@
  *
  ********************************************************************************/
 include_once 'modules/PurchaseOrder/PurchaseOrderPDFController.php';
-
 $controller = new Vtiger_PurchaseOrderPDFController($currentModule);
 $controller->loadRecord(vtlib_purify($_REQUEST['record']));
-
-$controller->Output('PurchaseOrder.pdf', 'D');//added file name to make it work in IE, also forces the download giving the user the option to save
+$purchaseorder_no = getModuleSequenceNumber($currentModule,vtlib_purify($_REQUEST['record']));
+$controller->Output('PurchaseOrder_'.$purchaseorder_no.'.pdf', 'D');//added file name to make it work in IE, also forces the download giving the user the option to save
 exit();
 ?>

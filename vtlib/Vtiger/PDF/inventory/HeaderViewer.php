@@ -31,10 +31,20 @@ class Vtiger_PDF_InventoryHeaderViewer extends Vtiger_PDF_HeaderViewer {
 			$offsetX = 5;
 			
 			$modelColumn0 = $modelColumns[0];
-			
-			$pdf->Image($modelColumn0['logo'], $headerFrame->x, $headerFrame->y);
-			list($imageWidth, $imageHeight, $imageType, $imageAttr) = getimagesize($modelColumn0['logo']);
-			$imageHeightInMM = ceil($imageHeight * 0.2645);
+
+			list($imageWidth, $imageHeight, $imageType, $imageAttr) = $parent->getimagesize(
+					$modelColumn0['logo']);
+			//division because of mm to px conversion
+			$w = $imageWidth/3;
+			if($w > 60) {
+				$w=60;
+			}
+			$h = $imageHeight/3;
+			if($h > 30) {
+				$h = 30;
+			}
+			$pdf->Image($modelColumn0['logo'], $headerFrame->x, $headerFrame->y, $w, $h);
+			$imageHeightInMM = 30;
 			
 			$pdf->SetFont('', 'B');
 			$contentHeight = $pdf->GetStringHeight( $modelColumn0['summary'], $headerColumnWidth);

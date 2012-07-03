@@ -12,7 +12,7 @@
 
 -->*}
 
-{if $MODULE eq 'Emails'}	
+{if $MODULE eq 'Emails'}
 	<form name="EditView" method="POST" ENCTYPE="multipart/form-data" action="index.php" onsubmit="VtigerJS_DialogBox.block();">
         <input type="hidden" name="form">
         <input type="hidden" name="send_mail">
@@ -94,3 +94,4 @@
 <input type="hidden" name="return_id" value="{$RETURN_ID}">
 <input type="hidden" name="return_action" value="{$RETURN_ACTION}">
 <input type="hidden" name="return_viewname" value="{$RETURN_VIEWNAME}">
+<input type="hidden" name="createmode" value="{$CREATEMODE}" />

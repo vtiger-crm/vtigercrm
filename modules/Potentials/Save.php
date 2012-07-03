@@ -31,18 +31,8 @@ $focus = new Potentials();
 $search=vtlib_purify($_REQUEST['search_url']);
 
 global $current_user;
-$currencyid=fetchCurrency($current_user->id);
-$rate_symbol = getCurrencySymbolandCRate($currencyid);
-$rate = $rate_symbol['rate'];
-$curr_symbol= $rate_symbol['symbol'];
 
 setObjectValuesFromRequest($focus);
-
-if(isset($_REQUEST['amount']))
-{
-	$value = convertToDollar($_REQUEST['amount'],$rate);
-	$focus->column_fields['amount'] = $value;
-}
 
 if($_REQUEST['assigntype'] == 'U')  {
 	$focus->column_fields['assigned_user_id'] = $_REQUEST['assigned_user_id'];

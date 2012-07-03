@@ -66,11 +66,16 @@ ksort($modulenamearr); // We avoided ORDER BY in Query (vtlib_prefetchModuleActi
 //Security Check done for RSS and Dashboards
 $allow_rss='no';
 $allow_dashbd='no';
+$allow_report='no';
 if(isPermitted('Rss','DetailView') == 'yes' && vtlib_isModuleActive('Rss')){
 	$allow_rss='yes';
 }	
 if(isPermitted('Dashboard','DetailView') == 'yes' && vtlib_isModuleActive('Dashboard')){
 	$allow_dashbd='yes';
+}
+
+if(isPermitted('Reports','DetailView') == 'yes' && vtlib_isModuleActive('Reports')){
+	$allow_report='yes';
 }
 
 $homedetails = $homeObj->getHomePageFrame();
@@ -92,6 +97,7 @@ $smarty->assign("ALL_TAG",$freetag->get_tag_cloud_html("",$current_user->id));
 $smarty->assign("MAXLEN",$maxdiv);
 $smarty->assign("ALLOW_RSS",$allow_rss);
 $smarty->assign("ALLOW_DASH",$allow_dashbd);
+$smarty->assign("ALLOW_REPORT",$allow_report);
 $smarty->assign("HOMEFRAME",$homedetails);
 $smarty->assign("MODULE_NAME",$modulenamearr);
 $smarty->assign("MOD",$mod_strings);
@@ -100,6 +106,12 @@ $smarty->assign("THEME", $theme);
 $smarty->assign("LAYOUT", $numberofcols);
 $widgetBlockSize = PerformancePrefs::getBoolean('HOME_PAGE_WIDGET_GROUP_SIZE', 12);
 $smarty->assign('widgetBlockSize', $widgetBlockSize);
+
+// First time login check
+include_once 'modules/Users/LoginHistory.php';
+$accept_login_delay_seconds = 5*60; // (use..5*60 for 5 min) to overcome redirection post authentication
+$smarty->assign('FIRST_TIME_LOGIN', LoginHistory::firstTimeLoggedIn($current_user->user_name, $accept_login_delay_seconds));
+// End
 
 $smarty->display("Home/Homestuff.tpl");
 

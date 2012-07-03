@@ -1,12 +1,12 @@
 <?php
-/*+*******************************************************************************
+/*+**********************************************************************************
  * The contents of this file are subject to the vtiger CRM Public License Version 1.0
  * ("License"); You may not use this file except in compliance with the License
  * The Original Code is:  vtiger CRM Open Source
  * The Initial Developer of the Original Code is vtiger.
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
- ********************************************************************************/
+ ************************************************************************************/
 
 require_once('Smarty_setup.php');
 require_once('data/Tracker.php');
@@ -21,14 +21,17 @@ $smarty = new vtigerCRM_Smarty();
 //added to fix the issue4600
 $searchurl = getBasic_Advance_SearchURL();
 $smarty->assign("SEARCH", $searchurl);
+
 //4600 ends
 
+$smarty->assign("UPLOADSIZE", $upload_maxsize/1000000); //Convert to MB
+$smarty->assign("UPLOAD_MAXSIZE",$upload_maxsize);
 if($_REQUEST['upload_error'] == true)
 {
 	echo '<br><b><font color="red"> '.$mod_strings['FILE_HAS_NO_DATA'].'.</font></b><br>';
 }
 
-if(isset($_REQUEST['record']) && $_REQUEST['record'] !='') 
+if(isset($_REQUEST['record']) && $_REQUEST['record'] !='')
 {
 	$focus->id = $_REQUEST['record'];
 	$focus->mode = 'edit';
@@ -51,13 +54,13 @@ if($focus->mode != 'edit')
 		} elseif(isset($owner['Groups']) && $owner['Groups'] != '') {
 			$focus->column_fields['assigntype'] = 'T';
 			$focus->column_fields['assigned_user_id'] = $owner['Groups'];
-		} 
-	}   
+		}
+	}
 }
 if(empty($_REQUEST['record']) && $focus->mode != 'edit'){
 	setObjectValuesFromRequest($focus);
 }
-			
+
 if(isset($_REQUEST['parent_id']) && $focus->mode != 'edit') {
 	$smarty->assign("PARENTID",vtlib_purify($_REQUEST['parent_id']));
 }
@@ -69,7 +72,7 @@ if(is_null($filename) || $filename == '')
 {
 	$smarty->assign("FILE_EXIST","no");
 }
-else 
+else
 {
 	$smarty->assign("FILE_NAME",$filename);
 	$smarty->assign("FILE_EXIST","yes");
@@ -104,10 +107,10 @@ $image_path=$theme_path."images/";
 $disp_view = getView($focus->mode);
 if($disp_view == 'edit_view')
 	$smarty->assign("BLOCKS",getBlocks($currentModule,$disp_view,$mode,$focus->column_fields));
-else	
+else
 {
 	$smarty->assign("BASBLOCKS",getBlocks($currentModule,$disp_view,$mode,$focus->column_fields,'BAS'));
-}	
+}
 $smarty->assign("OP_MODE",$disp_view);
 $category = getParentTab();
 $smarty->assign("CATEGORY",$category);
@@ -124,7 +127,7 @@ $USE_RTE = vt_hasRTE();
 if(getFieldVisibilityPermission('Documents',$current_user->id,'notecontent') != '0')
         $USE_RTE = false;
 $smarty->assign("USE_RTE",$USE_RTE);
-	
+
 if (isset($focus->name))
 $smarty->assign("NAME", $focus->name);
 else
@@ -139,6 +142,7 @@ else
 {
 	$smarty->assign("MODE",'create');
 }
+$smarty->assign('CREATEMODE', vtlib_purify($_REQUEST['createmode']));
 
 if (isset($_REQUEST['return_module']))
 $smarty->assign("RETURN_MODULE", vtlib_purify($_REQUEST['return_module']));
@@ -200,7 +204,7 @@ $smarty->assign("VALIDATION_DATA_FIELDNAME",$data['fieldname']);
 $smarty->assign("VALIDATION_DATA_FIELDDATATYPE",$data['datatype']);
 $smarty->assign("VALIDATION_DATA_FIELDLABEL",$data['fieldlabel']);
 $smarty->assign("DUPLICATE",vtlib_purify($_REQUEST['isDuplicate']));
- 
+
 global $adb;
 // Module Sequence Numbering
 $mod_seq_field = getModuleSequenceField($currentModule);
@@ -219,7 +223,14 @@ if($focus->mode != 'edit' && $mod_seq_field != null) {
 	$smarty->assign("MOD_SEQ_ID", $focus->column_fields[$mod_seq_field['name']]);
 }
 // END
- 
+
+// Gather the help information associated with fields
+$smarty->assign('FIELDHELPINFO', vtlib_getFieldHelpInfo($currentModule));
+// END
+
+$picklistDependencyDatasource = Vtiger_DependencyPicklist::getPicklistDependencyDatasource($currentModule);
+$smarty->assign("PICKIST_DEPENDENCY_DATASOURCE", Zend_Json::encode($picklistDependencyDatasource));
+
 if($focus->mode == 'edit')
 	$smarty->display("salesEditView.tpl");
 else

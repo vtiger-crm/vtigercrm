@@ -222,7 +222,7 @@ class dUnzip2{
 				$targetFileName
 			);
 		if($applyChmod && $targetFileName)
-			chmod($targetFileName, 0777);
+			@chmod($targetFileName, 0777);
 		
 		return $ret;
 	}

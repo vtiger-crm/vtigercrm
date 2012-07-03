@@ -26,7 +26,7 @@ if($cvid != "")
 		$customactionresult = $adb->pquery($customactionsql, $customactionparams);
 		if($customactionresult == false)
 		{
-			include('themes/'.$theme.'/header.php');
+			include('modules/Vtiger/header.php');
 			$errormessage = "<font color='red'><B>Error Message<ul>
 				<li><font color='red'>Error while inserting the record</font>
 				</ul></B></font> <br>" ;
@@ -40,7 +40,7 @@ if($cvid != "")
 		$updatecaresult = $adb->pquery($updatecasql, array($subject, $body, $cvid));
 		if($updatecaresult == false)
 		{
-			include('themes/'.$theme.'/header.php');
+			include('modules/Vtiger/header.php');
 			$errormessage = "<font color='red'><B>Error Message<ul>
 				<li><font color='red'>Error while inserting the record</font>
 				</ul></B></font> <br>" ;

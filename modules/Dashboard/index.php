@@ -28,7 +28,7 @@ global $currentModule;
 global $theme;
 $theme_path="themes/".$theme."/";
 $image_path=$theme_path."images/";
-require_once($theme_path.'layout_utils.php');
+require_once('modules/Vtiger/layout_utils.php');
 require_once('include/logging.php');
 
 $graph_array = Array(
@@ -77,7 +77,7 @@ if(isset($_REQUEST['type']) && $_REQUEST['type'] != '')
 <TABLE border=0 cellspacing=0 cellpadding=0 width=100% class=small>
 <tr><td style="height:2px"></td></tr>
 <tr>
-	<td style="padding-left:10px;padding-right:30px" class="moduleName" width="20%" nowrap><?php echo $app_strings['Analytics'];?> &gt; <a class="hdrLink" href="index.php?action=index&parenttab=Analytics&module=Dashboard"><?php echo $app_strings['Dashboard'] ?></a></td>
+	<td style="padding-left:10px;padding-right:30px" class="moduleName" width="20%" nowrap><a class="hdrLink" href="index.php?action=index&parenttab=Analytics&module=Dashboard"><?php echo $app_strings['Dashboard'] ?></a></td>
 
 	<td  nowrap width="8%">
 		<table border=0 cellspacing=0 cellpadding=0>
@@ -94,7 +94,7 @@ if(isset($_REQUEST['type']) && $_REQUEST['type'] != '')
 			</tr>
 			</table>
 	</td>
-	<td width="20">&nbsp;</td>
+	<td width="1">&nbsp;</td>
                 <td class="small" width="10%" align="left">
 				<table border=0 cellspacing=0 cellpadding=5>
 
@@ -126,8 +126,8 @@ if($CHAT_DISPLAY == 'true') {
 				</tr>
 				</table>
 	</td>
-	<td width="20">&nbsp;</td>
-               <td class="small" align="left" width="5%">
+	<td width="1">&nbsp;</td>
+	<td class="small" align="left" width="5%">
 		<table border=0 cellspacing=0 cellpadding=5>
 			<tr>
 				<td style="padding-right:0px;padding-left:10px;"><img src="<?php echo vtiger_imageurl('tbarImport-Faded.gif', $theme) ?>" border="0"></td>
@@ -137,11 +137,7 @@ if($CHAT_DISPLAY == 'true') {
 	</td>
 	<td width="20">&nbsp;</td>
                 <td class="small" align="left">	
-				<table border=0 cellspacing=0 cellpadding=5>
-				<tr>
-				<td style="padding-left:10px;"><a href="javascript:;" onmouseout="fninvsh('allMenu');" onClick="fnvshobj(this,'allMenu')"><img src="<?php echo $image_path;?>btnL3AllMenu.gif" alt="<?php echo $app_strings['LBL_ALL_MENU_ALT']; ?>" title="<?php echo $app_strings['LBL_ALL_MENU_TITLE']; ?>" border="0"></a></td>
-				</tr>
-				</table>
+				
 	</td>			
 	</tr>
 	</table>

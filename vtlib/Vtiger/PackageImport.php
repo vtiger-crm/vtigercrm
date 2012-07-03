@@ -9,9 +9,9 @@
  ************************************************************************************/
 include_once('vtlib/Vtiger/PackageExport.php');
 include_once('vtlib/Vtiger/Unzip.php');
-
 include_once('vtlib/Vtiger/Module.php');
 include_once('vtlib/Vtiger/Event.php');
+include_once('vtlib/Vtiger/Cron.php');
 
 /**
  * Provides API to import module into vtiger CRM
@@ -67,7 +67,7 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 
 	/**
 	 * XPath evaluation on the root module node.
-	 * @param String Path expression 
+	 * @param String Path expression
 	 */
 	function xpath($path) {
 		return $this->_modulexml->xpath($path);
@@ -126,7 +126,7 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 		$list = (Array)$this->_modulexml->modulelist;
 		return (Array)$list['dependent_module'];
 	}
-	
+
 	/**
 	 * Get the license of this package
 	 * NOTE: checkzip should have been called earlier.
@@ -153,24 +153,25 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 		foreach($filelist as $filename=>$fileinfo) {
 			$matches = Array();
 			preg_match('/manifest.xml/', $filename, $matches);
-			if(count($matches)) { 
+			if(count($matches)) {
 				$manifestxml_found = true;
 				$this->__parseManifestFile($unzip);
 				$modulename = $this->_modulexml->name;
 				$isModuleBundle = (string)$this->_modulexml->modulebundle;
-				
-				if($isModuleBundle === 'true' && (!empty($this->_modulexml)) && 
+
+				if($isModuleBundle === 'true' && (!empty($this->_modulexml)) &&
 						(!empty($this->_modulexml->dependencies)) &&
 						(!empty($this->_modulexml->dependencies->vtiger_version))) {
-					return true;
+					$languagefile_found = true;
+					break;
 				}
-				
+
 				// Do we need to check the zip further?
 				if($this->isLanguageType()) {
 					$languagefile_found = true; // No need to search for module language file.
 					break;
 				} else {
-					continue; 
+					continue;
 				}
 			}
 			// Check for language file.
@@ -179,18 +180,18 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 		}
 
 		// Verify module language file.
-		if(!empty($language_modulename) && $language_modulename == $modulename) { 
-			$languagefile_found = true; 
+		if(!empty($language_modulename) && $language_modulename == $modulename) {
+			$languagefile_found = true;
 		}
 
-		if(!empty($this->_modulexml) && 
+		if(!empty($this->_modulexml) &&
 			!empty($this->_modulexml->dependencies) &&
 			!empty($this->_modulexml->dependencies->vtiger_version)) {
 				$vtigerversion_found = true;
 		}
 
 		$validzip = false;
-		if($manifestxml_found && $languagefile_found && $vtigerversion_found) 
+		if($manifestxml_found && $languagefile_found && $vtigerversion_found)
 			$validzip = true;
 
 		if($validzip) {
@@ -255,15 +256,15 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 	function initImport($zipfile, $overwrite) {
 		$module = $this->getModuleNameFromZip($zipfile);
 		if($module != null) {
-			
+
 			$unzip = new Vtiger_Unzip($zipfile, $overwrite);
 
 			// Unzip selectively
 			$unzip->unzipAllEx( ".",
 				Array(
 					// Include only file/folders that need to be extracted
-					'include' => Array('templates', "modules/$module", 'cron'), 
-					//'exclude' => Array('manifest.xml')  
+					'include' => Array('templates', "modules/$module", 'cron'),
+					//'exclude' => Array('manifest.xml')
 					// NOTE: If excludes is not given then by those not mentioned in include are ignored.
 				),
 				// What files needs to be renamed?
@@ -352,7 +353,7 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 			}
 		}
 	}
-	
+
 
 	/**
 	 * Import Module
@@ -370,13 +371,14 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 			if($type == 'extension' || $type == 'language')
 				$isextension = true;
 		}
-		
+
 		$vtigerMinVersion = $this->_modulexml->dependencies->vtiger_version;
 		$vtigerMaxVersion = $this->_modulexml->dependencies->vtiger_max_version;
 
 		$moduleInstance = new Vtiger_Module();
 		$moduleInstance->name = $tabname;
 		$moduleInstance->label= $tablabel;
+        $moduleInstance->parent=$parenttab;
 		$moduleInstance->isentitytype = ($isextension != true);
 		$moduleInstance->version = (!$tabversion)? 0 : $tabversion;
 		$moduleInstance->minversion = (!$vtigerMinVersion)? false : $vtigerMinVersion;
@@ -387,7 +389,7 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 			$menuInstance = Vtiger_Menu::getInstance($parenttab);
 			$menuInstance->addModule($moduleInstance);
 		}
-		
+
 		$this->import_Tables($this->_modulexml);
 		$this->import_Blocks($this->_modulexml, $moduleInstance);
 		$this->import_CustomViews($this->_modulexml, $moduleInstance);
@@ -396,8 +398,9 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 		$this->import_Actions($this->_modulexml, $moduleInstance);
 		$this->import_RelatedLists($this->_modulexml, $moduleInstance);
 		$this->import_CustomLinks($this->_modulexml, $moduleInstance);
+		$this->import_CronTasks($this->_modulexml);
 
-		Vtiger_Module::fireEvent($moduleInstance->name, 
+		Vtiger_Module::fireEvent($moduleInstance->name,
 			Vtiger_Module::EVENT_MODULE_POSTINSTALL);
 
 		$moduleInstance->initWebservice();
@@ -462,7 +465,7 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 	function import_Blocks($modulenode, $moduleInstance) {
 		if(empty($modulenode->blocks) || empty($modulenode->blocks->block)) return;
 		foreach($modulenode->blocks->block as $blocknode) {
-			$blockInstance = $this->import_Block($modulenode, $moduleInstance, $blocknode);			
+			$blockInstance = $this->import_Block($modulenode, $moduleInstance, $blocknode);
 			$this->import_Fields($blocknode, $blockInstance, $moduleInstance);
 		}
 	}
@@ -506,7 +509,7 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 		$fieldInstance->generatedtype= $fieldnode->generatedtype;
 		$fieldInstance->readonly     = $fieldnode->readonly;
 		$fieldInstance->presence     = $fieldnode->presence;
-		$fieldInstance->selected     = $fieldnode->selected;
+		$fieldInstance->defaultvalue = $fieldnode->defaultvalue;
 		$fieldInstance->maximumlength= $fieldnode->maximumlength;
 		$fieldInstance->sequence     = $fieldnode->sequence;
 		$fieldInstance->quickcreate  = $fieldnode->quickcreate;
@@ -515,13 +518,13 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 		$fieldInstance->displaytype  = $fieldnode->displaytype;
 		$fieldInstance->info_type    = $fieldnode->info_type;
 
-		if(!empty($fieldnode->helpinfo)) 
+		if(!empty($fieldnode->helpinfo))
 			$fieldInstance->helpinfo = $fieldnode->helpinfo;
 
 		if(isset($fieldnode->masseditable))
 			$fieldInstance->masseditable = $fieldnode->masseditable;
 
-		if(isset($fieldnode->columntype) && !empty($fieldnode->columntype)) 
+		if(isset($fieldnode->columntype) && !empty($fieldnode->columntype))
 			$fieldInstance->columntype = $fieldnode->columntype;
 
 		$blockInstance->addField($fieldInstance);
@@ -563,7 +566,7 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 		if(empty($modulenode->customviews) || empty($modulenode->customviews->customview)) return;
 		foreach($modulenode->customviews->customview as $customviewnode) {
 			$filterInstance = $this->import_CustomView($modulenode, $moduleInstance, $customviewnode);
-			
+
 		}
 	}
 
@@ -630,8 +633,8 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 	function import_Event($modulenode, $moduleInstance, $eventnode) {
 		$event_condition = '';
 		if(!empty($eventnode->condition)) $event_condition = "$eventnode->condition";
-		Vtiger_Event::register($moduleInstance, 
-			(string)$eventnode->eventname, (string)$eventnode->classname, 
+		Vtiger_Event::register($moduleInstance,
+			(string)$eventnode->eventname, (string)$eventnode->classname,
 			(string)$eventnode->filename, (string)$event_condition
 		);
 	}
@@ -653,7 +656,7 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 	 */
 	function import_Action($modulenode, $moduleInstance, $actionnode) {
 		$actionstatus = $actionnode->status;
-		if($actionstatus == 'enabled') 
+		if($actionstatus == 'enabled')
 			$moduleInstance->enableTools($actionnode->name);
 		else
 			$moduleInstance->disableTools($actionnode->name);
@@ -677,13 +680,13 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 	function import_Relatedlist($modulenode, $moduleInstance, $relatedlistnode) {
 		$relModuleInstance = Vtiger_Module::getInstance($relatedlistnode->relatedmodule);
 		$label = $relatedlistnode->label;
-		$actions = false; 
+		$actions = false;
 		if(!empty($relatedlistnode->actions) && !empty($relatedlistnode->actions->action)) {
 			$actions = Array();
 			foreach($relatedlistnode->actions->action as $actionnode) {
 				$actions[] = "$actionnode";
 			}
-		}			
+		}
 		if($relModuleInstance) {
 			$moduleInstance->setRelatedList($relModuleInstance, "$label", $actions, "$relatedlistnode->function");
 		}
@@ -698,14 +701,39 @@ class Vtiger_PackageImport extends Vtiger_PackageExport {
 		if(empty($modulenode->customlinks) || empty($modulenode->customlinks->customlink)) return;
 
 		foreach($modulenode->customlinks->customlink as $customlinknode) {
+			$handlerInfo = null;
+			if(!empty($customlinknode->handler_path)) {
+				$handlerInfo = array();
+				$handlerInfo = array("$customlinknode->handler_path",
+										"$customlinknode->handler_class",
+										"$customlinknode->handler");
+			}
 			$moduleInstance->addLink(
 				"$customlinknode->linktype",
 				"$customlinknode->linklabel",
 				"$customlinknode->linkurl",
 				"$customlinknode->linkicon",
-				"$customlinknode->sequence"	
+				"$customlinknode->sequence",
+				$handlerInfo
 			);
 		}
 	}
-}			
+
+	/**
+	 * Import cron jobs of the module.
+	 * @access private
+	 */
+	function import_CronTasks($modulenode){
+		if(empty($modulenode->crons) || empty($modulenode->crons->cron)) return;
+		foreach ($modulenode->crons->cron as $cronTask){
+			if(empty($cronTask->status)){
+				$cronTask->status=Vtiger_Cron::$STATUS_ENABLED;
+			}
+			if((empty($cronTask->sequence))){
+				$cronTask->sequence=Vtiger_Cron::nextSequence();
+			}
+			Vtiger_Cron::register("$cronTask->name","$cronTask->handler", "$cronTask->frequency", "$modulenode->name","$cronTask->status","$cronTask->sequence","$cronTask->description");
+		}
+	}
+}
 ?>

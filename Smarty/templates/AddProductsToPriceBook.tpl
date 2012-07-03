@@ -12,8 +12,8 @@
 var parenttab = "{$CATEGORY}";
 function updateAllListPrice()
 {ldelim}
-        var unitprice_array = new Array({$UNIT_PRICE_ARRAY});
-        var fieldname_array = new Array({$FIELD_NAME_ARRAY});
+	var unitprice_array = new Array({$UNIT_PRICE_ARRAY});
+	var fieldname_array = new Array({$FIELD_NAME_ARRAY});
 
 	var n=unitprice_array.length;	
 	var unitprice,fieldname;
@@ -31,6 +31,15 @@ function updateAllListPrice()
 		fieldname=fieldname_array[j];	
 		updateListPrice(unitprice,fieldname,document.getElementById(checkid));
 	{rdelim}
+{rdelim}
+
+function updateListPriceForField(fieldname,element)
+{ldelim}
+	var unitprice_array = new Array({$UNIT_PRICE_ARRAY});
+	var fieldname_array = new Array({$FIELD_NAME_ARRAY});
+
+	var index = fieldname_array.indexOf(fieldname);
+	updateListPrice(unitprice_array[index],fieldname,element);
 {rdelim}
 
 </script>

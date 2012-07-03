@@ -22,10 +22,18 @@ class VtigerActorOperation extends WebserviceEntityOperation {
 		if($this->entityTableName === null){
 			throw new WebServiceException(WebServiceErrorCode::$UNKOWNENTITY,"Entity is not associated with any tables");
 		}
-		$this->meta = new VtigerCRMActorMeta($this->entityTableName,$webserviceObject,$adb,$user);
+		$this->meta = $this->getMetaInstance();
 		$this->moduleFields = null;
 		$this->element = null;
 		$this->id = null;
+	}
+
+	protected function getMetaInstance(){
+		if(empty(WebserviceEntityOperation::$metaCache[$this->webserviceObject->getEntityName()][$this->user->id])){
+			WebserviceEntityOperation::$metaCache[$this->webserviceObject->getEntityName()][$this->user->id]  
+					= new VtigerCRMActorMeta($this->entityTableName,$this->webserviceObject,$this->pearDB,$this->user);
+		}
+		return WebserviceEntityOperation::$metaCache[$this->webserviceObject->getEntityName()][$this->user->id];
 	}
 	
 	protected function getActorTables(){
@@ -43,6 +51,8 @@ class VtigerActorOperation extends WebserviceEntityOperation {
 				$row = $this->pearDB->query_result_rowdata($result,$i);
 				$tableName = $row['table_name'];
 			}
+			// Cache the result for further re-use
+			$actorTables[$this->webserviceObject->getEntityName()] = $tableName;
 		}
 		return $tableName;
 	}
@@ -93,7 +103,8 @@ class VtigerActorOperation extends WebserviceEntityOperation {
 		$success = $this->__create($elementType,$element);
 		if(!$success){
 			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
-				"Database error while performing required operation create");
+				vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		return $this->retrieve(vtws_getId($this->meta->getEntityId(),$this->id));
 	}
@@ -116,7 +127,8 @@ class VtigerActorOperation extends WebserviceEntityOperation {
 		$transactionSuccessful = vtws_runQueryAsTransaction($query,array($id),$result);
 		if(!$transactionSuccessful){
 			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
-				"Database error while performing required operation");
+				vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		$db = $this->pearDB;
 		if($result){
@@ -162,7 +174,8 @@ class VtigerActorOperation extends WebserviceEntityOperation {
 		$success = $this->__update($element,$ids[1]);
 		if(!$success){
 			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
-				"Database error while performing required operation");
+				vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		return $this->retrieve(vtws_getId($this->meta->getEntityId(),$ids[1]));
 	}
@@ -199,7 +212,8 @@ class VtigerActorOperation extends WebserviceEntityOperation {
 		$success = $this->__revise($element,$ids[1]);
 		if(!$success){
 			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
-				"Database error while performing required operation");
+				vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 
 		return $this->retrieve(vtws_getId($this->meta->getEntityId(),$ids[1]));
@@ -220,7 +234,8 @@ class VtigerActorOperation extends WebserviceEntityOperation {
 		$success = $this->__delete($elemId);
 		if(!$success){
 			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
-				"Database error while performing required operation");
+				vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		return array("status"=>"successful");
 	}
@@ -296,7 +311,9 @@ class VtigerActorOperation extends WebserviceEntityOperation {
 		$this->pearDB->completeTransaction();
 
 		if($error){
-			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,"Database error while performing required operation");
+			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
+					vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 
 		$noofrows = $this->pearDB->num_rows($result);

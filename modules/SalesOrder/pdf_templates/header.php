@@ -78,7 +78,7 @@ $pdf->addTextBlock($app_strings["Billing Address"].':',$billText, $billPositions
 
 // issue date block
 $issueBlock=array("80","37");
-$pdf->addRecBlock(getDisplayDate(date("Y-m-d")), $app_strings["Issue Date"],$issueBlock);
+$pdf->addRecBlock(DateTimeField::convertToUserFormat(date("Y-m-d")), $app_strings["Issue Date"],$issueBlock);
 
 // due date block
 $dueBlock=array("81","52");

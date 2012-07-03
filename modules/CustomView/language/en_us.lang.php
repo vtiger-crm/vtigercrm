@@ -18,7 +18,7 @@ License for
  ********************************************************************************/ 
 /********************************************************************************* 
  * $Header$ 
- * Description:  Defines the English language pack for the Account module. 
+ * Description:  Defines the English language pack for the Custom View.
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc. 
  * All Rights Reserved. 
  * Contributor(s): ______________________________________.. 
@@ -127,7 +127,7 @@ following values "Call","Meeting" or "Task".',
 'State'=>'State', 
  
 //Strings added for Accounts module fields 
-'Account Name'=>'Account Name', 
+'Account Name'=>'Organization Name',
 'Ticker Symbol'=>'Ticker Symbol', 
 'Other Phone'=>'Other Phone', 
 'Member Of'=>'Member Of', 
@@ -175,7 +175,7 @@ following values "Call","Meeting" or "Task".',
  
 //Strings added for Potential module fields 
  
-'Potential Name'=>'Potential Name', 
+'Potential Name'=>'Opportunity Name',
 'Amount'=>'Amount', 
 'Expected Close Date'=>'Expected Close Date', 
 'Next Step'=>'Next Step', 
@@ -219,7 +219,7 @@ following values "Call","Meeting" or "Task".',
  
 'Serial No'=>'Serial No', 
 'Product Sheet'=>'Product Sheet', 
-'GL Account'=>'GL Account', 
+'GL Account'=>'GL Organization',
  
 //Strings added for Price book module fields 
 'Price Book Name'=>'Price Book Name', 
@@ -260,7 +260,7 @@ following values "Call","Meeting" or "Task".',
 'New_Custom_View'=>'New Custom view',
 'Edit_Custom_View'=>'Edit Custom View', 
 'LBL_AF_HDR5'=>'Simple Time Filter allows you to select date based on  
-<b>Account Created Time</b> or  <b>Account Modified Time</b>', 
+<b>Organization Created Time</b> or  <b>Organization Modified Time</b>',
 'Select_Duration'=>'Select Duration', 
 'Simple_Time_Filter'=>'Simple Time Filter', 
 'Start_Date'=>'Start Date', 
@@ -280,6 +280,8 @@ following values "Call","Meeting" or "Task".',
 'LBL_NEW'=>'New',
 'LBL_EDIT'=>'Edit',
 'LBL_STATUS_PUBLIC_APPROVE'=>'Approve',
-'LBL_STATUS_PUBLIC_DENY'=>'Deny'
+'LBL_STATUS_PUBLIC_DENY'=>'Deny',
+
+'LBL_ADVANCED_FILTER' => 'Rule',
 ); 
 ?>

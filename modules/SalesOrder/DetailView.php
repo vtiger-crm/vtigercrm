@@ -62,6 +62,8 @@ $smarty->assign("UPDATEINFO",updateInfo($focus->id));
 
 $smarty->assign("CUSTOMFIELD", $cust_fld);
 $smarty->assign("ID", vtlib_purify($_REQUEST['record']));
+$salesorder_no = getModuleSequenceNumber($currentModule,vtlib_purify($_REQUEST['record']));
+$smarty->assign("SO_NO",$salesorder_no);
 
 // Module Sequence Numbering
 $mod_seq_field = getModuleSequenceField($currentModule);

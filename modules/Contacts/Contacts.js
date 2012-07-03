@@ -145,11 +145,6 @@ function searchMapLocation(addressType)
 			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('mailingstreet')]))	
 				mapParameter = document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('mailingstreet')]).innerHTML+' ';
 		}
-		if(fieldname.indexOf('mailingpobox') > -1)
-		{
-			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('mailingpobox')]))
-				mapParameter = mapParameter + document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('mailingpobox')]).innerHTML+' ';
-		}
 		if(fieldname.indexOf('mailingcity') > -1)
 		{
 			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('mailingcity')]))
@@ -177,11 +172,6 @@ function searchMapLocation(addressType)
 		{
 			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('otherstreet')]))
 				mapParameter = document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('otherstreet')]).innerHTML+' ';
-		}
-		if(fieldname.indexOf('otherpobox') > -1)
-		{
-			if(document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('otherpobox')]))
-				mapParameter = mapParameter + document.getElementById("dtlview_"+fieldlabel[fieldname.indexOf('otherpobox')]).innerHTML+' ';
 		}
 		if(fieldname.indexOf('othercity') > -1)
 		{

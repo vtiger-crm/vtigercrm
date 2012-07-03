@@ -10,7 +10,7 @@
 
 global $current_language,$log;
 require_once('include/database/PearDatabase.php');
-checkFileAccess('modules/'.$_REQUEST['fld_module'].'/language/'.$current_language.'.lang.php');
+checkFileAccessForInclusion('modules/'.$_REQUEST['fld_module'].'/language/'.$current_language.'.lang.php');
 require_once('modules/'.$_REQUEST['fld_module'].'/language/'.$current_language.'.lang.php');
 global $mod_strings;
 

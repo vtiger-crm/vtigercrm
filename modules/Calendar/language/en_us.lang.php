@@ -14,7 +14,7 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header$
- * Description:  Defines the English apmt_locationuage pack
+ * Description:  Defines the English pack for Calendar Module
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.
  * All Rights Reserved.
  * Contributor(s): ______________________________________..
@@ -133,22 +133,22 @@ $mod_strings = Array(
 ),
 
 'cal_weekdays_short'=>array(
-"Sun",
 "Mon",
 "Tue",
 "Wed",
 "Thu",
 "Fri",
 "Sat",
+"Sun",
 ),
 'cal_weekdays_long'=>array(
-"Sunday",
 "Monday",
 "Tuesday",
 "Wednesday",
 "Thursday",
 "Friday",
 "Saturday",
+"Sunday",
 ),
 'cal_month_short'=>array(
 "",
@@ -292,8 +292,8 @@ $mod_strings = Array(
 'LBL_LIST_CLOSE'=>'Close',
 'LBL_LIST_STATUS'=>'Status',
 'LBL_LIST_CONTACT'=>'Contact',
-//Added for 4.2 release for Account column support as shown by Fredy
-'LBL_LIST_ACCOUNT'=>'Account',
+//Added for 4.2 release for Organization column support as shown by Fredy
+'LBL_LIST_ACCOUNT'=>'Organization',
 'LBL_LIST_RELATED_TO'=>'Related to',
 'LBL_LIST_DUE_DATE'=>'Due Date',
 'LBL_LIST_DATE'=>'Date',
@@ -447,6 +447,9 @@ $mod_strings = Array(
 'LBL_SUCCESS'=>'Success!',
 'LBL_NO_IMPORT_TO_UNDO'=>'There was no import to undo.',
 'LBL_FAILURE'=>'Failed!',
+    
+'LBL_ARE_YOU_SURE'=>'Are you sure?',
+'Calendar ID' => 'Calendar ID',
 );
 
 ?>

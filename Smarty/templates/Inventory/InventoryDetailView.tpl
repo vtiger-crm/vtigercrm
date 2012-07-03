@@ -154,7 +154,7 @@ function getListOfRecords(obj, sModule, iId,sParentTab)
 								
 								<td class="dvtSelectedCell" align=center nowrap>{$SINGLE_MOD|@getTranslatedString:$MODULE} {$APP.LBL_INFORMATION}</td>	
 								<td class="dvtTabCache" style="width:10px">&nbsp;</td>
-								{if $SinglePane_View eq 'false' && $IS_REL_LIST neq false}
+								{if $SinglePane_View eq 'false' && $IS_REL_LIST neq false && $IS_REL_LIST|@count > 0}
 									<td class="dvtUnSelectedCell" onmouseout="fnHideDrop('More_Information_Modules_List');" onmouseover="fnDropDown(this,'More_Information_Modules_List');" align="center" nowrap>
 										<a href="index.php?action=CallRelatedList&module={$MODULE}&record={$ID}&parenttab={$CATEGORY}">{$APP.LBL_MORE} {$APP.LBL_INFORMATION}</a>
 										<div onmouseover="fnShowDrop('More_Information_Modules_List')" onmouseout="fnHideDrop('More_Information_Modules_List')"
@@ -215,7 +215,7 @@ function getListOfRecords(obj, sModule, iId,sParentTab)
 
 <!-- The following table is used to display the buttons -->
 <!-- Button displayed - finished-->
-							 {include_php file="./include/DetailViewBlockStatus.php"}
+							 {include_php file="include/DetailViewBlockStatus.php"}
 
 <!-- Entity information(blocks) display - start -->
 {foreach key=header item=detail from=$BLOCKS}
@@ -265,8 +265,9 @@ function getListOfRecords(obj, sModule, iId,sParentTab)
 			{assign var=keycursymb value=$data.cursymb}
 			{assign var=keysalut value=$data.salut}
 			{assign var=keycntimage value=$data.cntimage}
-			   {assign var=keyadmin value=$data.isadmin}
-							   
+			{assign var=keyadmin value=$data.isadmin}
+			{assign var=display_type value=$data.displaytype}
+			{assign var=_readonly value=$data.readonly}
 
 				{if $label ne ''}
 					{if $keycntimage ne ''}
@@ -274,11 +275,13 @@ function getListOfRecords(obj, sModule, iId,sParentTab)
 					{elseif $label neq 'Tax Class'}<!-- Avoid to display the label Tax Class -->
 						{if $keyid eq '71' || $keyid eq '72'}  <!--CurrencySymbol-->
 							<td class="dvtCellLabel" align=right width=25%><input type="hidden" id="hdtxt_IsAdmin" value={$keyadmin}></input>{$label} ({$keycursymb})</td>
+						{elseif $keyid eq '9'}
+							<td class="dvtCellLabel" align=right width=25%><input type="hidden" id="hdtxt_IsAdmin" value={$keyadmin}></input>{$label} {$APP.COVERED_PERCENTAGE}</td>
 						{else}
 							<td class="dvtCellLabel" align=right width=25%><input type="hidden" id="hdtxt_IsAdmin" value={$keyadmin}></input>{$label}</td>
 						{/if}
 					{/if}  
-					{if $EDIT_PERMISSION eq 'yes' && $display_type neq '2'}
+					{if $EDIT_PERMISSION eq 'yes' && $display_type neq '2' && $_readonly eq '0'}
 						{* Performance Optimization Control *}
 						{if !empty($DETAILVIEW_AJAX_EDIT) }
 							{include file="DetailViewUI.tpl"}
@@ -354,7 +357,7 @@ function getListOfRecords(obj, sModule, iId,sParentTab)
 								
 								<td class="dvtSelectedCellBottom" align=center nowrap>{$SINGLE_MOD|@getTranslatedString:$MODULE} {$APP.LBL_INFORMATION}</td>	
 								<td class="dvtTabCacheBottom" style="width:10px">&nbsp;</td>
-								{if $SinglePane_View eq 'false'}
+								{if $SinglePane_View eq 'false' && $IS_REL_LIST neq false && $IS_REL_LIST|@count > 0}
 								<td class="dvtUnSelectedCell" align=center nowrap><a href="index.php?action=CallRelatedList&module={$MODULE}&record={$ID}&parenttab={$CATEGORY}">{$APP.LBL_MORE} {$APP.LBL_INFORMATION}</a></td>
 								{/if}
 								<td class="dvtTabCacheBottom" align="right" style="width:100%">
@@ -403,17 +406,20 @@ function getListOfRecords(obj, sModule, iId,sParentTab)
 <script>
 function getTagCloud()
 {ldelim}
-new Ajax.Request(
-        'index.php',
-        {ldelim}queue: {ldelim}position: 'end', scope: 'command'{rdelim},
-        method: 'post',
-        postBody: 'module={$MODULE}&action={$MODULE}Ajax&file=TagCloud&ajxaction=GETTAGCLOUD&recordid={$ID}',
-        onComplete: function(response) {ldelim}
-                                $("tagfields").innerHTML=response.responseText;
-                                $("txtbox_tagfields").value ='';
+	var obj = $("tagfields");
+	if(obj != null && typeof(obj) != undefined) {ldelim}
+		new Ajax.Request(
+        	'index.php',
+        	{ldelim}queue: {ldelim}position: 'end', scope: 'command'{rdelim},
+      		method: 'post',
+			postBody: 'module={$MODULE}&action={$MODULE}Ajax&file=TagCloud&ajxaction=GETTAGCLOUD&recordid={$ID}',
+			onComplete: function(response) {ldelim}
+							$("tagfields").innerHTML=response.responseText;
+                            $("txtbox_tagfields").value ='';
                         {rdelim}
-        {rdelim}
-);
+        	{rdelim}
+		);
+	{rdelim}
 {rdelim}
 getTagCloud();
 </script>

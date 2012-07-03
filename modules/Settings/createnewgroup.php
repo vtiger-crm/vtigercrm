@@ -131,7 +131,7 @@ if($mode == 'edit')
 			}
 			elseif($memberType == 'users')
 			{
-				$memberName=getUserName($memberId);
+				$memberName=getUserFullName($memberId);
 				$memberDisplay="User::";
 			}
 			$member[]=$memberType.'::'.$memberId;

@@ -15,7 +15,7 @@ if($_REQUEST['module_settings'] == 'true') {
 
 	$targetSettingPage = "modules/$targetmodule/Settings.php";
 	if(file_exists($targetSettingPage)) {
-		Vtiger_Utils::checkFileAccess($targetSettingPage);
+		Vtiger_Utils::checkFileAccessForInclusion($targetSettingPage);
 		require_once($targetSettingPage);
 	}
 }

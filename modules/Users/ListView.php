@@ -46,7 +46,7 @@ $list_query = getListQuery("Users");
 if( $adb->dbType == "pgsql")
 	$list_query = fixPostgresQuery($list_query, $log, 0);
 
-$userid = array(); 
+$userid = array();
 $userid_Query = "SELECT id,user_name FROM vtiger_users WHERE user_name IN ('admin')";
 $users = $adb->pquery($userid_Query,array());
 $norows = $adb->num_rows($users);
@@ -64,10 +64,6 @@ if(!$_SESSION['lvs'][$currentModule]) {
 	$modObj->sorder = $sorder;
 	$modObj->sortby = $order_by;
 	$_SESSION['lvs'][$currentModule] = get_object_vars($modObj);
-}
-
-if(ListViewSession::hasViewChanged($currentModule,$viewid)) {
-	$_SESSION['USERS_ORDER_BY'] = '';
 }
 
 if($_REQUEST['sorder'] !='')

@@ -15,6 +15,7 @@ $leadstatusval = $_REQUEST['leadval'];
 $viewid = vtlib_purify($_REQUEST['viewname']);
 $return_module = vtlib_purify($_REQUEST['return_module']);
 $return_action = vtlib_purify($_REQUEST['return_action']);
+$excludedRecords=vtlib_purify($_REQUEST['excludedRecords']);
 global $rstart;
 //Added to fix 4600
 $url = getBasic_Advance_SearchURL();
@@ -25,8 +26,7 @@ if(isset($_REQUEST['start']) && $_REQUEST['start']!='') {
 
 global $current_user;
 global $adb, $log;
-$storearray = explode(";",trim($idlist,';'));
-
+$storearray = getSelectedRecords($_REQUEST,$return_module,$idlist,$excludedRecords);//explode(";",trim($idlist,';'));
 $ids_list = array();
 
 $date_var = date('Y-m-d H:i:s');

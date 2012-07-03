@@ -7,6 +7,7 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ************************************************************************************/
+require_once 'data/VTEntityDelta.php';
 
 class VTWorkflowEntity{
 	function __construct($user, $id){
@@ -29,7 +30,7 @@ class VTWorkflowEntity{
 	function getData(){
 		return $this->data;
 	}
-	
+
 	/**
 	 * Get the entity id.
 	 *
@@ -38,7 +39,7 @@ class VTWorkflowEntity{
 	function getId(){
 		return $this->data['id'];
 	}
-	
+
 	/**
 	 * Get the name of the module represented by the entity data object.
 	 *
@@ -49,18 +50,18 @@ class VTWorkflowEntity{
 			global $adb;
 			$wsId = $this->data['id'];
 			$parts = explode('x', $wsId);
-			$result = $adb->pquery('select name from vtiger_ws_entity where id=?', 
+			$result = $adb->pquery('select name from vtiger_ws_entity where id=?',
 						 array($parts[0]));
 			$rowData = $adb->raw_query_result_rowdata($result, 0);
 			$this->moduleName = $rowData['name'];
 		}
 		return $this->moduleName;
 	}
-	
+
 	function get($fieldName){
 		return $this->data[$fieldName];
 	}
-	
+
 	function set($fieldName, $value){
 
 		$this->data[$fieldName] = $value;
@@ -69,7 +70,20 @@ class VTWorkflowEntity{
 	function save(){
 		vtws_update($this->data,$this->user);
 	}
-	
+
+	function isNew() {
+		$wsId = $this->data['id'];
+		$parts = explode('x', $wsId);
+		$recordId = $parts[1];
+		$entityDelta = new VTEntityDelta();
+		$oldEntity = $entityDelta->getOldEntity($this->moduleName, $recordId);
+		if($oldEntity == null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 }
 
 class VTEntityCache{
@@ -77,7 +91,7 @@ class VTEntityCache{
 		$this->user = $user;
 		$this->cache = array();
 	}
-	
+
 	function forId($id){
 		if($this->cache[$id]==null){
 			$data  = new VTWorkflowEntity($this->user, $id);

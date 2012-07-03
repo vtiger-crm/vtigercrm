@@ -52,26 +52,26 @@
 							<input type="hidden" name="form_token" value="{$FORM_TOKEN}">
 							{if $CATEGORY eq 'Settings'}
 							<input type="hidden" name="parenttab" value="{$PARENTTAB}" style="margin:0px">
-							{/if}	
+							{/if}
 							<table width="100%" border="0" cellpadding="0" cellspacing="0" >
 							<tr>
 								<td colspan=2>
 									<!-- Heading and Icons -->
 									<table width="100%" cellpadding="5" cellspacing="0" border="0" class="settingsSelUITopLine">
 									<tr>
-										<td width=50 rowspan="2"><img src="{'ico-users.gif'|@vtiger_imageurl:$THEME}" align="absmiddle"></td>	
+										<td width=50 rowspan="2"><img src="{'ico-users.gif'|@vtiger_imageurl:$THEME}" align="absmiddle"></td>
 										<td>
 											{if $CATEGORY eq 'Settings'}
 											<span class="heading2">
 											<b><a href="index.php?module=Settings&action=index&parenttab=Settings">{$MOD.LBL_SETTINGS} </a> &gt; <a href="index.php?module=Administration&action=index&parenttab=Settings"> {$MOD.LBL_USERS} </a>&gt;"{$USERNAME}" </b></span>
 											{else}
-											<span class="heading2">	
+											<span class="heading2">
 											<b>{$APP.LBL_MY_PREFERENCES}</b>
 											</span>
 											{/if}
-											<span id="vtbusy_info" style="display:none;" valign="bottom"><img src="{'vtbusy.gif'|@vtiger_imageurl:$THEME}" border="0"></span>					
+											<span id="vtbusy_info" style="display:none;" valign="bottom"><img src="{'vtbusy.gif'|@vtiger_imageurl:$THEME}" border="0"></span>
 										</td>
-										
+
 									</tr>
 									<tr>
 										<td>{$UMOD.LBL_USERDETAIL_INFO} "{$USERNAME}"</td>
@@ -105,14 +105,14 @@
 									<table class="tableHeading" border="0" cellpadding="5" cellspacing="0" width="100%">
 									<tr>
 										{strip}
-										 <td class="big">	
+										 <td class="big">
 										<strong>{$smarty.foreach.blockforeach.iteration}. {$header}</strong>
 										 </td>
-										 <td class="small" align="right">&nbsp;</td>	
+										 <td class="small" align="right">&nbsp;</td>
 										{/strip}
 									</tr>
 									</table>
-									
+
 									<table border="0" cellpadding="5" cellspacing="0" width="100%">
 									{foreach item=detail from=$detail}
 									<tr >
@@ -129,48 +129,48 @@
 										   {assign var=keysalut value=$data.salut}
 										   {assign var=keycntimage value=$data.cntimage}
 										   {assign var=keyadmin value=$data.isadmin}
-										   
+
 										   {if $label ne ''}
 										   <td class="dvtCellLabel" align=right width=25%><input type="hidden" id="hdtxt_IsAdmin" value={$keyadmin}></input>{$label}</td>
 											{include file="DetailViewUI.tpl"}
 										   {else}
 										   <td class="dvtCellLabel" align=right>&nbsp;</td>
 										   <td class="dvtCellInfo" align=left >&nbsp;</td>
-										   {/if}	
+										   {/if}
 										{/foreach}
 									</tr>
 									{/foreach}
 									</table>
 									{assign var=list_numbering value=$smarty.foreach.blockforeach.iteration}
 									{/foreach}
-									
+
 									<br>
 									<!-- Home page components -->
 									<table class="tableHeading" border="0" cellpadding="5" cellspacing="0" width="100%">
 									<tr>
-										 <td class="big">	
+										 <td class="big">
 										<strong>{$list_numbering+1}. {$UMOD.LBL_HOME_PAGE_COMP}</strong>
 										 </td>
-										 <td class="small" align="right"><img src="{'showDown.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_EXPAND_COLLAPSE}" title="{$APP.LBL_EXPAND_COLLAPSE}" onClick="ShowHidefn('home_comp');"></td>	
+										 <td class="small" align="right"><img src="{'showDown.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_EXPAND_COLLAPSE}" title="{$APP.LBL_EXPAND_COLLAPSE}" onClick="ShowHidefn('home_comp');"></td>
 									</tr>
 									</table>
-									
-									<div style="float: none; display: none;" id="home_comp">	
+
+									<div style="float: none; display: none;" id="home_comp">
 									<table border="0" cellpadding="5" cellspacing="0" width="100%">
 									{foreach item=homeitems key=values from=$HOMEORDER}
 										<tr><td class="dvtCellLabel" align="right" width="30%">{$UMOD.$values|@getTranslatedString:'Home'}</td>
 											{if $homeitems neq ''}
 												<td class="dvtCellInfo" align="center" width="5%">
-												<img src="{'prvPrfSelectedTick.gif'|@vtiger_imageurl:$THEME}" alt="{$UMOD.LBL_SHOWN}" title="{$UMOD.LBL_SHOWN}" height="12" width="12"></td><td class="dvtCellInfo" align="left">{$UMOD.LBL_SHOWN}</td> 		
-												{else}	
+												<img src="{'prvPrfSelectedTick.gif'|@vtiger_imageurl:$THEME}" alt="{$UMOD.LBL_SHOWN}" title="{$UMOD.LBL_SHOWN}" height="12" width="12"></td><td class="dvtCellInfo" align="left">{$UMOD.LBL_SHOWN}</td>
+												{else}
 												<td class="dvtCellInfo" align="center" width="5%">
-												<img src="{'no.gif'|@vtiger_imageurl:$THEME}" alt="{$UMOD.LBL_HIDDEN}" title="{$UMOD.LBL_HIDDEN}" height="12" width="12"></td><td class="dvtCellInfo" align="left">{$UMOD.LBL_HIDDEN}</td> 		
-											{/if}	
-										</tr>			
+												<img src="{'no.gif'|@vtiger_imageurl:$THEME}" alt="{$UMOD.LBL_HIDDEN}" title="{$UMOD.LBL_HIDDEN}" height="12" width="12"></td><td class="dvtCellInfo" align="left">{$UMOD.LBL_HIDDEN}</td>
+											{/if}
+										</tr>
 									{/foreach}
-									</table>	
+									</table>
 									</div>
-								
+
 									<br>
 									<!-- Tag Cloud Display -->
 									<table class="tableHeading" border="0" cellpadding="5" cellspacing="0" width="100%">
@@ -197,7 +197,7 @@
 									<!-- My Groups -->
 									<table class="tableHeading" border="0" cellpadding="5" cellspacing="0" width="100%">
 									<tr>
-										<td class="big">	
+										<td class="big">
 										<strong>{$list_numbering+3}. {$UMOD.LBL_MY_GROUPS}</strong>
 										 </td>
 										 <td class="small" align="right">
@@ -206,64 +206,64 @@
 										{else}
 											&nbsp;
 										{/if}
-										</td>	
+										</td>
 									</tr>
 									</table>
-									
+
 									<table border="0" cellpadding="5" cellspacing="0" width="100%">
-									<tr><td align="left"><div id="user_group_cont" style="display:none;"></div></td></tr>	
-									</table>	
+									<tr><td align="left"><div id="user_group_cont" style="display:none;"></div></td></tr>
+									</table>
 									<br>
 									<!-- Login History -->
 									{if $IS_ADMIN eq 'true'}
 									<table class="tableHeading" border="0" cellpadding="5" cellspacing="0" width="100%">
 										<tr>
-										 <td class="big">	
+										 <td class="big">
 										<strong>{$list_numbering+4}. {$UMOD.LBL_LOGIN_HISTORY}</strong>
 										 </td>
-										 <td class="small" align="right"><img src="{'showDown.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_EXPAND_COLLAPSE}" title="{$APP.LBL_EXPAND_COLLAPSE}" onClick="fetchlogin_js({$ID});"></td>	
+										 <td class="small" align="right"><img src="{'showDown.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_EXPAND_COLLAPSE}" title="{$APP.LBL_EXPAND_COLLAPSE}" onClick="fetchlogin_js({$ID});"></td>
 										</tr>
 									</table>
 
 									<table border="0" cellpadding="5" cellspacing="0" width="100%">
-									<tr><td align="left"><div id="login_history_cont" style="display:none;"></div></td></tr>	
-									</table>	
-									<br>	
-									{/if}	
+									<tr><td align="left"><div id="login_history_cont" style="display:none;"></div></td></tr>
+									</table>
+									<br>
+									{/if}
 								</td>
 								</tr>
 								</table>
 								<!-- User detail blocks ends -->
-								
+
 								</td>
 							</tr>
 							<tr>
 								<td colspan=2 class="small"><div align="right"><a href="#top">{$MOD.LBL_SCROLL}</a></div></td>
 							</tr>
 							</table>
-							
+
 						</form>
-			
+
 					</td>
 				</tr>
 				</table>
 
-		
+
 	</div>
 	</td>
-	
+
 </tr>
 </table>
-			
+
 			</td>
 			</tr>
 			</table>
-			
+
 			</td>
-			<td valign="top"><img src="{'showPanelTopRight.gif'|@vtiger_imageurl:$THEME}"></td>			
+			<td valign="top"><img src="{'showPanelTopRight.gif'|@vtiger_imageurl:$THEME}"></td>
 			</tr>
 			</table>
-			
+
 
 
 

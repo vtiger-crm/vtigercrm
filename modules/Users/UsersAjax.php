@@ -13,7 +13,7 @@ global $current_user;
 global $adb;
 if(isset($_REQUEST['file']) && ($_REQUEST['file'] !=''))
 {
-	checkFileAccess('modules/Users/'.$_REQUEST['file'].'.php');
+	checkFileAccessForInclusion('modules/Users/'.$_REQUEST['file'].'.php');
 	require_once('modules/Users/'.$_REQUEST['file'].'.php');
 }
 ?>

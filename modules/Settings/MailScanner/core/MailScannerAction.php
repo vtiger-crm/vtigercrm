@@ -246,8 +246,9 @@ class Vtiger_MailScannerAction {
 	 */
 	function __CreateNewEmail($mailrecord, $module, $linkfocus) {	
 		global $current_user, $adb;
-		if(!$current_user) $current_user = new Users();
-		$current_user->id = 1;
+		if(!$current_user) {
+			$current_user = Users::getActiveAdminUser();
+		}
 
 		$focus = new Emails();
 		$focus->column_fields['parent_type'] = $module;
@@ -258,7 +259,7 @@ class Vtiger_MailScannerAction {
 		$focus->column_fields['description'] = $mailrecord->getBodyHTML();
 		$focus->column_fields['assigned_user_id'] = $linkfocus->column_fields['assigned_user_id'];
 		$focus->column_fields["date_start"]= date('Y-m-d', $mailrecord->_date);
-		$focus->column_fields["email_flag"] = 'SAVED';
+		$focus->column_fields["email_flag"] = 'MAILSCANNER';
 		
 		$from=$mailrecord->_from[0];
 		$to = $mailrecord->_to[0];
@@ -323,7 +324,16 @@ class Vtiger_MailScannerAction {
 				
 				// Link document to base record
 				$adb->pquery("INSERT INTO vtiger_senotesrel(crmid, notesid) VALUES(?,?)", 
-					Array($basefocus->id, $document->id));				
+					Array($basefocus->id, $document->id));
+
+				// Link document to Parent entity - Account/Contact/...
+				list($eid,$junk)=explode('@',$basefocus->column_fields['parent_id']);
+				$adb->pquery("INSERT INTO vtiger_senotesrel(crmid, notesid) VALUES(?,?)",
+					Array($eid, $document->id));
+
+				// Link Attachement to the Email
+				$adb->pquery("INSERT INTO vtiger_seattachmentsrel(crmid, attachmentsid) VALUES(?,?)",
+					Array($basefocus->id, $attachid));
 			}
 		}	
 	}

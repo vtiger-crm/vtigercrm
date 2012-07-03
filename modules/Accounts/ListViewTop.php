@@ -43,7 +43,7 @@ function getTopAccounts($maxval,$calCnt)
 	$list_query = "select vtiger_potential.potentialname,vtiger_account.accountid, vtiger_account.accountname, ".
 	"vtiger_account.tickersymbol, sum(vtiger_potential.amount) as amount from vtiger_potential ".
 	"inner join vtiger_crmentity on (vtiger_potential.potentialid=vtiger_crmentity.crmid) ".
-	"left join vtiger_account on (vtiger_potential.related_to=vtiger_account.accountid) ";
+	"inner join vtiger_account on (vtiger_potential.related_to=vtiger_account.accountid) ";
 	$list_query .= " WHERE vtiger_crmentity.deleted = 0 ".$where.
 		" AND vtiger_potential.potentialid>0";
 	$list_query .= " AND vtiger_crmentity.smownerid='".$current_user->id."' ".
@@ -99,7 +99,7 @@ function getTopAccounts($maxval,$calCnt)
 
 		$Top_Accounts = (strlen($account['accountname']) > 20) ? (substr($account['accountname'],0,20).'...') : $account['accountname'];
 		$value[]='<a href="index.php?action=DetailView&module=Accounts&record='.$account['accountid'].'">'.$Top_Accounts.'</a>';
-		$value[]=convertFromDollar($account['amount'],$rate);
+		$value[] = CurrencyField::convertToUserFormat($account['amount']);
 		$entries[$account['accountid']]=$value;	
 	}
 	$values=Array('ModuleName'=>'Accounts','Title'=>$title,'Header'=>$header,'Entries'=>$entries);

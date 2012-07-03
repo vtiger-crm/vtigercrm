@@ -806,7 +806,7 @@ function create_contact1($user_name, $first_name, $last_name, $email_address ,$a
    $contact->column_fields[otherphone]= $other_phone;
    $contact->column_fields[fax]= $fax;
    $contact->column_fields[department]=$department;
-   $contact->column_fields[birthday]= getDisplayDate($birthdate);
+   $contact->column_fields[birthday]= DateTimeField::convertToUserFormat($birthdate);
    $contact->column_fields[assistant]= $assistant_name;
    $contact->column_fields[assistantphone]= $assistant_phone;
    $contact->column_fields[description]= $description;

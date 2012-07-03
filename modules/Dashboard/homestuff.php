@@ -30,7 +30,7 @@ function dashboardDisplayCall($type,$Chart_Type,$from_page)
 	global $theme;
 	$theme_path="themes/".$theme."/";
 	$image_path=$theme_path."images/";
-	require_once($theme_path.'layout_utils.php');
+	require_once('modules/Vtiger/layout_utils.php');
 	require_once('include/logging.php');
 
 	$graph_array = Array(

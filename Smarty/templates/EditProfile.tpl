@@ -167,10 +167,7 @@
 			        {foreach key=tabid item=elements from=$TAB_PRIV}	
 			        <tr>
 					{assign var=modulename value=$TAB_PRIV[$tabid][0]}
-					{assign var="MODULELABEL" value=$modulename}
-					{if $APP[$modulename] neq ''}
-						{assign var="MODULELABEL" value=$APP[$modulename]}
-					{/if}
+					{assign var="MODULELABEL" value=$modulename|@getTranslatedString:$modulename}
 			          <td class="small cellLabel" width="3%"><div align="right">
 					{$TAB_PRIV[$tabid][1]}
 			          </div></td>
@@ -206,7 +203,7 @@
 						{foreach item=row_values from=$FIELD_PRIVILEGES[$tabid]}
 				            	<tr>
 						      {foreach item=element from=$row_values}
-					              <td valign="top">{$element.1}</td>
+					              <td valign="top">{$element.2}{$element.1}</td>
 					              <td>{$element.0}</td>
 						      {/foreach}
 				                </tr>
@@ -218,7 +215,7 @@
 						{foreach item=row_values from=$FIELD_PRIVILEGES[16]}
 				            	<tr>
 						      {foreach item=element from=$row_values}
-					              <td valign="top">{$element.1}</td>
+					              <td valign="top">{$element.2}{$element.1}</td>
 					              <td>{$element.0}</td>
 						      {/foreach}
 				                </tr>
@@ -489,5 +486,32 @@ function initialiseprofile()
 	}	
 }
 //initialiseprofile();
+
+function toogleAccess(elementId) {
+	var element = document.getElementById(elementId);
+	if(element == null || typeof(element) == 'undefined') return;
+	
+	if(element.value == 0) {
+		element.value = 1;
+	} else {
+		element.value = 0;
+	}
+	
+	var lockedImage = document.getElementById(elementId+'_locked');
+	if(lockedImage != null && typeof(lockedImage) != 'undefined') {
+		if(lockedImage.style.display == 'none')
+			lockedImage.style.display = 'inline';
+		else
+			lockedImage.style.display = 'none';
+	}
+	
+	var unlockedImage = document.getElementById(elementId+'_unlocked');
+	if(unlockedImage != null && typeof(unlockedImage) != 'undefined') {
+		if(unlockedImage.style.display == 'none')
+			unlockedImage.style.display = 'inline';
+		else
+			unlockedImage.style.display = 'none';
+	}
+}
 {/literal}
 </script>

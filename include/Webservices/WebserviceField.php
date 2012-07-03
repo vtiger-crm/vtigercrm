@@ -41,6 +41,8 @@ class WebserviceField{
 	private $explicitDefaultValue;
 	
 	private $genericUIType = 10;
+
+	private $readOnly = 0;
 	
 	private function __construct($adb,$row){
 		$this->uitype = $row['uitype'];
@@ -51,7 +53,7 @@ class WebserviceField{
 		$this->fieldName = $row['fieldname'];
 		$this->fieldLabel = $row['fieldlabel'];
 		$this->displayType = $row['displaytype'];
-		$this->massEditable = ($row['masseditable'] === 1)? true: false;
+		$this->massEditable = ($row['masseditable'] === '1')? true: false;
 		$typeOfData = $row['typeofdata'];
 		$this->presence = $row['presence'];
 		$this->typeOfData = $typeOfData;
@@ -69,6 +71,12 @@ class WebserviceField{
 		$this->defaultValuePresent = false;
 		$this->referenceList = null;
 		$this->explicitDefaultValue = false;
+
+		$this->readOnly = (isset($row['readonly']))? $row['readonly'] : 0;
+
+		if(array_key_exists('defaultvalue', $row)) {
+			$this->setDefault($row['defaultvalue']);
+		}
 	}
 	
 	public static function fromQueryResult($adb,$result,$rowNumber){
@@ -137,6 +145,10 @@ class WebserviceField{
 		return $this->blockName;
 	}
 
+	public function getTabId(){
+		return $this->tabid;
+	}
+
 	public function isNullable(){
 		if($this->dataFromMeta !== true){
 			$this->fillColumnMeta();
@@ -153,6 +165,11 @@ class WebserviceField{
 	
 	public function getUIType(){
 		return $this->uitype;
+	}
+
+	public function isReadOnly() {
+		if($this->readOnly == 1) return true;
+		return false;
 	}
 	
 	private function setNullable($nullable){
@@ -192,7 +209,7 @@ class WebserviceField{
 		foreach ($tableFields as $fieldName => $dbField) {
 			if(strcmp($fieldName,$this->getColumnName())===0){
 				$this->setNullable(!$dbField->not_null);
-				if($dbField->has_default === true){
+				if($dbField->has_default === true && !$this->explicitDefaultValue){
 					$this->defaultValuePresent = $dbField->has_default;
 					$this->setDefault($dbField->default_value);
 				}
@@ -252,6 +269,13 @@ class WebserviceField{
 				$referenceTypes[] = 'Campaigns';
 			}
 			
+			global $current_user;
+			$types = vtws_listtypes(null, $current_user);
+			$accessibleTypes = $types['types'];
+			if(!is_admin($current_user)) {
+				array_push($accessibleTypes, 'Users');
+			}
+			$referenceTypes = array_values(array_intersect($accessibleTypes,$referenceTypes));
 			$referenceList[$this->getFieldId()] = $referenceTypes;
 			$this->referenceList = $referenceTypes;
 			return $referenceTypes;
@@ -305,6 +329,63 @@ class WebserviceField{
 			WebserviceField::$fieldTypeMapping[$this->getUIType()] = false;
 			return null;
 		}
+	}
+	
+	function getPicklistDetails(){
+		$hardCodedPickListNames = array("hdntaxtype","email_flag");
+		$hardCodedPickListValues = array(
+				"hdntaxtype"=>array(
+					array("label"=>"Individual","value"=>"individual"),
+					array("label"=>"Group","value"=>"group")
+				),
+				"email_flag" => array(
+					array('label'=>'SAVED','value'=>'SAVED'),
+					array('label'=>'SENT','value' => 'SENT'),
+					array('label'=>'MAILSCANNER','value' => 'MAILSCANNER')
+				)
+			);
+		if(in_array(strtolower($this->getFieldName()),$hardCodedPickListNames)){
+			return $hardCodedPickListValues[strtolower($this->getFieldName())];
+		}
+		return $this->getPickListOptions($this->getFieldName());
+	}
+
+	function getPickListOptions(){
+		$fieldName = $this->getFieldName();
+		
+		$default_charset = VTWS_PreserveGlobal::getGlobal('default_charset');
+		$options = array();
+		$sql = "select * from vtiger_picklist where name=?";
+		$result = $this->pearDB->pquery($sql,array($fieldName));
+		$numRows = $this->pearDB->num_rows($result);
+		if($numRows == 0){
+			$sql = "select * from vtiger_$fieldName";
+			$result = $this->pearDB->pquery($sql,array());
+			$numRows = $this->pearDB->num_rows($result);
+			for($i=0;$i<$numRows;++$i){
+				$elem = array();
+				$picklistValue = $this->pearDB->query_result($result,$i,$fieldName);
+				$picklistValue = decode_html($picklistValue);
+				$moduleName = getTabModuleName($this->getTabId());
+				if($moduleName == 'Events') $moduleName = 'Calendar';
+				$elem["label"] = getTranslatedString($picklistValue,$moduleName);
+				$elem["value"] = $picklistValue;
+				array_push($options,$elem);
+			}
+		}else{
+			$user = VTWS_PreserveGlobal::getGlobal('current_user');
+			$details = getPickListValues($fieldName,$user->roleid);
+			for($i=0;$i<sizeof($details);++$i){
+				$elem = array();
+				$picklistValue = decode_html($details[$i]);
+				$moduleName = getTabModuleName($this->getTabId());
+				if($moduleName == 'Events') $moduleName = 'Calendar';
+				$elem["label"] = getTranslatedString($picklistValue,$moduleName);
+				$elem["value"] = $picklistValue;
+				array_push($options,$elem);
+			}
+		}
+		return $options;
 	}
 
 	function getPresence() {

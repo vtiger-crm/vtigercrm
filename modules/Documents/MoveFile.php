@@ -19,13 +19,15 @@ if($current_user->is_admin != 'on')
 else
 {
 	$new_folderid = $_REQUEST['folderid'];
+	$idlist = vtlib_purify($_REQUEST['idlist']);
+	$excludedRecords=vtlib_purify($_REQUEST['excludedRecords']);
 	
 	if(isset($_REQUEST['idlist']) && $_REQUEST['idlist']!= '')
 	{
 		$id_array = Array();
-		$id_array = explode(';',$_REQUEST['idlist']);
-		for($i = 0;$i < count($id_array)-1;$i++)
-		{
+		$id_array = getSelectedRecords($_REQUEST,'Documents',$idlist,$excludedRecords);//explode(';',$_REQUEST['idlist']);
+		$id_array = array_filter($id_array);
+		for($i = 0;$i < count($id_array);$i++) {
 			ChangeFolder($id_array[$i],$new_folderid);	
 		}
 		header("Location: index.php?action=DocumentsAjax&file=ListView&mode=ajax&module=Documents");

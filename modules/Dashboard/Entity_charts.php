@@ -75,8 +75,9 @@ function module_Chart_HomePageDashboard($userinfo) {
 
 	// Calendar moudule
 	$calcountres = $adb->query("SELECT count(*) as count FROM vtiger_crmentity se INNER JOIN vtiger_activity act ON act.activityid = se.crmid
-		WHERE se.deleted = 0 AND se.smownerid = $user_id AND ((act.status!='Completed' AND act.status!='Deferred') OR act.status IS NULL)
-		AND ((act.eventstatus!='Held' AND act.eventstatus!='Not Held') OR act.eventstatus IS NULL)");
+		WHERE se.deleted = 0 AND se.smownerid = $user_id AND act.activitytype != 'Emails' AND
+			((act.status!='Completed' AND act.status!='Deferred') OR act.status IS NULL)
+			AND ((act.eventstatus!='Held' AND act.eventstatus!='Not Held') OR act.eventstatus IS NULL)");
 	$modrecords['Calendar']= $adb->query_result($calcountres,0,'count');
 
 	// Ignore the special module
@@ -126,10 +127,11 @@ function module_Chart_HomePageDashboard($userinfo) {
 				$cnt_val .= $modrec_count;
 
 				$modviewid = $cvidinfo[$modulename];
+				$username = getFullNameFromArray('Users', $userinfo->column_fields);
 				if($target_val!= '') $target_val.= '::';
-				$target_val.= urlencode("index.php?module=$modulename&action=ListView&from_homepagedb=true&type=dbrd&query=true&owner=$userinfo->user_name&viewname=$modviewid");
+				$target_val.= urlencode("index.php?module=$modulename&action=ListView&from_homepagedb=true&type=dbrd&query=true&owner=$username&viewname=$modviewid");
 				if($test_target_val!='') $test_target_val.= 'K';
-				$test_target_val.=urlencode("index.php?module=$modulename&action=ListView&from_homepagedb=true&type=dbrd&query=true&owner=$userinfo->user_name&viewname=$modviewid");
+				$test_target_val.=urlencode("index.php?module=$modulename&action=ListView&from_homepagedb=true&type=dbrd&query=true&owner=$username&viewname=$modviewid");
 
 				$urlstring .= 'K';
 				$cnt_table .= "<tr><td>$modulename</td><td align='center'>$modrec_count</td></tr>";

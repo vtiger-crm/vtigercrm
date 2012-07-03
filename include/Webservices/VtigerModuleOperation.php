@@ -14,8 +14,15 @@ class VtigerModuleOperation extends WebserviceEntityOperation {
 	
 	public function VtigerModuleOperation($webserviceObject,$user,$adb,$log){
 		parent::__construct($webserviceObject,$user,$adb,$log);
-		$this->meta = new VtigerCRMObjectMeta($this->webserviceObject,$this->user);
+		$this->meta = $this->getMetaInstance();
 		$this->tabId = $this->meta->getTabId();
+	}
+	
+	protected function getMetaInstance(){
+		if(empty(WebserviceEntityOperation::$metaCache[$this->webserviceObject->getEntityName()][$this->user->id])){
+			WebserviceEntityOperation::$metaCache[$this->webserviceObject->getEntityName()][$this->user->id]  = new VtigerCRMObjectMeta($this->webserviceObject,$this->user);
+		}
+		return WebserviceEntityOperation::$metaCache[$this->webserviceObject->getEntityName()][$this->user->id];
 	}
 	
 	public function create($elementType,$element){
@@ -25,14 +32,24 @@ class VtigerModuleOperation extends WebserviceEntityOperation {
 		
 		$error = $crmObject->create($element);
 		if(!$error){
-			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,"Database error while performing required operation");
+			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
+					vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		
 		$id = $crmObject->getObjectId();
+
+		// Bulk Save Mode
+		if(CRMEntity::isBulkSaveMode()) {		
+			// Avoiding complete read, as during bulk save mode, $result['id'] is enough
+			return array('id' => vtws_getId($this->meta->getEntityId(), $id) );
+		}
 		
 		$error = $crmObject->read($id);
 		if(!$error){
-			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,"Database error while performing required operation");
+			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
+				vtws_getWebserviceTranslatedString('LBL_'.
+						WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		
 		return DataTransform::filterAndSanitize($crmObject->getFields(),$this->meta);
@@ -46,7 +63,9 @@ class VtigerModuleOperation extends WebserviceEntityOperation {
 		$crmObject = new VtigerCRMObject($this->tabId, true);
 		$error = $crmObject->read($elemid);
 		if(!$error){
-			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,"Database error while performing required operation");
+			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
+					vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		
 		return DataTransform::filterAndSanitize($crmObject->getFields(),$this->meta);
@@ -60,14 +79,18 @@ class VtigerModuleOperation extends WebserviceEntityOperation {
 		$crmObject->setObjectId($ids[1]);
 		$error = $crmObject->update($element);
 		if(!$error){
-			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,"Database error while performing required operation");
+			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
+					vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		
 		$id = $crmObject->getObjectId();
 		
 		$error = $crmObject->read($id);
 		if(!$error){
-			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,"Database error while performing required operation");
+			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
+				vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		
 		return DataTransform::filterAndSanitize($crmObject->getFields(),$this->meta);
@@ -81,14 +104,18 @@ class VtigerModuleOperation extends WebserviceEntityOperation {
 		$crmObject->setObjectId($ids[1]);
 		$error = $crmObject->revise($element);
 		if(!$error){
-			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,"Database error while performing required operation");
+			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
+					vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 
 		$id = $crmObject->getObjectId();
 
 		$error = $crmObject->read($id);
 		if(!$error){
-			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,"Database error while performing required operation");
+			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
+					vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 
 		return DataTransform::filterAndSanitize($crmObject->getFields(),$this->meta);
@@ -102,7 +129,9 @@ class VtigerModuleOperation extends WebserviceEntityOperation {
 		
 		$error = $crmObject->delete($elemid);
 		if(!$error){
-			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,"Database error while performing required operation");
+			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
+					vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		return array("status"=>"successful");
 	}
@@ -124,7 +153,9 @@ class VtigerModuleOperation extends WebserviceEntityOperation {
 		$this->pearDB->completeTransaction();
 		
 		if($error){
-			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,"Database error while performing required operation");
+			throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
+					vtws_getWebserviceTranslatedString('LBL_'.
+							WebServiceErrorCode::$DATABASEQUERYERROR));
 		}
 		
 		$noofrows = $this->pearDB->num_rows($result);

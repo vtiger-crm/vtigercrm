@@ -24,7 +24,7 @@ function getTopQuotes($maxval,$calCnt)
 	require_once('include/ListView/ListView.php');
 	require_once('include/utils/utils.php');
 	require_once('modules/CustomView/CustomView.php');
-	
+
 	global $app_strings,$current_language,$current_user;
 	$current_module_strings = return_module_language($current_language, 'Quotes');
 
@@ -45,13 +45,12 @@ function getTopQuotes($maxval,$calCnt)
 			$viewid = "0";
 		}
 	}
-	
+
 	$theme_path="themes/".$theme."/";
 	$image_path=$theme_path."images/";
 
 	//Retreive the list from Database
 	//<<<<<<<<<customview>>>>>>>>>
-	$date_var = date('Y-m-d');
 	$currentModule = 'Quotes';
 	$viewId = getCvIdOfAll($currentModule);
 	$queryGenerator = new QueryGenerator($currentModule, $current_user);
@@ -73,23 +72,20 @@ function getTopQuotes($maxval,$calCnt)
 	}
 	$newFields = array_merge($newFields, $widgetSelectedFields);
 	$queryGenerator->setFields($newFields);
-	$_REQUEST = getTopQuotesSearch($_REQUEST, array(
-		'assigned_user_id'=>$current_user->column_fields['user_name'],
-		'validtill'=>$date_var,'quotestage.Rejected' => $current_module_strings['Rejected'],
-		'quotestage.Accepted' => $current_module_strings['Accepted']));
+	$_REQUEST = getTopQuotesSearch($_REQUEST);
 	$queryGenerator->addUserSearchConditions($_REQUEST);
 	$search_qry = '&query=true'.getSearchURL($_REQUEST);
 	$query = $queryGenerator->getQuery();
 
 	//<<<<<<<<customview>>>>>>>>>
-	
+
 	$query .= " LIMIT " . $adb->sql_escape_string($maxval);
 
 	if($calCnt == 'calculateCnt') {
 		$list_result_rows = $adb->query(mkCountQuery($query));
 		return $adb->query_result($list_result_rows, 0, 'count');
 	}
-	
+
 	$list_result = $adb->query($query);
 
 	//Retreiving the no of rows
@@ -136,8 +132,8 @@ function getTopQuotes($maxval,$calCnt)
 	}
 
 	$focus = new Quotes();
-	
-	
+
+
 	$title=array('TopOpenQuotes.gif',$current_module_strings['LBL_MY_TOP_QUOTE'],'home_mytopquote');
 	//Retreive the List View Table Header
 	$controller = new ListViewController($adb, $current_user, $queryGenerator);
@@ -150,33 +146,66 @@ function getTopQuotes($maxval,$calCnt)
 
 	$values=Array('ModuleName'=>'Quotes','Title'=>$title,'Header'=>$header,'Entries'=>$entries,'search_qry'=>$search_qry);
 
-	if ( ($display_empty_home_blocks && $noofrows == 0 ) || ($noofrows>0) )
+	if ( ($noofrows == 0 ) || ($noofrows>0) )
 		return $values;
 }
 
-function getTopQuotesSearch($output, $input) {
+function getTopQuotesSearch($output) {
+	global $current_user;
+	$currentDateTime = new DateTimeField(date('Y-m-d H:i:s'));
+
 	$output['query'] = 'true';
-	$output['Fields0'] = 'assigned_user_id';
-	$output['Condition0'] = 'e';
-	$output['Srch_value0'] = $input['assigned_user_id'];
-	$output['Fields1'] = 'validtill';
-	$output['Condition1'] = 'h';
-	$output['Srch_value1'] = $input['validtill'];
-	$output['Fields2'] = 'quotestage';
-	$output['Condition2'] = 'n';
-	$output['Srch_value2'] = 'Rejected';
-	$output['Fields3'] = 'quotestage';
-	$output['Condition3'] = 'n';
-	$output['Srch_value3'] = 'Accepted';
-	$output['Fields4'] = 'quotestage';
-	$output['Condition4'] = 'n';
-	$output['Srch_value4'] = $input['quotestage.Rejected'];
-	$output['Fields5'] = 'quotestage';
-	$output['Condition5'] = 'n';
-	$output['Srch_value5'] = $input['quotestage.Accepted'];
 	$output['searchtype'] = 'advance';
-	$output['search_cnt'] = '6';
-	$output['matchtype'] = 'all';
+
+	$advft_criteria_groups = array('1' => array('groupcondition' => null));
+	$advft_criteria = array(
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_quotes:quotestage:quotestage:Quotes_Quote_Stage:V',
+            'comparator' => 'n',
+            'value' => 'Accepted',
+            'columncondition' => 'and'
+        ),
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_quotes:quotestage:quotestage:Quotes_Quote_Stage:V',
+            'comparator' => 'n',
+            'value' => 'Rejected',
+            'columncondition' => 'and'
+        ),
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_quotes:quotestage:quotestage:Quotes_Quote_Stage:V',
+            'comparator' => 'n',
+            'value' => getTranslatedString('Accepted', 'Quotes'),
+            'columncondition' => 'and'
+        ),
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_quotes:quotestage:quotestage:Quotes_Quote_Stage:V',
+            'comparator' => 'n',
+            'value' => getTranslatedString('Rejected', 'Quotes'),
+            'columncondition' => 'and'
+        ),
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_quotes:validtill:validtill:Quotes_Valid_Till:D',
+            'comparator' => 'h',
+            'value' => $currentDateTime->getDisplayDate(),
+            'columncondition' => 'and'
+        ),
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_crmentity:smownerid:assigned_user_id:Quotes_Assigned_To:V',
+            'comparator' => 'e',
+            'value' => getFullNameFromArray('Users', $current_user->column_fields),
+            'columncondition' => null
+        )
+	);
+
+	$output['advft_criteria'] = Zend_Json::encode($advft_criteria);
+	$output['advft_criteria_groups'] = Zend_Json::encode($advft_criteria_groups);
+
 	return $output;
 }
 

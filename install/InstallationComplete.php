@@ -111,7 +111,7 @@ if(isset($application_unique_key) && !empty($application_unique_key)) {
 					<strong><?php echo $installationStrings['LBL_DOCUMENTATION_TUTORIAL']; ?></strong>
 					<ul>
 						<li><?php echo $installationStrings['LBL_DOCUMENTATION_TEXT']; ?>
-							<a href="http://wiki.vtiger.com" target="_blank">http://wiki.vtiger.com</a>
+							<a href="http://wiki.vtiger.com/index.php/Main_Page#tab=5.4.0" target="_blank">http://wiki.vtiger.com</a>
 						</li>
 						<li><?php echo $installationStrings['LBL_TUTORIAL_TEXT']; ?>
 							<a href="http://youtube.com/vtigercrm" target="_blank">http://youtube.com/vtigercrm</a>

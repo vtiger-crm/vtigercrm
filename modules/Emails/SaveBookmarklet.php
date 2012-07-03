@@ -52,7 +52,7 @@ $handler = new $handlerClass($webserviceObject,$current_user,$adb,$log);
 $meta = $handler->getMeta();
 $meta->retrieveMeta();
 
-$types = vtws_listtypes($current_user);
+$types = vtws_listtypes(null, $current_user);
 if(!in_array($elementType,$types['types'])){
 	throw new WebServiceException(WebServiceErrorCode::$ACCESSDENIED,"Permission to perform the operation is denied");
 }

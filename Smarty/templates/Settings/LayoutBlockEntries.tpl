@@ -68,7 +68,7 @@
 																				<td>{if $entries.hidden_count neq '0'}
 																					<select class="small" id="hiddenfield_assignid_{$entries.blockid}" style="width:225px" size="10" multiple>
 																					{foreach name=inner item=value from=$entries.hiddenfield}	
-																						<option value="{$value.fieldselect}">{$value.fieldlabel}</option>
+																						<option value="{$value.fieldselect}">{$value.fieldlabel|@getTranslatedString:$MODULE}</option>
 																					{/foreach}
 																						</select>
 																					{else}
@@ -137,6 +137,7 @@
 																								<tr><td align="left"><a id="field10_{$entries.blockid}"	href="javascript:void(0);" class="customMnu" style="text-decoration:none; background-image:url({'text.gif'|@vtiger_imageurl:$THEME});" 		onclick = "makeFieldSelected(this,10,{$entries.blockid});"> {$MOD.LBL_TEXT_AREA} </a></td></tr>
 																								<tr><td align="left"><a id="field11_{$entries.blockid}"	href="javascript:void(0);" class="customMnu" style="text-decoration:none; background-image:url({'cfpicklist.gif'|@vtiger_imageurl:$THEME});" 	onclick = "makeFieldSelected(this,11,{$entries.blockid});"> {$MOD.LBL_MULTISELECT_COMBO} </a></td></tr>
 																								<tr><td align="left"><a id="field12_{$entries.blockid}"	href="javascript:void(0);" class="customMnu" style="text-decoration:none; background-image:url({'skype.gif'|@vtiger_imageurl:$THEME});" 		onclick = "makeFieldSelected(this,12,{$entries.blockid});"> {$MOD.Skype} </a></td></tr>
+                                                                                                <tr><td align="left"><a id="field13_{$entries.blockid}"	href="javascript:void(0);" class="customMnu" style="text-decoration:none; background-image:url({'time.PNG'|@vtiger_imageurl:$THEME});" 		onclick = "makeFieldSelected(this,13,{$entries.blockid});"> {$MOD.Time} </a></td></tr>
 																							</table>
 																						</div>	
 																					</td>
@@ -368,8 +369,32 @@
 													</td>
 												</tr>
 												<tr>
+													<td valign="top" class="dvtCellInfo" align="left" width="10px">
+														{assign var="defaultsetting" value=$value.defaultvalue}
+														<input id="defaultvalue_check_{$value.fieldselect}"  type="checkbox" 
+														{if $defaultsetting.permitted eq false}
+															disabled 
+														{/if}
+														{if $defaultsetting.value neq ''}
+															checked
+														{/if}
+													</td>
+													<td valign="top" class="dvtCellInfo" align="left">	
+														&nbsp;{$MOD.LBL_DEFAULT_VALUE}<br>
+														{assign var="fieldElementId" value='defaultvalue_'|cat:$value.fieldselect}
+														{if $defaultsetting.permitted eq true}
+                											{include file="Settings/FieldUI.tpl" 
+                												_FIELD_UI_TYPE=$value.uitype
+                												_FIELD_SELECTED_VALUE=$defaultsetting.value
+                												_FIELD_ELEMENT_ID=$fieldElementId
+                												_ALL_AVAILABLE_VALUES=$defaultsetting._allvalues
+                											}
+														{/if}
+													</td>
+												</tr>
+												<tr>
 													<td colspan="3" class="dvtCellInfo" align="center">
-														<input  type="button" name="save"  value=" &nbsp; {$APP.LBL_SAVE_BUTTON_LABEL} &nbsp; " class="crmButton small save" onclick="saveFieldInfo('{$value.fieldselect}','{$MODULE}','updateFieldProperties');" />&nbsp;
+														<input  type="button" name="save"  value=" &nbsp; {$APP.LBL_SAVE_BUTTON_LABEL} &nbsp; " class="crmButton small save" onclick="saveFieldInfo('{$value.fieldselect}','{$MODULE}','updateFieldProperties','{$value.typeofdata}');" />&nbsp;
 														{if $value.customfieldflag neq 0}
 															<input type="button" name="delete" value=" {$APP.LBL_DELETE_BUTTON_LABEL} " class="crmButton small delete" onclick="deleteCustomField('{$value.fieldselect}','{$MODULE}','{$value.columnname}','{$value.uitype}')" />
 														{/if}

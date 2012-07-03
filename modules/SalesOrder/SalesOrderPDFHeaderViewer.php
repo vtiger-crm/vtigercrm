@@ -24,9 +24,18 @@
 
 				$modelColumnLeft = $modelColumns[0];
 
-				$pdf->Image($modelColumnLeft['logo'], $headerFrame->x, $headerFrame->y);
 				list($imageWidth, $imageHeight, $imageType, $imageAttr) = getimagesize($modelColumnLeft['logo']);
-				$imageHeightInMM = ceil($imageHeight * 0.2645);
+				//division because of mm to px conversion
+				$w = $imageWidth/3;
+				if($w > 60) {
+					$w=60;
+				}
+				$h = $imageHeight/3;
+				if($h > 30) {
+					$h = 30;
+				}
+				$pdf->Image($modelColumnLeft['logo'], $headerFrame->x, $headerFrame->y, $w, $h);
+				$imageHeightInMM = 30;
 
 				$pdf->SetFont('', 'B');
 				$contentHeight = $pdf->GetStringHeight( $modelColumnLeft['summary'], $headerColumnWidth);

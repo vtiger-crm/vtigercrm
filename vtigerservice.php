@@ -35,7 +35,7 @@ if(isset($_REQUEST['service']))
 	}
 	else
 	{
-		echo "No Service Configured for $_REQUEST[service]";
+		echo "No Service Configured for ". strip_tags($_REQUEST[service]);
 	}
 }
 else

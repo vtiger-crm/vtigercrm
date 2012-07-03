@@ -14,19 +14,18 @@
 <table border=0 cellspacing=0 cellpadding=5 width="50%" class="small homePageButtons">
 <tr style="cursor: pointer;">
 	<td style="padding-left:10px;padding-right:50px" width=10% class="moduleName" nowrap>
-		{$APP.$CATEGORY}&nbsp;&gt; 
 		<a class="hdrLink" href="index.php?action=index&module={$MODULE}">
 			{$APP.$MODULE}
 		</a>
 	</td>
 	<td class="sep1">
 		&nbsp;
-	</td>	
+	</td>
 
 	<td align='left'>
 		<img width="27" height="27" onClick='fnAddWindow(this,"addWidgetDropDown");' onMouseOut='fnRemoveWindow();' src="{'btnL3Add.gif'|@vtiger_imageurl:$THEME}" border="0" title="{$MOD.LBL_HOME_ADDWINDOW}" alt"{$MOD.LBL_HOME_ADDWINDOW}" style="cursor:pointer;">
 	</td>
-	
+
 {if $CHECK.Calendar eq 'yes' && $CALENDAR_ACTIVE eq 'yes' && $CALENDAR_DISPLAY eq 'true'}
 	<td>
 		<img width="27" height="27" src="{'btnL3Calendar.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_CALENDAR_ALT}" title="{$APP.LBL_CALENDAR_TITLE}" border=0  onClick='fnvshobj(this,"miniCal");getMiniCal();'/>
@@ -45,20 +44,18 @@
 {if $CHAT_DISPLAY eq 'true' }
 	<td>
 		<img width="27" height="27" src="{'tbarChat.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_CHAT_ALT}" title="{$APP.LBL_CHAT_TITLE}" border=0  onClick='return window.open("index.php?module=Home&action=vtchat","Chat","width=600,height=450,resizable=1,scrollbars=1");'>
-	</td>	
+	</td>
 {/if}
 	<td>
 		<img width="27" height="27" src="{'btnL3Tracker.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_LAST_VIEWED}" title="{$APP.LBL_LAST_VIEWED}" border="0" onClick="fnvshobj(this,'tracker');">
 	</td>
 
-	<td>
-		<img width="27" height="27" src="{'btnL3AllMenu.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_ALL_MENU_ALT}" title="{$APP.LBL_ALL_MENU_TITLE}" border="0" onmouseout="fninvsh('allMenu');" onClick="$('allMenu').style.display='block'; $('allMenu').style.visibility='visible';placeAtCenter($('allMenu'))">
-	</td>
+	
 	
 	<td align='left'>
 		<img width="27" height="27" onClick='showOptions("changeLayoutDiv");' src="{'orgshar.gif'|@vtiger_imageurl:$THEME}" border="0" title="{$MOD.LBL_HOME_LAYOUT}" alt"{$MOD.LBL_HOME_LAYOUT}" style="cursor:pointer;">
 	</td>
-	
+
 	<td width="100%" align="center">
 		<div id="vtbusy_info" style="display: none;">
 			<img src="{'status.gif'|@vtiger_imageurl:$THEME}" border="0" />
@@ -96,6 +93,19 @@
 			<a href='javascript:;' class='drop_down' id="addNotebook">
 				{$MOD.LBL_NOTEBOOK}
 			</a>
+               </li>
+
+{if $ALLOW_REPORT eq "yes"}
+		<li>
+			<a href='javascript:;' class='drop_down' id="addReportCharts">
+				{'LBL_REPORTCHARTS'|@getTranslatedString:$MODULE}
+			</a>
+		</li>
+{/if}
+        <li>
+			<a href='javascript:;' class='drop_down' id="defaultwidget">
+				{'LBL_DEFAULT_WIDGET'|@getTranslatedString:$MODULE}
+			</a>
 		</li>
 		{*<!-- this has been commented as some websites are opening up in full page (they have a target="_top")
 		<li>
@@ -105,17 +115,17 @@
 		</li>
 		-->*}
 	</div>
-	
+
 	{*<!-- the following div is used to display the contents for the add widget window -->*}
-	<div id="addWidgetsDiv" class="layerPopup" style="z-index:2000; display:none; width: 400px;">
-		<input type="hidden" name="stufftype" id="stufftype_id">	
+	<div id="addWidgetsDiv" class="layerPopup" style="z-index:2000; display:none; width:400px;">
+		<input type="hidden" name="stufftype" id="stufftype_id">
 		<table width="100%" border="0" cellpadding="5" cellspacing="0" class="layerHeadingULine">
 		<tr>
 			<td class="layerPopupHeading" align="left" id="divHeader"></td>
 			<td align="right"><a href="javascript:;" onclick="fnhide('addWidgetsDiv');$('stufftitle_id').value='';"><img src="{'close.gif'|@vtiger_imageurl:$THEME}" border="0"  align="absmiddle" /></a></td>
 		</tr>
 		</table>
-		<table border=0 cellspacing=0 cellpadding=5 width=95% align=center> 
+		<table border=0 cellspacing=0 cellpadding=5 width=95% align=center>
 		<tr>
 			<td class=small >
 			{*<!-- popup specific content fill in starts -->*}
@@ -180,6 +190,9 @@
 				<td class="dvtCellLabel"  width="110" align="right">{$MOD.LBL_HOME_DASHBOARD_NAME}</td>
 				<td id="selDashName" class="dvtCellInfo" colspan="2" width="300"></td>
 			</tr>
+			<tr id="homewidget" style="display:none">
+				<td id="home" class="dvtCellInfo" colspan="2" width="300"></td>
+			</tr>
 			<tr id="dashTypeRow" style="display:none">
 				<td class="dvtCellLabel" align="right" width="110">{$MOD.LBL_HOME_DASHBOARD_TYPE}</td>
 				<td id="selDashType" class="dvtCellInfo" width="300" colspan="2">
@@ -190,12 +203,26 @@
 					</select>
 				</td>
 			</tr>
-			</table>	
+			<tr id="reportNameRow" style="display:none">
+				<td class="dvtCellLabel"  width="110" align="right">{'LBL_HOME_REPORT_NAME'|@getTranslatedString:$MODULE}</td>
+				<td id="selReportName" class="dvtCellInfo" colspan="2" width="300"></td>
+			</tr>
+			<tr id="reportTypeRow" style="display:none">
+				<td class="dvtCellLabel" align="right" width="110">{'LBL_HOME_REPORT_TYPE'|@getTranslatedString:$MODULE}</td>
+				<td id="selReportType" class="dvtCellInfo" width="300" colspan="2">
+					<select name="selreporttype" id="selreportcharttype_id" class="detailedViewTextBox" onfocus="this.className='detailedViewTextBoxOn'" onblur="this.className='detailedViewTextBox'" style="width:60%">
+						<option value="horizontalbarchart">{$MOD.LBL_HOME_HORIZONTAL_BARCHART}</option>
+						<option value="verticalbarchart">{$MOD.LBL_HOME_VERTICAL_BARCHART}</option>
+						<option value="piechart">{$MOD.LBL_HOME_PIE_CHART}</option>
+					</select>
+				</td>
+			</tr>
+		</table>
 			{*<!-- popup specific content fill in ends -->*}
 			</td>
 		</tr>
 		</table>
-		
+
 		<table border=0 cellspacing=0 cellpadding=5 width=95% align="center">
 			<tr>
 				<td align="right">
@@ -248,6 +275,6 @@
 			<input type="button" name="cancel" value="{$APP.LBL_CANCEL_BUTTON_LABEL}" class="crmbutton small cancel" onclick="hideOptions('changeLayoutDiv');">
 		</td>
 	</tr>
-	
+
 	</table>
 </div>

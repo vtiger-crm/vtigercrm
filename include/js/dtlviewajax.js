@@ -305,7 +305,12 @@ function dtlViewAjaxSave(fieldLabel,module,uitype,tableName,fieldName,crmId)
 		}
 	}else if(uitype == '17')
 	{
-		getObj(dtlView).innerHTML = "<a href=\"http://"+ tagValue+"\" target=\"_blank\">"+tagValue+"&nbsp;</a>";
+		var matchPattern = /^[\w]+:\/\//;
+        if(tagValue.match(matchPattern)){
+            getObj(dtlView).innerHTML = "<a href=\""+ tagValue+"\" target=\"_blank\">"+tagValue+"&nbsp;</a>";
+        }else{
+            getObj(dtlView).innerHTML = "<a href=\"http://"+ tagValue+"\" target=\"_blank\">"+tagValue+"&nbsp;</a>";
+        }	
 	}else if(uitype == '85')
         {
                 getObj(dtlView).innerHTML = "<a href=\"skype://"+ tagValue+"?call\">"+tagValue+"&nbsp;</a>";
@@ -411,7 +416,7 @@ function dtlViewAjaxSave(fieldLabel,module,uitype,tableName,fieldName,crmId)
 			getObj(dtlView).innerHTML = popObj.value;
 		}
 	}
-	else if(uitype == '15' || uitype == '16' )
+	else if(uitype == '15' || uitype == '16' || uitype == '31' || uitype == '32')
         {
                         var notaccess =document.getElementById(txtBox);
                         tagValue = notaccess.options[notaccess.selectedIndex].text;

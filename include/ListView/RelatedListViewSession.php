@@ -32,20 +32,20 @@ class RelatedListViewSession {
 		$this->start =1;
 	}
 	
-	function addRelatedModuleToSession($relationId, $header) {
+	public static function addRelatedModuleToSession($relationId, $header) {
 		global $currentModule;
 		$_SESSION['relatedlist'][$currentModule][$relationId] = $header;
 		$start = RelatedListViewSession::getRequestStartPage();
 		RelatedListViewSession::saveRelatedModuleStartPage($relationId, $start);
 	}
 	
-	function removeRelatedModuleFromSession($relationId, $header) {
+	public static function removeRelatedModuleFromSession($relationId, $header) {
 		global $currentModule;		
 		
 		unset($_SESSION['relatedlist'][$currentModule][$relationId]);
 	}
 	
-	function getRelatedModulesFromSession() {
+	public static function getRelatedModulesFromSession() {
 		global $currentModule;		
 
 		$allRelatedModuleList = isPresentRelatedLists($currentModule);
@@ -60,13 +60,13 @@ class RelatedListViewSession {
 		return $moduleList;
 	}
 	
-	function saveRelatedModuleStartPage($relationId, $start) {
+	public static function saveRelatedModuleStartPage($relationId, $start) {
 		global $currentModule;
 		
 		$_SESSION['rlvs'][$currentModule][$relationId]['start'] = $start;
 	}
 	
-	function getCurrentPage($relationId) {
+	public static function getCurrentPage($relationId) {
 		global $currentModule;
 		
 		if(!empty($_SESSION['rlvs'][$currentModule][$relationId]['start'])){
@@ -75,7 +75,7 @@ class RelatedListViewSession {
 		return 1;
 	}
 	
-	function getRequestStartPage(){
+	public static function getRequestStartPage(){
 		$start = $_REQUEST['start'];
 		if(!is_numeric($start)){
 			$start = 1;
@@ -87,7 +87,7 @@ class RelatedListViewSession {
 		return $start;
 	}
 	
-	function getRequestCurrentPage($relationId, $query) {
+	public static function getRequestCurrentPage($relationId, $query) {
 		global $list_max_entries_per_page, $adb;
 		
 		$start = 1;

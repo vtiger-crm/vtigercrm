@@ -143,10 +143,10 @@ $data['endhr'] = $time_arr['endhour'];
 $data['endmin'] = $time_arr['endmin'];
 $data['endfmt'] = $time_arr['endfmt'];
 $data['record'] = $focus->id;
-if(isset($finaldata['sendnotification']) && $finaldata['sendnotification'] == 'yes')
-        $data['sendnotification'] = $mod_strings['LBL_YES'];
+if(isset($finaldata['sendnotification']) && $finaldata['sendnotification'] == strtolower($mod_strings['LBL_YES'])) 
+	$data['sendnotification'] = $mod_strings['LBL_YES'];
 else
-        $data['sendnotification'] = $mod_strings['LBL_NO'];
+	$data['sendnotification'] = $mod_strings['LBL_NO'];
 $data['subject'] = $finaldata['subject'];
 $data['date_start'] = $stdate;
 $data['due_date'] = $enddate;
@@ -157,6 +157,7 @@ else
 	$data['taskpriority'] = $finaldata['taskpriority'];
 $data['modifiedtime'] = $finaldata['modifiedtime'];
 $data['createdtime'] = $finaldata['createdtime'];
+$data['modifiedby'] = $finaldata['modifiedby'];
 $data['parent_name'] = $finaldata['parent_id'];
 $data['description'] = $finaldata['description'];
 if($activity_mode == 'Task')
@@ -190,93 +191,44 @@ elseif($activity_mode == 'Events')
 	else
 		$data['set_reminder'] = $mod_strings['LBL_NO'];
 	//To set recurring details
-	$query = 'select vtiger_recurringevents.recurringfreq,vtiger_recurringevents.recurringinfo from vtiger_recurringevents where vtiger_recurringevents.activityid = ?';
+	$query = 'SELECT vtiger_recurringevents.*, vtiger_activity.date_start, vtiger_activity.time_start, vtiger_activity.due_date, vtiger_activity.time_end
+				FROM vtiger_recurringevents
+					INNER JOIN vtiger_activity ON vtiger_activity.activityid = vtiger_recurringevents.activityid
+					WHERE vtiger_recurringevents.activityid = ?';
 	$res = $adb->pquery($query, array($focus->id));
 	$rows = $adb->num_rows($res);
-	if($rows != 0)
-	{
-		$data['recurringcheck'] = $mod_strings['LBL_YES'];
-		$data['repeat_frequency'] = $adb->query_result($res,0,'recurringfreq');
-		$recurringinfo =  explode("::",$adb->query_result($res,0,'recurringinfo'));
-		$data['recurringtype'] = $recurringinfo[0];
-		if($recurringinfo[0] == 'Weekly')
-		{
-			$weekrpt_str = '';
-			if(count($recurringinfo) > 1)
-			{
-				$weekrpt_str .= 'on ';
-				for($i=1;$i<count($recurringinfo);$i++)
-				{
-					$label = 'LBL_DAY'.$recurringinfo[$i];
-					if($i != 1)
-						$weekrpt_str .= ', ';
-					$weekrpt_str .= $mod_strings[$label];
-				}
-			}
-			$data['repeat_str'] = $weekrpt_str;
-		}
-		elseif($recurringinfo[0] == 'Monthly')
-		{   
-			$monthrpt_str = '';
-			$data['repeatMonth'] = $recurringinfo[1];  
-			if($recurringinfo[1] == 'date')
-			{
-				$data['repeatMonth_date'] = $recurringinfo[2];
-				$monthrpt_str .= $mod_strings['on'].'&nbsp;'.$recurringinfo[2].'&nbsp;'.$mod_strings['day of the month'];
-			}
-			else 
-			{ 
-				$data['repeatMonth_daytype'] = $recurringinfo[2];
-				$data['repeatMonth_day'] = $recurringinfo[3];
-				switch($data['repeatMonth_day'])
-				{
-					case 0 :
-						$day = $mod_strings['LBL_DAY0'];
-						break;
-					case 1 :
-						$day = $mod_strings['LBL_DAY1'];
-						break;
-					case 2 :
-						$day = $mod_strings['LBL_DAY2'];
-						break;
-					case 3 :
-						$day = $mod_strings['LBL_DAY3'];
-						break;
-					case 4 :
-						$day = $mod_strings['LBL_DAY4'];
-						break;
-					case 5 :
-						$day = $mod_strings['LBL_DAY5'];
-						break;
-					case 6 :
-						$day = $mod_strings['LBL_DAY6'];
-						break;
-				}
+	if($rows > 0) {
+		$recurringObject = RecurringType::fromDBRequest($adb->query_result_rowdata($res, 0));
+		$recurringInfoDisplayData = $recurringObject->getDisplayRecurringInfo();
+		$data = array_merge($data, $recurringInfoDisplayData);
 
-				$monthrpt_str .= 'on '.$mod_strings[$recurringinfo[2]].' '.$day;
-			}
-			$data['repeat_str'] = $monthrpt_str;
-		}
+	} else  {
+		$data['recurringcheck'] = getTranslatedString('LBL_NO', $currentModule);
+		$data['repeat_str'] = '';
 	}
-	else 
-	{   
-		$data['recurringcheck'] = $mod_strings['LBL_NO'];
-		$data['repeat_month_str'] = '';
-	}
-	$sql = 'select vtiger_users.user_name,vtiger_invitees.* from vtiger_invitees left join vtiger_users on vtiger_invitees.inviteeid=vtiger_users.id where activityid=?';
+	$sql = 'select vtiger_users.*,vtiger_invitees.* from vtiger_invitees left join vtiger_users on vtiger_invitees.inviteeid=vtiger_users.id where activityid=?';
 	$result = $adb->pquery($sql, array($focus->id));
 	$num_rows=$adb->num_rows($result);
 	$invited_users=Array();
 	for($i=0;$i<$num_rows;$i++)
 	{
 		$userid=$adb->query_result($result,$i,'inviteeid');
-		$username=$adb->query_result($result,$i,'user_name');
+		$username = getFullNameFromQResult($result, $i, 'Users');
 		$invited_users[$userid]=$username;
 	}
 	$smarty->assign("INVITEDUSERS",$invited_users);
 	$related_array = getRelatedListsInformation("Calendar", $focus);
-	
-	$smarty->assign("CONTACTS",$related_array['Contacts']['entries']);
+	$fieldsname = $related_array['Contacts']['header'];
+	$contact_info = $related_array['Contacts']['entries'];
+
+	$entityIds = array_keys($contact_info);
+	$displayValueArray = getEntityName('Contacts', $entityIds);
+	if (!empty($displayValueArray)) {
+		foreach ($displayValueArray as $key => $field_value) {
+			$entityname[] = '<a href="index.php?module=Contacts&action=DetailView&record=' . $key . '">' . $field_value . '</a>';
+		}
+	}
+	$smarty->assign("CONTACTS",$entityname);
 	
 	$is_fname_permitted = getFieldVisibilityPermission("Contacts", $current_user->id, 'firstname');
 	$smarty->assign("IS_PERMITTED_CNT_FNAME",$is_fname_permitted);

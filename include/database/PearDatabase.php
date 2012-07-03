@@ -28,19 +28,19 @@ class PreparedQMark2SqlValue {
         $this->ctr = 0;
         $this->vals = $vals;
     }
-    function call($matches){ 
-            /** 
-             * If ? is found as expected in regex used in function convert2sql 
-             * /('[^']*')|(\"[^\"]*\")|([?])/ 
-             * 
-             */ 
-            if($matches[3]=='?'){ 
-                    $this->ctr++; 
-                    return $this->vals[$this->ctr-1]; 
-            }else{ 
-                    return $matches[0]; 
-            } 
-    } 
+    function call($matches){
+            /**
+             * If ? is found as expected in regex used in function convert2sql
+             * /('[^']*')|(\"[^\"]*\")|([?])/
+             *
+             */
+            if($matches[3]=='?'){
+                    $this->ctr++;
+                    return $this->vals[$this->ctr-1];
+            }else{
+                    return $matches[0];
+            }
+    }
 }
 
 /**
@@ -107,7 +107,7 @@ class PearDatabaseCache {
 		// If the result is too big, don't cache it
 		if($this->_parent->num_rows($result) > $this->_CACHE_RESULT_ROW_LIMIT) {
 			global $log;
-			$log->fatal("[" . get_class($this) . "] Cannot cache result! $sql [Exceeds limit ". 
+			$log->fatal("[" . get_class($this) . "] Cannot cache result! $sql [Exceeds limit ".
 				$this->_CACHE_RESULT_ROW_LIMIT . ", Total Rows " . $this->_parent->num_rows($result) . "]");
 			return false;
 		}
@@ -130,7 +130,7 @@ class PearDatabaseCache {
 			if($result->EOF) $result->MoveFirst();
 			else if($result->CurrentRow() != 0) {
 				global $log;
-				$log->fatal("[" . get_class($this) . "] Cannot reuse result! $usekey [Rows Total " . 
+				$log->fatal("[" . get_class($this) . "] Cannot reuse result! $usekey [Rows Total " .
 					$this->_parent->num_rows($result) . ", Currently At: " . $result->CurrentRow() . "]");
 				// Do no allow result to be re-used if it is in use.
 				$result = false;
@@ -196,13 +196,13 @@ class PearDatabase{
 	static function &getInstance() {
 		global $adb, $log;
 
-		if(!isset($adb)) { 
+		if(!isset($adb)) {
 			$adb = new self();
 		}
 		return $adb;
 	}
-	// END	
-	
+	// END
+
 	/*
 	 * Reset query result for resuing if cache is enabled.
 	 */
@@ -214,36 +214,36 @@ class PearDatabase{
 		}
 	}
 	// END
-	
+
     function isMySQL() { return (stripos($this->dbType ,'mysql') === 0);}
     function isOracle() { return $this->dbType=='oci8'; }
     function isPostgres() { return $this->dbType=='pgsql'; }
-    
+
     function println($msg)
     {
 		require_once('include/logging.php');
 		$log1 =& LoggerManager::getLogger('VT');
 		if(is_array($msg)) {
 		    $log1->info("PearDatabse ->".print_r($msg,true));
-		} else { 
+		} else {
 		    $log1->info("PearDatabase ->".$msg);
 		}
 		return $msg;
     }
 
-    function setDieOnError($value){	 $this->dieOnError = $value; } 
-    function setDatabaseType($type){ $this->dbType = $type; } 
+    function setDieOnError($value){	 $this->dieOnError = $value; }
+    function setDatabaseType($type){ $this->dbType = $type; }
     function setUserName($name){ $this->userName = $name; }
-    
+
     function setOption($name, $value){
 		if(isset($this->dbOptions)) $this->dbOptions[$name] = $value;
 		if(isset($this->database)) $this->database->setOption($name, $value);
     }
-    
-    function setUserPassword($pass){ $this->userPassword = $pass; }    
+
+    function setUserPassword($pass){ $this->userPassword = $pass; }
     function setDatabaseName($db){ $this->dbName = $db;	}
     function setDatabaseHost($host){ $this->dbHostName = $host;	}
-    
+
     function getDataSourceName(){
 		return 	$this->dbType. "://".$this->userName.":".$this->userPassword."@". $this->dbHostName . "/". $this->dbName;
     }
@@ -255,17 +255,17 @@ class PearDatabase{
 		$this->database->StartTrans();
     }
 
-    function completeTransaction() {	
-	    if($this->isPostgres()) return;	
+    function completeTransaction() {
+	    if($this->isPostgres()) return;
 		if($this->database->HasFailedTrans()) $this->println("TRANS  Rolled Back");
 		else $this->println("TRANS  Commited");
-	
+
 		$this->database->CompleteTrans();
 		$this->println("TRANS  Completed");
     }
 
     function hasFailedTransaction(){ return $this->database->HasFailedTrans();   }
-    
+
     function checkError($msg='', $dieOnError=false) {
 		if($this->dieOnError || $dieOnError) {
 			$bt = debug_backtrace();
@@ -276,7 +276,7 @@ class PearDatabase{
 			echo '<pre>';
 			var_export($ut);
 			echo '</pre>';
-		    $this->println("ADODB error ".$msg."->[".$this->database->ErrorNo()."]".$this->database->ErrorMsg());	
+		    $this->println("ADODB error ".$msg."->[".$this->database->ErrorNo()."]".$this->database->ErrorMsg());
 		    die ($msg."ADODB error ".$msg."->".$this->database->ErrorMsg());
 		} else {
 		    $this->println("ADODB error ".$msg."->[".$this->database->ErrorNo()."]".$this->database->ErrorMsg());
@@ -288,7 +288,7 @@ class PearDatabase{
 		return is_array($arr)?array_change_key_case($arr):$arr;
     }
 
-    var $req_flist;	
+    var $req_flist;
     function checkConnection(){
 		global $log;
 
@@ -305,9 +305,9 @@ class PearDatabase{
 	 */
 	function logSqlTiming($startat, $endat, $sql, $params=false) {
 		global $logsqltm;
-		// Specifically for timing the SQL execution, you need to enable DEBUG in log4php.properties		
+		// Specifically for timing the SQL execution, you need to enable DEBUG in log4php.properties
 		if($logsqltm->isDebugEnabled()){
-			if(PerformancePrefs::getBoolean('SQL_LOG_INCLUDE_CALLER', false)) {					
+			if(PerformancePrefs::getBoolean('SQL_LOG_INCLUDE_CALLER', false)) {
 				$callers = debug_backtrace();
 				$callerscount = count($callers);
 				$callerfunc = '';
@@ -319,13 +319,13 @@ class PearDatabase{
 					// Caller function will be in next information block
 					if($calleridx < $callerscount) {
 						$callerfunc = $callers[$calleridx+1]['function'];
-						if(!empty($callerfunc)) $callerfunc = " ($callerfunc) ";	
+						if(!empty($callerfunc)) $callerfunc = " ($callerfunc) ";
 					}
 					$logsqltm->debug(
-						"CALLER: (" . $callers[$calleridx]['line'] . ') ' . 
-						$callers[$calleridx]['file'] . $callerfunc);					
+						"CALLER: (" . $callers[$calleridx]['line'] . ') ' .
+						$callers[$calleridx]['file'] . $callerfunc);
 				}
-			}						
+			}
 			$logsqltm->debug("SQL: " . $sql);
 			if($params != null && count($params) > 0) $logsqltm->debug("PARAMS: [" . implode(",", $params) . "]");
 			$logsqltm->debug("EXEC: " . ($endat - $startat) ." micros [START=$startat, END=$endat]");
@@ -335,35 +335,35 @@ class PearDatabase{
 
 	/**
 	 * Execute SET NAMES UTF-8 on the connection based on configuration.
-	 */	
+	 */
 	function executeSetNamesUTF8SQL($force = false) {
 		global $default_charset;
 		// Performance Tuning: If database default charset is UTF-8, we don't need this
 		if(strtoupper($default_charset) == 'UTF-8' && ($force || !$this->isdb_default_utf8_charset)) {
-	
+
 			$sql_start_time = microtime(true);
-	
+
 			$setnameSql = "SET NAMES utf8";
 			$this->database->Execute($setnameSql);
 			$this->logSqlTiming($sql_start_time, microtime(true), $setnameSql);
-		}	
+		}
 	}
-	
+
 	/**
-	 * Execute query in a batch. 
-	 * 
-	 * For example: 
+	 * Execute query in a batch.
+	 *
+	 * For example:
 	 * INSERT INTO TABLE1 VALUES (a,b);
 	 * INSERT INTO TABLE1 VALUES (c,d);
-	 * 
+	 *
 	 * like: INSERT INTO TABLE1 VALUES (a,b), (c,d)
 	 */
 	function query_batch($prefixsql, $valuearray) {
 		if(PerformancePrefs::getBoolean('ALLOW_SQL_QUERY_BATCH')) {
 			$sql = $prefixsql;
-			$suffixsql = $valuearray;			
+			$suffixsql = $valuearray;
 			if(!is_array($valuearray)) $suffixsql = implode(',', $valuearray);
-			$this->query($prefixsql . $suffixsql);			
+			$this->query($prefixsql . $suffixsql);
 		} else {
 			if(is_array($valuearray) && !empty($valuearray)) {
 				foreach($valuearray as $suffixsql) {
@@ -384,28 +384,28 @@ class PearDatabase{
 			return $fromcache;
 		}
 	}
-	// END		
+	// END
 	$log->debug('query being executed : '.$sql);
 	$this->checkConnection();
 
 	$this->executeSetNamesUTF8SQL();
-	
+
 	$sql_start_time = microtime(true);
 	$result = & $this->database->Execute($sql);
 	$this->logSqlTiming($sql_start_time, microtime(true), $sql);
-	
+
 	$this->lastmysqlrow = -1;
 	if(!$result)$this->checkError($msg.' Query Failed:' . $sql . '::', $dieOnError);
-	
+
 	// Performance Tuning: Cache the query result
 	if($this->isCacheEnabled()) {
 		$this->getCacheInstance()->cacheResult($result, $sql);
 	}
 	// END
-	return $result;		
+	return $result;
     }
 
-	
+
 	/**
 	 * Convert PreparedStatement to SQL statement
 	 */
@@ -424,12 +424,12 @@ class PearDatabase{
 				else {
 					$vals[$index] = "'".$this->sql_escape_string($vals[$index]). "'";
 				}
-			} 
+			}
 			if($vals[$index] === null) {
 				$vals[$index] = "NULL";
 			}
 		}
-		$sql = preg_replace_callback("/('[^']*')|(\"[^\"]*\")|([?])/", array(new PreparedQMark2SqlValue($vals),"call"), $ps); 
+		$sql = preg_replace_callback("/('[^']*')|(\"[^\"]*\")|([?])/", array(new PreparedQMark2SqlValue($vals),"call"), $ps);
 		return $sql;
 	}
 
@@ -438,8 +438,8 @@ class PearDatabase{
    	* @param $params -- Parameters for the prepared statement
    	* @param $dieOnError -- Set to true, when query execution fails
    	* @param $msg -- Error message on query execution failure
-   	*/	
-	function pquery($sql, $params, $dieOnError=false, $msg='') {		
+   	*/
+	function pquery($sql, $params, $dieOnError=false, $msg='') {
 		global $log, $default_charset;
 		// Performance Tuning: Have we cached the result earlier?
 		if($this->isCacheEnabled()) {
@@ -454,13 +454,13 @@ class PearDatabase{
 		$this->checkConnection();
 
 		$this->executeSetNamesUTF8SQL();
-				
+
 		$sql_start_time = microtime(true);
 		$params = $this->flatten_array($params);
 		if (count($params) > 0) {
-			$log->debug('Prepared sql query parameters : [' . implode(",", $params) . ']'); 
+			$log->debug('Prepared sql query parameters : [' . implode(",", $params) . ']');
 		}
-		
+
 		if($this->avoidPreparedSql || empty($params)) {
 			$sql = $this->convert2Sql($sql, $params);
 			$result = &$this->database->Execute($sql);
@@ -469,7 +469,7 @@ class PearDatabase{
 		}
 		$sql_end_time = microtime(true);
 		$this->logSqlTiming($sql_start_time, $sql_end_time, $sql, $params);
-		
+
 		$this->lastmysqlrow = -1;
 		if(!$result)$this->checkError($msg.' Query Failed:' . $sql . '::', $dieOnError);
 
@@ -478,7 +478,7 @@ class PearDatabase{
 			$this->getCacheInstance()->cacheResult($result, $sql, $params);
 		}
 		// END
-		return $result;	
+		return $result;
 	}
 
 	/**
@@ -491,15 +491,15 @@ class PearDatabase{
 		if($input == null) return null;
 		if($output == null) $output = array();
 		foreach($input as $value) {
-			if(is_array($value)) {	
+			if(is_array($value)) {
 				$output = $this->flatten_array($value, $output);
-			} else {	
+			} else {
 				array_push($output, $value);
 			}
 		}
 		return $output;
 	}
-	
+
     function getEmptyBlob($is_string=true)
     {
 	//if(dbType=="oci8") return 'empty_blob()';
@@ -508,21 +508,21 @@ class PearDatabase{
 	return null;
     }
 
-    function updateBlob($tablename, $colname, $id, $data)	
+    function updateBlob($tablename, $colname, $id, $data)
     {
 	$this->println("updateBlob t=".$tablename." c=".$colname." id=".$id);
 	$this->checkConnection();
 	$this->executeSetNamesUTF8SQL();
-	
+
 	$sql_start_time = microtime(true);
 	$result = $this->database->UpdateBlob($tablename, $colname, $data, $id);
 	$this->logSqlTiming($sql_start_time, microtime(true), "Update Blob $tablename, $colname, $id");
-	
+
 	$this->println("updateBlob t=".$tablename." c=".$colname." id=".$id." status=".$result);
 	return $result;
     }
 
-    function updateBlobFile($tablename, $colname, $id, $filename)	
+    function updateBlobFile($tablename, $colname, $id, $filename)
     {
 	$this->println("updateBlobFile t=".$tablename." c=".$colname." id=".$id." f=".$filename);
 	$this->checkConnection();
@@ -531,7 +531,7 @@ class PearDatabase{
 	$sql_start_time = microtime(true);
 	$result = $this->database->UpdateBlobFile($tablename, $colname, $filename, $id);
 	$this->logSqlTiming($sql_start_time, microtime(true), "Update Blob $tablename, $colname, $id");
-	
+
 	$this->println("updateBlobFile t=".$tablename." c=".$colname." id=".$id." f=".$filename." status=".$result);
 	return $result;
     }
@@ -542,30 +542,30 @@ class PearDatabase{
 	//$this->println("ADODB limitQuery sql=".$sql." st=".$start." co=".$count);
 	$log->debug(' limitQuery sql = '.$sql .' st = '.$start .' co = '.$count);
 	$this->checkConnection();
-	
+
 	$this->executeSetNamesUTF8SQL();
-	
+
 	$sql_start_time = microtime(true);
 	$result =& $this->database->SelectLimit($sql,$count,$start);
 	$this->logSqlTiming($sql_start_time, microtime(true), "$sql LIMIT $count, $start");
-	
+
 	if(!$result) $this->checkError($msg.' Limit Query Failed:' . $sql . '::', $dieOnError);
-	return $result;		
+	return $result;
     }
-    
+
     function getOne($sql, $dieOnError=false, $msg='')
     {
 	$this->println("ADODB getOne sql=".$sql);
 	$this->checkConnection();
-	
+
 	$this->executeSetNamesUTF8SQL();
-	
+
 	$sql_start_time = microtime(true);
 	$result =& $this->database->GetOne($sql);
 	$this->logSqlTiming($sql_start_time, microtime(true), "$sql GetONE");
-	
+
 	if(!$result) $this->checkError($msg.' Get one Query Failed:' . $sql . '::', $dieOnError);
-	return $result;		
+	return $result;
     }
 
     function getFieldsDefinition(&$result)
@@ -579,10 +579,10 @@ class PearDatabase{
 
 	$i = 0;
 	$n = $result->FieldCount();
-	while ($i < $n) 
+	while ($i < $n)
 	{
 		$meta = $result->FetchField($i);
-		if (!$meta) 
+		if (!$meta)
 		{
 			return 0;
 		}
@@ -591,7 +591,7 @@ class PearDatabase{
 	}
 
 	//$this->println($field_array);
-	return $field_array;			
+	return $field_array;
     }
 
     function getFieldsArray(&$result)
@@ -605,10 +605,10 @@ class PearDatabase{
 
 	$i = 0;
 	$n = $result->FieldCount();
-	while ($i < $n) 
+	while ($i < $n)
 	{
 	    $meta = $result->FetchField($i);
-	    if (!$meta) 
+	    if (!$meta)
 	    {
 		return 0;
 	    }
@@ -617,14 +617,14 @@ class PearDatabase{
 	}
 
 	//$this->println($field_array);
-	return $field_array;			
+	return $field_array;
     }
-    
+
     function getRowCount(&$result){
 		global $log;
 		if(isset($result) && !empty($result))
-		    $rows= $result->RecordCount();			
-		return $rows;			
+		    $rows= $result->RecordCount();
+		return $rows;
     }
 
     /* ADODB newly added. replacement for mysql_num_rows */
@@ -646,7 +646,7 @@ class PearDatabase{
 		$arr = $result->FetchRow();
         if(is_array($arr))
 			$arr = array_map('to_html', $arr);
-        return $this->change_key_case($arr);	
+        return $this->change_key_case($arr);
     }
 
     ## adds new functions to the PearDatabase class to come around the whole
@@ -764,7 +764,7 @@ class PearDatabase{
 	    	throw new Exception("missing field");
 	    if (!count($a))
 	    	throw new Exception("empty arrays not allowed");
-	    
+
 	    foreach($a as $walk => $cur)
 	    	$l .= ($l?',':'').$this->quote($cur{$field});
 
@@ -784,7 +784,7 @@ class PearDatabase{
     ## Code-Contribution given by weigelt@metux.de - Ends
 
     /* ADODB newly added. replacement for mysql_result() */
-    function query_result(&$result, $row, $col=0) {		
+    function query_result(&$result, $row, $col=0) {
 		if (!is_object($result))
 	                throw new Exception("result is not an object");
 		$result->Move($row);
@@ -802,7 +802,7 @@ class PearDatabase{
                 throw new Exception("result is not an object");
 		$result->Move($row);
 		$rowdata = $this->change_key_case($result->FetchRow());
-		
+
 		foreach($rowdata as $col => $coldata) {
 			if($col != 'fieldlabel')
 				$rowdata[$col] = to_html($coldata);
@@ -812,7 +812,7 @@ class PearDatabase{
 
 	/**
 	 * Get an array representing a row in the result set
-	 * Unlike it's non raw siblings this method will not escape 
+	 * Unlike it's non raw siblings this method will not escape
 	 * html entities in return strings.
 	 *
 	 * The case of all the field names is converted to lower case.
@@ -835,7 +835,7 @@ class PearDatabase{
     function getAffectedRowCount(&$result){
 		global $log;
 		$log->debug('getAffectedRowCount');
-		$rows =$this->database->Affected_Rows(); 
+		$rows =$this->database->Affected_Rows();
 		$log->debug('getAffectedRowCount rows = '.$rows);
 		return $rows;
     }
@@ -843,7 +843,7 @@ class PearDatabase{
     function requireSingleResult($sql, $dieOnError=false,$msg='', $encode=true) {
 		$result = $this->query($sql, $dieOnError, $msg);
 
-		if($this->getRowCount($result ) == 1)				
+		if($this->getRowCount($result ) == 1)
 	    	return $result;
 		$this->log->error('Rows Returned:'. $this->getRowCount($result) .' More than 1 row returned for '. $sql);
 		return '';
@@ -854,45 +854,45 @@ class PearDatabase{
     function requirePsSingleResult($sql, $params, $dieOnError=false,$msg='', $encode=true) {
 		$result = $this->pquery($sql, $params, $dieOnError, $msg);
 
-		if($this->getRowCount($result ) == 1)				
+		if($this->getRowCount($result ) == 1)
 	    	return $result;
 		$this->log->error('Rows Returned:'. $this->getRowCount($result) .' More than 1 row returned for '. $sql);
 		return '';
-    }   
+    }
 
     function fetchByAssoc(&$result, $rowNum = -1, $encode=true) {
 		if($result->EOF) {
 		    $this->println("ADODB fetchByAssoc return null");
 		    return NULL;
 		}
-		if(isset($result) && $rowNum < 0) {			
-		    $row = $this->change_key_case($result->GetRowAssoc(false));			
-		    $result->MoveNext();			
+		if(isset($result) && $rowNum < 0) {
+		    $row = $this->change_key_case($result->GetRowAssoc(false));
+		    $result->MoveNext();
 		    if($encode&& is_array($row))
 				return array_map('to_html', $row);
-		    return $row;			
+		    return $row;
 		}
-	
+
 		if($this->getRowCount($result) > $rowNum) {
 		    $result->Move($rowNum);
 		}
 		$this->lastmysqlrow = $rowNum;
-		$row = $this->change_key_case($result->GetRowAssoc(false));		
+		$row = $this->change_key_case($result->GetRowAssoc(false));
 		$result->MoveNext();
 		$this->println($row);
-			
+
 		if($encode&& is_array($row))
-			return array_map('to_html', $row);	
+			return array_map('to_html', $row);
 		return $row;
     }
-    
+
     function getNextRow(&$result, $encode=true){
 		global $log;
 		$log->info('getNextRow');
 		if(isset($result)){
 	    	$row = $this->change_key_case($result->FetchRow());
 		    if($row && $encode&& is_array($row))
-				return array_map('to_html', $row);	
+				return array_map('to_html', $row);
 	    	return $row;
 		}
 		return null;
@@ -905,9 +905,9 @@ class PearDatabase{
     function field_name(&$result, $col) {
 		return $result->FetchField($col);
     }
-    
+
     function getQueryTime(){
-		return $this->query_time;	
+		return $this->query_time;
     }
 
     function connect($dieOnError = false) {
@@ -917,10 +917,10 @@ class PearDatabase{
 		    return;
 		}
 		$this->database = ADONewConnection($this->dbType);
-		
+
 		$this->database->PConnect($this->dbHostName, $this->userName, $this->userPassword, $this->dbName);
 		$this->database->LogSQL($this->enableSQLlog);
-		
+
 		// 'SET NAMES UTF8' needs to be executed even if database has default CHARSET UTF8
 		// as mysql server might be running with different charset!
 		// We will notice problem reading UTF8 characters otherwise.
@@ -978,7 +978,7 @@ class PearDatabase{
     }
 
     function quote($string){
-		return $this->database->qstr($string);	
+		return $this->database->qstr($string);
     }
 
     function disconnect() {
@@ -1004,15 +1004,15 @@ class PearDatabase{
 		if($userName!=false) $this->userName=$userPassword;
 		if($userPassword!=false) $this->userPassword=$userPassword;
 		if($dbName!=false) $this->dbName=$dbName;
-		if($dbType!=false) $this->dbType=$dbType;		
+		if($dbType!=false) $this->dbType=$dbType;
 
 		$this->checkConnection();
 		$db = $this->database;
 		$schema = new adoSchema( $db );
 		//Debug Adodb XML Schema
-		$sehema->XMLS_DEBUG = TRUE;
+		$schema->XMLS_DEBUG = TRUE;
 		//Debug Adodb
-		$sehema->debug = true;
+		$schema->debug = true;
 		$sql = $schema->ParseSchema( $schemaFile );
 
 		$this->println("--------------Starting the table creation------------------");
@@ -1037,7 +1037,7 @@ class PearDatabase{
 		$this->println("ADODB alterTableTable table=".$tablename." flds=".$flds." oper=".$oper);
 		$this->checkConnection();
 		$dict = NewDataDictionary($this->database);
-	
+
 		if($oper == 'Add_Column') {
 		    $sqlarray = $dict->AddColumnSQL($tablename, $flds);
 		} else if($oper == 'Delete_Column') {
@@ -1053,7 +1053,7 @@ class PearDatabase{
     }
 
     function getColumnNames($tablename) {
-		$this->println("ADODB getColumnNames table=".$tablename);	
+		$this->println("ADODB getColumnNames table=".$tablename);
 		$this->checkConnection();
 		$adoflds = $this->database->MetaColumns($tablename);
 		$i=0;
@@ -1061,21 +1061,21 @@ class PearDatabase{
 		    $colNames[$i] = $fld->name;
 		    $i++;
 		}
-		return $colNames;	
+		return $colNames;
     }
 
     function formatString($tablename,$fldname, $str) {
 		$this->checkConnection();
 		$adoflds = $this->database->MetaColumns($tablename);
-	
+
 		foreach ( $adoflds as $fld ) {
 		    if(strcasecmp($fld->name,$fldname)==0) {
-				$fldtype =strtoupper($fld->type); 	
+				$fldtype =strtoupper($fld->type);
 				if(strcmp($fldtype,'CHAR')==0 || strcmp($fldtype,'VARCHAR') == 0 || strcmp($fldtype,'VARCHAR2') == 0 || strcmp($fldtype,'LONGTEXT')==0 || strcmp($fldtype,'TEXT')==0) {
 				    return $this->database->Quote($str);
 				} else if(strcmp($fldtype,'DATE') ==0 || strcmp($fldtype,'TIMESTAMP')==0) {
 				    return $this->formatDate($str);
-				} else {				
+				} else {
 				    return $str;
 				}
 		    }
@@ -1099,7 +1099,7 @@ class PearDatabase{
 		$this->checkConnection();
 		$db = &$this->database;
 		$datestr = $db->SQLDate("Y-m-d, H:i:s" ,$datecolname);
-		return $datestr;	
+		return $datestr;
     }
 
     function getUniqueID($seqname) {
@@ -1111,19 +1111,19 @@ class PearDatabase{
 		$this->checkConnection();
 		$result = & $this->database->MetaTables('TABLES');
 		$this->println($result);
-		return $result;		
+		return $result;
     }
-	
-	//To get a function name with respect to the database type which escapes strings in given text 
+
+	//To get a function name with respect to the database type which escapes strings in given text
 	function sql_escape_string($str)
 	{
 		if($this->isMySql())
 			$result_data = mysql_real_escape_string($str);
 		elseif($this->isPostgres())
-			$result_data = pg_escape_string($str);			
+			$result_data = pg_escape_string($str);
 		return $result_data;
 	}
-	
+
 	// Function to get the last insert id based on the type of database
 	function getLastInsertID($seqname = '') {
 		if($this->isPostgres()) {
@@ -1135,10 +1135,10 @@ class PearDatabase{
 			}
 		} else {
 			$last_insert_id = $this->database->Insert_ID();
-		}		
+		}
 		return $last_insert_id;
 	}
-	
+
 	// Function to escape the special characters in database name based on database type.
 	function escapeDbName($dbName='') {
 		if ($dbName == '')  $dbName = $this->dbName;

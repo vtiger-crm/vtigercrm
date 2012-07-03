@@ -27,8 +27,9 @@ $org_name = $adb->query_result($result,0,'organizationname');
 
 if($org_name=='')
 {
-	$sql="insert into vtiger_organizationdetails values(?,?,?,?,?,?,?,?,?)";
-	$params = array($organization_name, $organization_address, $organization_city, $organization_state, $organization_code, $organization_country, $organization_phone, $organization_fax, $organization_website);
+	$organizationId = $this->db->getUniqueID('vtiger_organizationdetails');
+	$sql="insert into vtiger_organizationdetails(organization_id,organizationname, address, city, state, code, country, phone, fax, website) values(?,?,?,?,?,?,?,?,?)";
+	$params = array($organizationId, $organization_name, $organization_address, $organization_city, $organization_state, $organization_code, $organization_country, $organization_phone, $organization_fax, $organization_website);
 }
 else
 {

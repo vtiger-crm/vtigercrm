@@ -135,6 +135,9 @@ $currencies = array(
 	'Zambia, Kwacha' => array('ZMK', 'ZMK'),
 	'Yemen, Rials'=>array('YER','﷼'),
 	'Zimbabwe Dollars'=>array('ZWD','Z$'),
+	'Malawi, Kwacha' => array('MWK', 'MK'),
+	'Tunisian, Dinar' => array('TD', 'TD'),
+	'Moroccan, Dirham' => array('MAD', 'درهم'),
 	);	
 /*
 	'Afghanistan, Afghanis'=>array('SAR','﷼'),	

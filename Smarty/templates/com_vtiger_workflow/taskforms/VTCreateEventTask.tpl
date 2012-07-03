@@ -1,3 +1,14 @@
+{*<!--
+/*+**********************************************************************************
+ * The contents of this file are subject to the vtiger CRM Public License Version 1.0
+ * ("License"); You may not use this file except in compliance with the License
+ * The Original Code is:  vtiger CRM Open Source
+ * The Initial Developer of the Original Code is vtiger.
+ * Portions created by vtiger are Copyright (C) vtiger.
+ * All Rights Reserved.
+ ************************************************************************************/
+-->*}
+
 <script src="modules/com_vtiger_workflow/resources/vtigerwebservices.js" type="text/javascript" charset="utf-8"></script>
 
 <script type="text/javascript" charset="utf-8">
@@ -24,7 +35,7 @@ var eventType = '{$task->eventType}';
 			<span id="event_status_busyicon"><b>{$MOD.LBL_LOADING}</b><img src="{'vtbusy.gif'|@vtiger_imageurl:$THEME}" border="0"></span>
 			<select id="event_status" value="{$task->status}" name="status" class="small" style="display: none;"></select>
 		</td>
-	</tr> 
+	</tr>
 	<tr valign="top">
 		<td class='dvtCellLabel' align="right" width=15% nowrap="nowrap"><b>Type</b></td>
 		<td class='dvtCellInfo'>
@@ -34,16 +45,26 @@ var eventType = '{$task->eventType}';
 	</tr>
 	<tr><td colspan="2"><hr size="1" noshade="noshade" /></td></tr>
 	<tr>
+		<td colspan="2" align="right">
+			<span class="helpmessagebox">{$MOD.LBL_WORKFLOW_NOTE_EVENT_TASK_TIMEZONE}</span>
+		</td>
+	</tr>
+	<tr>
 		<td align="right"><b>Start Time</b></td>
-		<td><input type="hidden" name="startTime" value="{$task->startTime}" id="workflow_time" style="width:60px"  class="time_field"></td>
+		{if $task->startTime neq ''}
+			{assign var=now value=$task->startTime}
+		{else}
+			{assign var=now value=$USER_TIME}
+		{/if}
+		<td><input type="hidden" name="startTime" value="{$now}" id="workflow_time" style="width:60px"  class="time_field"></td>
 	</tr>
 	<tr>
 		<td align="right"><b>Start Date</b></td>
 		<td>
-			<input type="text" name="startDays" value="{$task->startDays}" id="start_days" style="width:30px" class="small"> days 
-			<select name="startDirection" value="{$task->startDirection}" class="small">
-				<option>After</option>
-				<option>Before</option>
+			<input type="text" name="startDays" value="{$task->startDays}" id="start_days" style="width:30px" class="small"> days
+			<select name="startDirection" class="small">
+				<option {if $task->startDirection eq 'After'}selected{/if} value="After">After</option>
+				<option {if $task->startDirection eq 'Before'}selected{/if} value="Before">Before</option>
 			</select>
 			<select name="startDatefield" value="{$task->startDatefield}" class="small">
 				{foreach key=name item=label from=$dateFields}
@@ -56,14 +77,19 @@ var eventType = '{$task->eventType}';
 	</tr>
 	<tr>
 		<td align="right"><b>End Time</b></td>
-		<td><input type="hidden" name="endTime" value="{$task->endTime}" id="end_time" style="width:60px" class="time_field"></td>
+		{if $task->endTime neq ''}
+			{assign var=now value=$task->endTime}
+		{else}
+			{assign var=now value=$USER_TIME}
+		{/if}
+		<td><input type="hidden" name="endTime" value="{$now}" id="end_time" style="width:60px" class="time_field"></td>
 	</tr>
 	<tr>
 		<td align="right"><b>End Date</b></td>
-		<td><input type="text" name="endDays" value="{$task->endDays}" id="end_days" style="width:30px" class="small"> days 
-			<select name="endDirection" value="{$task->endDirection}" class="small">
-				<option>After</option>
-				<option>Before</option>
+		<td><input type="text" name="endDays" value="{$task->endDays}" id="end_days" style="width:30px" class="small"> days
+			<select name="endDirection" class="small">
+				<option {if $task->endDirection eq 'After'}selected{/if} value="After">After</option>
+				<option {if $task->endDirection eq 'Before'}selected{/if} value="Before">Before</option>
 			</select>
 			<select name="endDatefield" value="{$task->endDatefield}" class="small">
 				{foreach key=name item=label from=$dateFields}
@@ -105,7 +131,7 @@ var eventType = '{$task->eventType}';
 							<option value="Yearly" {if $task->recurringtype eq "Yearly"}selected{/if}>{$MOD.LBL_YEAR}</option>
 						</select>
 						<!-- Limit for Repeating Event -->
-						<b>{$MOD.LBL_UNTIL}:</b> <input type="text" name="calendar_repeat_limit_date" id="calendar_repeat_limit_date" class="textbox" style="width:90px" value="{$task->calendar_repeat_limit_date|@getDisplayDate}"></td><td align="left"><img border=0 src="{$IMAGE_PATH}btnL3Calendar.gif" alt="{$MOD.LBL_SET_DATE}" title="{$MOD.LBL_SET_DATE}" id="jscal_trigger_calendar_repeat_limit_date">
+						<b>{$MOD.LBL_UNTIL}:</b> <input type="text" name="calendar_repeat_limit_date" id="calendar_repeat_limit_date" class="textbox" style="width:90px" value="{$REPEAT_DATE}"></td><td align="left"><img border=0 src="{$IMAGE_PATH}btnL3Calendar.gif" alt="{$MOD.LBL_SET_DATE}" title="{$MOD.LBL_SET_DATE}" id="jscal_trigger_calendar_repeat_limit_date">
 						<script type="text/javascript">
 						Calendar.setup ({ldelim}
 							inputField : "calendar_repeat_limit_date", ifFormat : "{$dateFormat}", showsTime : false, button : "jscal_trigger_calendar_repeat_limit_date", singleClick : true, step : 1
@@ -136,7 +162,9 @@ var eventType = '{$task->eventType}';
 							<td>
 								<table border=0 cellspacing=0 cellpadding=2>
 									<tr>
-										<td><input type="radio" {if $task->repeatMonth eq "date"}checked{/if} name="repeatMonth" value="date"></td><td>{$MOD.on}</td><td><input type="text" class=textbox style="width:20px" value="{$task->repeatMonth_date}" name="repeatMonth_date" ></td><td>{assign var=languageKey value='day of the month'}{$MOD[$languageKey]}</td>
+										<td><input type="radio" {if $task->repeatMonth eq "date"}checked{/if} name="repeatMonth" value="date"></td><td>{$MOD.on}</td>
+										<td><input type="text" class="textbox" style="width:20px" value="{$task->repeatMonth_date}" name="repeatMonth_date" ></td>
+										<td>{assign var=languageKey value='day of the month'}{$MOD[$languageKey]}</td>
 									</tr>
 								</table>
 							</td>
@@ -149,13 +177,13 @@ var eventType = '{$task->eventType}';
 											<input type="radio" {if $task->repeatMonth eq "day"}checked{/if} name="repeatMonth" value="day"></td>
 										<td>{$MOD.on}</td>
 										<td>
-											<select name="repeatMonth_daytype">
+											<select name="repeatMonth_daytype" class="small">
 												<option value="first" {if $task->repeatMonth_daytype eq "first"}selected{/if}>{$MOD.First}</option>
 												<option value="last" {if $task->repeatMonth_daytype eq "last"}selected{/if}>{$MOD.Last}</option>
 											</select>
 										</td>
 										<td>
-											<select name="repeatMonth_day">
+											<select name="repeatMonth_day" class="small">
 												<option value=1 {if $task->repeatMonth_day eq 1}selected{/if}>{$MOD.LBL_DAY1}</option>
 												<option value=2 {if $task->repeatMonth_day eq 2}selected{/if}>{$MOD.LBL_DAY2}</option>
 												<option value=3 {if $task->repeatMonth_day eq 3}selected{/if}>{$MOD.LBL_DAY3}</option>

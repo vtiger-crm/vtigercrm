@@ -108,7 +108,7 @@ for($i=0;$i<$adb->num_rows($result);$i++){
 
 	// Variable reassignment and reformatting for author
 	$author_id = $db->query_result($result,$i,'smcreatorid');
-	$entry_author = getUserName($author_id);
+	$entry_author = getUserFullName($author_id);
 	$entry_author = htmlspecialchars ($entry_author);
 	
 	$entry_link = $site_URL."/index.php?modules=".$mod_notify[$i]['setype']."&amp;action=DetailView&amp;record=".$mod_notify[$i]['crmid'];

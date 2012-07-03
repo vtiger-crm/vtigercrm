@@ -82,7 +82,7 @@ if(move_uploaded_file($_FILES["binFile"]["tmp_name"],$uploaddir.$_FILES["binFile
 				$module = vtlib_purify($_REQUEST['target_module']);
 			   	header("Location: index.php?action=upload&module=Settings&parenttab=Settings&flag=".$error_flag."&description=".$strDescription."&tempModule=".$module);	
 			} else {
-				include('themes/'.$theme.'/header.php');
+				include('modules/Vtiger/header.php');
 				$errormessage = "<font color='red'><B>Error Message<ul>
 				<li><font color='red'>Invalid file OR</font>
 				<li><font color='red'>File has no data</font>
@@ -107,14 +107,14 @@ else
 	$errorCode =  $_FILES['binFile']['error'];
 	if($errorCode == 4)
 	{
-		include('themes/'.$theme.'/header.php');
+		include('modules/Vtiger/header.php');
 		include "upload.php";
 		// $errormessage = "<B><font color='red'>Kindly give a valid file for upload!</font></B> <br>" ;
 		echo "<script>alert('".$mod_strings['SPECIFY_FILE_TO_MERGE']."')</script>";
 	}
 	else if($errorCode == 2) 
 	{
-		include('themes/'.$theme.'/header.php');
+		include('modules/Vtiger/header.php');
 		include "upload.php";
 		//$errormessage = "<B><font color='red'>Sorry, the uploaded file exceeds the maximum filesize limit. Please try a smaller file</font></B> <br>";
 		echo "<script>alert('".$mod_strings['FILESIZE_EXCEEDS_INFO_CONFIG_INC']."')</script>";	
@@ -123,13 +123,13 @@ else
 	}
 	elseif($errorCode == 1)
 	{
-		include('themes/'.$theme.'/header.php');
+		include('modules/Vtiger/header.php');
 		include "upload.php";
 		echo "<script>alert('".$mod_strings['FILESIZE_EXCEEDS_INFO_PHP_INI']."')</script>";
 	}
 	else if($errorCode == 3)
 	{
-		include('themes/'.$theme.'/header.php');
+		include('modules/Vtiger/header.php');
 		include "upload.php";
 		echo "<script>alert('".$mod_strings['PROBLEMS_IN_FILEUPLOAD']."')</script>";
 

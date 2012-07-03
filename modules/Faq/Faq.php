@@ -23,7 +23,6 @@
 
 include_once('config.php');
 require_once('include/logging.php');
-require_once('data/SugarBean.php');
 require_once('include/utils/utils.php');
 
 	global $empty_string;
@@ -77,6 +76,9 @@ class Faq extends CRMEntity {
 	var $default_sort_order = 'DESC';
 
 	var $mandatory_fields = Array('question','faq_answer','createdtime' ,'modifiedtime');
+
+	// For Alphabetical search
+	var $def_basicsearch_col = 'question';
 	
 	/**	Constructor which will set the column_fields in this object
 	 */
@@ -181,7 +183,8 @@ class Faq extends CRMEntity {
 					left join vtiger_groups as vtiger_groups$module on vtiger_groups$module.groupid = vtiger_crmentity.smownerid 
 					left join vtiger_users as vtiger_users$module on vtiger_users$module.id = vtiger_crmentity.smownerid 
 					left join vtiger_groups on vtiger_groups.groupid = vtiger_crmentity.smownerid 
-					left join vtiger_users on vtiger_users.id = vtiger_crmentity.smownerid";
+					left join vtiger_users on vtiger_users.id = vtiger_crmentity.smownerid
+                    left join vtiger_users as vtiger_lastModifiedBy".$module." on vtiger_lastModifiedBy".$module.".id = vtiger_crmentity.modifiedby";
 	            return $query;
 	}
 
@@ -196,5 +199,10 @@ class Faq extends CRMEntity {
 		);
 		return $rel_tables[$secmodule];
 	}
+
+	function clearSingletonSaveFields() {
+		$this->column_fields['comments'] = '';
+	}
+	
 }
 ?>

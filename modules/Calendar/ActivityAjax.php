@@ -17,27 +17,6 @@ require_once('include/logging.php');
 $cal_log =& LoggerManager::getLogger('calendar');
 $cal_log->debug("In CalendarAjax file");
 $mysel = vtlib_purify($_REQUEST['view']);
-if($_REQUEST['file'] == 'OpenListView')
-{
-	require_once('Smarty_setup.php');
-	$smarty = new vtigerCRM_Smarty;
-	require_once("modules/Calendar/OpenListView.php");
-	$smarty->assign("APP",$app_strings);
-	$smarty->assign("IMAGE_PATH",$image_path);
-	if($_REQUEST['mode'] == '0')
-	{
-		$activities[0] = getPendingActivities(0);
-		$smarty->assign("ACTIVITIES",$activities);
-		$smarty->display("upcomingActivities.tpl");
-	}
-	else if($_REQUEST['mode'] == '1')
-	{
-		$activities[1] = getPendingActivities(1);
-		$smarty->assign("ACTIVITIES",$activities);
-		$smarty->display("pendingActivities.tpl");
-	}
-	die();
-}
 $calendar_arr = Array();
 $calendar_arr['IMAGE_PATH'] = $image_path;
 $date_data = array();
@@ -63,8 +42,8 @@ if ( isset($_REQUEST['year']))
 	$date_data['year'] = $_REQUEST['year'];
 }
 
-		
-if((isset($_REQUEST['type']) && $_REQUEST['type'] !='') || (isset($_REQUEST['n_type']) && $_REQUEST['n_type'] !='')) 
+
+if((isset($_REQUEST['type']) && $_REQUEST['type'] !='') || (isset($_REQUEST['n_type']) && $_REQUEST['n_type'] !=''))
 {
 	$type = $_REQUEST['type'];
 	$n_type = $_REQUEST['n_type'];
@@ -89,17 +68,17 @@ if((isset($_REQUEST['type']) && $_REQUEST['type'] !='') || (isset($_REQUEST['n_t
 	elseif($type == 'settings')
 	{
 		$cal_log->debug("going to get calendar Settings");
-		require_once('modules/Calendar/calendar_share.php');	
+		require_once('modules/Calendar/calendar_share.php');
 	}
 	else
 	{
-		$subtab = vtlib_purify($_REQUEST['subtab']); 
+		$subtab = vtlib_purify($_REQUEST['subtab']);
 		if(empty($mysel))
 		{
 			$mysel = 'day';
 		}
 		$calendar_arr['calendar'] = new Calendar($mysel,$date_data);
-		
+
 		$calendar_arr['view'] = $mysel;
 		if($calendar_arr['calendar']->view == 'day')
 			$start_date = $end_date = $calendar_arr['calendar']->date_time->get_formatted_date();
@@ -126,7 +105,7 @@ if((isset($_REQUEST['type']) && $_REQUEST['type'] !='') || (isset($_REQUEST['n_t
 		{
 			die("view:".$calendar_arr['calendar']->view." is not defined");
 		}
-		
+
 		if($type == 'change_owner' || $type == 'activity_delete' || $type == 'change_status' || $type == 'activity_postpone' || $n_type == 'nav')
 		{
 			if($current_user->hour_format != '')
@@ -147,10 +126,6 @@ if((isset($_REQUEST['type']) && $_REQUEST['type'] !='') || (isset($_REQUEST['n_t
 				}
 				ChangeStatus($status,$return_id,$activity_type);
 				$mail_data = getActivityMailInfo($return_id,$status,$activity_type);
-				if($mail_data['sendnotification'] == 1)
-				{
-					getEventNotification($activity_type,$mail_data['subject'],$mail_data);
-				}
 				$invitee_qry = "select * from vtiger_invitees where activityid=?";
 				$invitee_res = $adb->pquery($invitee_qry, array($return_id));
 				$count = $adb->num_rows($invitee_res);
@@ -184,7 +159,7 @@ if((isset($_REQUEST['type']) && $_REQUEST['type'] !='') || (isset($_REQUEST['n_t
 					}
 					elseif($calendar_arr['view'] == 'week')
 					{
-						echo getWeekViewLayout($calendar_arr)."####".getEventInfo($calendar_arr,'listcnt');	
+						echo getWeekViewLayout($calendar_arr)."####".getEventInfo($calendar_arr,'listcnt');
 					}
 					elseif($calendar_arr['view'] == 'month')
 					{
@@ -221,7 +196,7 @@ if((isset($_REQUEST['type']) && $_REQUEST['type'] !='') || (isset($_REQUEST['n_t
 		}
 		elseif($type == 'view')
 		{
-			checkFileAccess('modules/Calendar/'.$_REQUEST['file'].'.php');
+			checkFileAccessForInclusion('modules/Calendar/'.$_REQUEST['file'].'.php');
 			require_once('modules/Calendar/'.$_REQUEST['file'].'.php');
 		}
 		else

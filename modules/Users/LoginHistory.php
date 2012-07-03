@@ -12,7 +12,6 @@
 
 include_once('config.php');
 require_once('include/logging.php');
-require_once('data/SugarBean.php');
 require_once('include/logging.php');
 require_once('include/ListView/ListView.php');
 require_once('include/database/PearDatabase.php');
@@ -204,6 +203,35 @@ class LoginHistory {
 		return $query;
 	}
 
+	/**
+	 * Determine if the user has logged-in first
+	 * @param accept_delay_seconds Allow the delay (in seconds) between login_time recorded and current time as first time.
+	 * This will be helpful if login is performed and client is redirected for home page where this function is invoked.
+	 */
+	static function firstTimeLoggedIn($user_name, $accept_delay_seconds=10) {		
+		$firstTimeLoginStatus = false;
+		
+		global $adb;
+		
+		// Search for at-least two records.
+		$query = 'SELECT login_time, logout_time FROM vtiger_loginhistory WHERE user_name=? ORDER BY login_id DESC LIMIT 2';
+		$result= $adb->pquery($query, array($user_name));
+		$recordCount = $result? $adb->num_rows($result) : 0;
+		
+		if ($recordCount === 0) {
+			$firstTimeLoginStatus = true;
+		} else {		
+			if ($recordCount == 1) { // Only first time?
+				$row = $adb->fetch_array($result);
+				$login_delay = time() - strtotime($row['login_time']);
+				// User not logged out and is within expected delay?			
+				if (strcmp('0000-00-00 00:00:00', $row['logout_time']) === 0 && $login_delay < $accept_delay_seconds) {
+					$firstTimeLoginStatus = true;
+				}				
+			}
+		}
+		return $firstTimeLoginStatus;
+	}
 }
 
 

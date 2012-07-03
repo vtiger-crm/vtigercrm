@@ -82,7 +82,7 @@ require_once('include/utils/UserInfoUtil.php');
 		global $adb,$image_path,$log,$theme;
 		$log->debug("Entering status_availability(".$owner,$userid.",".$activity_id.",".$avail_date.",".$activity_start_time.",".$activity_end_time.") method ...");
 		$avail_flag="false";
-		$avail_date=getDBInsertDateValue($avail_date);
+		$avail_date=DateTimeField::convertToDBFormat($avail_date);
 		if( $owner != $userid)
 		{
 			

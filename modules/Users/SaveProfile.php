@@ -151,8 +151,7 @@ $num_act_util_per = $adb->num_rows($act_utility_result);
 	}
 
 
-
-	$modArr=getFieldModuleAccessArray();
+$modArr=getModuleAccessArray();
  
 
 foreach($modArr as $fld_module => $fld_label)
@@ -172,6 +171,8 @@ foreach($modArr as $fld_module => $fld_label)
 		{
 			$visible_value = 1;
 		}
+		$readonlyfieldid = $fieldid.'_readonly';
+		$readOnlyValue = $_REQUEST[$readonlyfieldid];
 		//Updating the Mandatory vtiger_fields
 		$uitype = $adb->query_result($fieldListResult,$i,"uitype");
 		$displaytype =  $adb->query_result($fieldListResult,$i,"displaytype");
@@ -184,7 +185,7 @@ foreach($modArr as $fld_module => $fld_label)
 		}
 		//Updating the database
 		$sql11="insert into vtiger_profile2field values(?,?,?,?,?)";
-        $adb->pquery($sql11, array($profileid, $tab_id, $fieldid, $visible_value,1));
+        $adb->pquery($sql11, array($profileid, $tab_id, $fieldid, $visible_value,$readOnlyValue));
 	}
 }
 	$loc = "Location: index.php?action=ListProfiles&module=Settings&mode=view&parenttab=Settings&profileid=".vtlib_purify($profileid)."&selected_tab=".vtlib_purify($def_tab)."&selected_module=".vtlib_purify($def_module);

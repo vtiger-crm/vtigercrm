@@ -37,9 +37,9 @@ function vtSaveWorkflowTemplate($adb, $request){
 	$returnUrl = $request['return_url'];
 	?>
 		<script type="text/javascript" charset="utf-8">
-			 window.location="<?=$returnUrl?>";
+			 window.location="<?php echo $returnUrl?>";
 		</script>
-		<a href="<?=$returnUrl?>">Return</a>	
+		<a href="<?php echo $returnUrl?>">Return</a>
 	<?php
 }
 vtSaveWorkflowTemplate($adb, $_REQUEST);

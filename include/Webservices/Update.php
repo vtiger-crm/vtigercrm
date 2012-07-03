@@ -22,7 +22,7 @@
 		$meta = $handler->getMeta();
 		$entityName = $meta->getObjectEntityName($element['id']);
 		
-		$types = vtws_listtypes($user);
+		$types = vtws_listtypes(null, $user);
 		if(!in_array($entityName,$types['types'])){
 			throw new WebServiceException(WebServiceErrorCode::$ACCESSDENIED,"Permission to perform the operation is denied");
 		}
@@ -50,11 +50,16 @@
 				$elemTypeId = $ids[0];
 				$elemId = $ids[1];
 				$referenceObject = VtigerWebserviceObject::fromId($adb,$elemTypeId);
-				if(!in_array($referenceObject->getEntityName(),$details)){
+				if (!in_array($referenceObject->getEntityName(),$details)){
 					throw new WebServiceException(WebServiceErrorCode::$REFERENCEINVALID,
 						"Invalid reference specified for $fieldName");
 				}
-				if(!in_array($referenceObject->getEntityName(),$types['types'])){
+				if ($referenceObject->getEntityName() == 'Users') {
+					if(!$meta->hasAssignPrivilege($element[$fieldName])) {
+						throw new WebServiceException(WebServiceErrorCode::$ACCESSDENIED, "Cannot assign record to the given user");
+					}
+				}
+				if (!in_array($referenceObject->getEntityName(), $types['types']) && $referenceObject->getEntityName() != 'Users') {
 					throw new WebServiceException(WebServiceErrorCode::$ACCESSDENIED,
 						"Permission to access reference type is denied ".$referenceObject->getEntityName());
 				}

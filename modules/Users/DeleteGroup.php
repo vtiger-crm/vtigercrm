@@ -9,6 +9,7 @@
  ********************************************************************************/
 
 require_once('include/utils/UserInfoUtil.php');
+
 global $adb;
 $del_id =  $_REQUEST['delete_group_id'];
 $transfer_group_id = $_REQUEST['transfer_group_id'];

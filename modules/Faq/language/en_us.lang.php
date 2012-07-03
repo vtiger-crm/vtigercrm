@@ -14,7 +14,7 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header$
- * Description:  Defines the English language pack 
+ * Description:  Defines the English language pack for FAQ Module
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.
  * All Rights Reserved.
  * Contributor(s): ______________________________________..
@@ -77,7 +77,7 @@ $mod_strings = Array(
 'NTC_COPY_BILLING_ADDRESS'=>'Copy billing address to shipping address',
 'NTC_COPY_SHIPPING_ADDRESS'=>'Copy shipping address to billing address',
 'NTC_REMOVE_MEMBER_ORG_CONFIRMATION'=>'Are you sure you want to remove this record as a member organization?',
-'LBL_DUPLICATE'=>'Potential Duplicate Faq',
+'LBL_DUPLICATE'=>'Opportunities Duplicate Faq',
 'MSG_DUPLICATE' => 'Creating this vtiger_account may vtiger_potentialy create a duplicate vtiger_account. You may either select an vtiger_account from the list below or you may click on Create New Faq to continue creating a new vtiger_account with the previously entered data.',
 
 'LBL_INVITEE'=>'Contacts',
@@ -87,8 +87,8 @@ $mod_strings = Array(
 'LBL_GENERAL_INFORMATION'=>'General Information',
 
 //for v4 release added
-'LBL_NEW_POTENTIAL'=>'New Potential',
-'LBL_POTENTIAL_TITLE'=>'Potentials',
+'LBL_NEW_POTENTIAL'=>'New Opportunity',
+'LBL_POTENTIAL_TITLE'=>'Opportunities',
 
 'LBL_NEW_TASK'=>'New Task',
 'LBL_TASK_TITLE'=>'Tasks',
@@ -138,7 +138,7 @@ $mod_strings = Array(
 // Module Sequence Numbering
 'Faq No' => 'Faq No',
 // END
-
+'Faq ID' => 'FAQ ID',
 );
 
 ?>

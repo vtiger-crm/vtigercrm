@@ -30,7 +30,7 @@ class Vtiger_FieldBasic {
 	var $generatedtype = 1;
 	var	$readonly      = 1;
 	var	$presence      = 2;
-	var	$selected      = 0;
+	var	$defaultvalue      = '';
 	var	$maximumlength = 100;
 	var	$sequence      = false;
 	var	$quickcreate   = 1;
@@ -159,11 +159,11 @@ class Vtiger_FieldBasic {
 		if(!$this->label) $this->label = $this->name;
 
 		$adb->pquery("INSERT INTO vtiger_field (tabid, fieldid, columnname, tablename, generatedtype,
-			uitype, fieldname, fieldlabel, readonly, presence, selected, maximumlength, sequence,
+			uitype, fieldname, fieldlabel, readonly, presence, defaultvalue, maximumlength, sequence,
 			block, displaytype, typeofdata, quickcreate, quickcreatesequence, info_type, helpinfo) 
 			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 				Array($this->getModuleId(), $this->id, $this->column, $this->table, $this->generatedtype,
-				$this->uitype, $this->name, $this->label, $this->readonly, $this->presence, $this->selected,
+				$this->uitype, $this->name, $this->label, $this->readonly, $this->presence, $this->defaultvalue,
 				$this->maximumlength, $this->sequence, $this->getBlockId(), $this->displaytype, $this->typeofdata,
 				$this->quickcreate, $this->quicksequence, $this->info_type, $this->helpinfo));
 

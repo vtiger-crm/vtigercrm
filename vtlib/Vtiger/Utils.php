@@ -41,6 +41,43 @@ class Vtiger_Utils {
 		return $strvalue;
 	}
 
+	/**
+	 * Function to check the file access is made within web root directory as well as is safe for php inclusion
+	 * @param String File path to check
+	 * @param Boolean False to avoid die() if check fails
+	 */
+	static function checkFileAccessForInclusion($filepath, $dieOnFail=true) {
+		global $root_directory;
+		// Set the base directory to compare with
+		$use_root_directory = $root_directory;
+		if(empty($use_root_directory)) {
+			$use_root_directory = realpath(dirname(__FILE__).'/../../.');
+		}
+
+		$unsafeDirectories = array('storage', 'cache', 'test');
+
+		$realfilepath = realpath($filepath);
+
+		/** Replace all \\ with \ first */
+		$realfilepath = str_replace('\\\\', '\\', $realfilepath);
+		$rootdirpath  = str_replace('\\\\', '\\', $use_root_directory);
+
+		/** Replace all \ with / now */
+		$realfilepath = str_replace('\\', '/', $realfilepath);
+		$rootdirpath  = str_replace('\\', '/', $rootdirpath);
+
+		$relativeFilePath = str_replace($rootdirpath, '', $realfilepath);
+		$filePathParts = explode('/', $relativeFilePath);
+
+		if(stripos($realfilepath, $rootdirpath) !== 0 || in_array($filePathParts[0], $unsafeDirectories)) {
+			if($dieOnFail) {
+				die("Sorry! Attempt to access restricted file.");
+			}
+			return false;
+		}
+		return true;
+	}
+
 	/** 
 	 * Function to check the file access is made within web root directory. 
 	 * @param String File path to check

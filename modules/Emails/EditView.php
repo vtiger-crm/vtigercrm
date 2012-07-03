@@ -37,7 +37,7 @@ global $default_charset;
 $focus = CRMEntity::getInstance($currentModule);
 $smarty = new vtigerCRM_Smarty();
 $json = new Zend_Json();
-
+$smarty->assign("UPLOADSIZE", $upload_maxsize/1000000); // Convert to MB
 if($_REQUEST['upload_error'] == true)
 {
         echo '<br><b><font color="red"> The selected file has no data or a invalid file.</font></b><br>';
@@ -213,7 +213,14 @@ if(isset($_REQUEST["mailid"]) && $_REQUEST["mailid"] != "") {
 			$smarty->assign('SUBJECT',"RE: ".$webmail->subject);
 
 	} elseif($_REQUEST["reply"] == "single"){
-		$smarty->assign('TO_MAIL',$webmail->reply_to[0].",");	
+		$replyToInfo = $webmail->getReplyToInformation(); 
+		if(!empty($replyToInfo)){ 
+			$smarty->assign('TO_MAIL',$replyToInfo['name']."<".$webmail->reply_to[0].">".","); 
+			$smarty->assign('IDLISTS',$replyToInfo['id'].'@'.$replyToInfo['fieldId'].'|'); 
+		} 
+		else 
+			$smarty->assign('TO_MAIL',$replyToInfo['name']."<".$webmail->reply_to[0].">".","); 
+			
 		//$smarty->assign('BCC_MAIL',$webmail->to[0]);
 		if(preg_match("/RE:/i", $webmail->subject))
 			$smarty->assign('SUBJECT',$webmail->subject);
@@ -252,27 +259,27 @@ $smarty->assign("ATT_ID_LIST",$att_id_list);
 //needed when creating a new email with default values passed in
 if (isset($_REQUEST['contact_name']) && is_null($focus->contact_name)) 
 {
-	$focus->contact_name = $_REQUEST['contact_name'];
+	$focus->contact_name = vtlib_purify($_REQUEST['contact_name']);
 }
 if (isset($_REQUEST['contact_id']) && is_null($focus->contact_id)) 
 {
-	$focus->contact_id = $_REQUEST['contact_id'];
+	$focus->contact_id = vtlib_purify($_REQUEST['contact_id']);
 }
 if (isset($_REQUEST['parent_name']) && is_null($focus->parent_name)) 
 {
-	$focus->parent_name = $_REQUEST['parent_name'];
+	$focus->parent_name = vtlib_purify($_REQUEST['parent_name']);
 }
 if (isset($_REQUEST['parent_id']) && is_null($focus->parent_id)) 
 {
-	$focus->parent_id = $_REQUEST['parent_id'];
+	$focus->parent_id = vtlib_purify($_REQUEST['parent_id']);
 }
 if (isset($_REQUEST['parent_type'])) 
 {
-	$focus->parent_type = $_REQUEST['parent_type'];
+	$focus->parent_type = vtlib_purify($_REQUEST['parent_type']);
 }
 if (isset($_REQUEST['filename']) && $_REQUEST['isDuplicate'] != 'true') 
 {
-        $focus->filename = $_REQUEST['filename'];
+        $focus->filename = vtlib_purify($_REQUEST['filename']);
 }
 elseif (is_null($focus->parent_type)) 
 {
@@ -290,7 +297,14 @@ else $smarty->assign("NAME", "");
 if($focus->mode == 'edit')
 {
 	$smarty->assign("UPDATEINFO",updateInfo($focus->id));
-        $smarty->assign("MODE", $focus->mode);
+	if(((!empty($_REQUEST['forward']) || !empty($_REQUEST['reply'])) &&
+			$focus->column_fields['email_flag'] != 'SAVED') || (empty($_REQUEST['forward']) &&
+			empty($_REQUEST['reply']) && $focus->column_fields['email_flag'] != 'SAVED')) {
+		$mode = '';
+	} else {
+		$mode = $focus->mode;
+	}
+	$smarty->assign("MODE", $mode);
 }
 
 // Unimplemented until jscalendar language vtiger_files are fixed

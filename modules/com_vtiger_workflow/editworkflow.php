@@ -19,10 +19,11 @@ require_once("VTTaskManager.inc");
 require_once("VTWorkflowApplication.inc");
 require_once "VTWorkflowTemplateManager.inc";
 require_once "VTWorkflowUtils.php";
+require_once 'config.help.link.php';
 
 function vtWorkflowEdit($adb, $request, $requestUrl, $current_language, $app_strings){
 
-	global $theme;
+	global $theme, $helpLinks;
 	$util = new VTWorkflowUtils();
 
 	$image_path = "themes/$theme/images/";
@@ -63,10 +64,11 @@ function vtWorkflowEdit($adb, $request, $requestUrl, $current_language, $app_str
 	$tm = new VTTaskManager($adb);
 	$tasks = $tm->getTasksForWorkflow($workflow->id);
 	$smarty->assign("tasks", $tasks);
-	$smarty->assign("taskTypes", $tm->getTaskTypes());
-	$smarty->assign("newTaskReturnUrl", $requestUrl);
+	$taskTypes = $tm->getTaskTypes($workflow->moduleName);
+	$smarty->assign("taskTypes", $taskTypes);
+	$smarty->assign("newTaskReturnUrl", vtlib_purify($requestUrl));
 
-	$smarty->assign("returnUrl", $request["return_url"]);
+	$smarty->assign("returnUrl", vtlib_purify($request["return_url"]));
 	$smarty->assign("APP", $app_strings);
 	$smarty->assign("MOD", array_merge(
 	return_module_language($current_language,'Settings'),
@@ -80,6 +82,8 @@ function vtWorkflowEdit($adb, $request, $requestUrl, $current_language, $app_str
 	$smarty->assign("workflow", $workflow);
 	$smarty->assign("saveType", isset($workflow->id)?"edit":"new");
 	$smarty->assign("module", $module);
+
+	$smarty->assign("WORKFLOW_TRIGGER_TYPES_HELP_LINK", $helpLinks['WORKFLOW_TRIGGER_TYPES']);
 
 	$smarty->display("{$module->name}/EditWorkflow.tpl");
 }

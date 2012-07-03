@@ -22,7 +22,7 @@
 		{$recordListRange}
 	</td>
 	<!-- Page Navigation -->
-	<td nowrap width="30%" align="center">
+	<td nowrap width="100%" align="center">
 		<table border=0 cellspacing=0 cellpadding=0 class="small">
 			<tr>{$NAVIGATION}</tr>
 		</table>
@@ -62,7 +62,7 @@
 	{/if}
 	<a href="index.php?action=EditView&return_action=ListView&return_module=Users&module=Users&parenttab=Settings&record={$userid}&isDuplicate=true"><img src="{'settingsActBtnDuplicate.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_DUPLICATE_BUTTON}" title="{$APP.LBL_DUPLICATE_BUTTON}" border="0"></a>
 </td>
-	<td class="listTableRow small" valign=top><b><a href="index.php?module=Users&action=DetailView&parenttab=Settings&record={$userid}"> {$listvalues.3} </a></b><br><a href="index.php?module=Users&action=DetailView&parenttab=Settings&record={$userid}"> {$listvalues.1} {$listvalues.0}</a> ({$listvalues.2})</td>
+	<td class="listTableRow small" valign=top><b><a href="index.php?module=Users&action=DetailView&parenttab=Settings&record={$userid}"> {$listvalues.3} </a></b><br><a href="index.php?module=Users&action=DetailView&parenttab=Settings&record={$userid}"> {$listvalues.1} </a> ({$listvalues.2})</td>
 	<td class="listTableRow small" valign=top>{$listvalues.5}&nbsp;</td>
 	<td class="listTableRow small" valign=top>{$listvalues.7}&nbsp;</td>
 	<td class="listTableRow small" valign=top>{$listvalues.6}&nbsp;</td>

@@ -27,28 +27,6 @@
 <input type="hidden" name="return_action" value="{$RETURN_ACTION}">
 <input type="hidden" id="user_dateformat" name="user_dateformat" value="{$DATEFORMAT}">
 <script language="javascript" type="text/javascript">
-var typeofdata = new Array();
-typeofdata['V'] = ['e','n','s','ew','c','k'];
-typeofdata['N'] = ['e','n','l','g','m','h'];
-typeofdata['T'] = ['e','n','l','g','m','h'];
-typeofdata['I'] = ['e','n','l','g','m','h'];
-typeofdata['C'] = ['e','n'];
-typeofdata['DT'] = ['e','n','l','g','m','h'];
-typeofdata['D'] = ['e','n','l','g','m','h'];
-typeofdata['NN'] = ['e','n','l','g','m','h'];
-typeofdata['E'] = ['e','n','s','ew','c','k'];
-var fLabels = new Array();
-fLabels['e'] = alert_arr.EQUALS;
-fLabels['n'] = alert_arr.NOT_EQUALS_TO;
-fLabels['s'] = alert_arr.STARTS_WITH;
-fLabels['ew'] = alert_arr.ENDS_WITH;
-fLabels['c'] = alert_arr.CONTAINS;
-fLabels['k'] = alert_arr.DOES_NOT_CONTAINS;
-fLabels['l'] = alert_arr.LESS_THAN;
-fLabels['g'] = alert_arr.GREATER_THAN;
-fLabels['m'] = alert_arr.LESS_OR_EQUALS;
-fLabels['h'] = alert_arr.GREATER_OR_EQUALS;
-var noneLabel;
 function goto_CustomAction(module)
 {ldelim}
         document.location.href = "index.php?module="+module+"&action=CustomAction&record={$CUSTOMVIEWID}";
@@ -576,144 +554,28 @@ function mandatoryCheck()
             </table>
    </div>
    <div id="mnuTab2" {$advdiv} >
-      <table width="100%" cellspacing="0" cellpadding="5" class="dvtContentSpace">
-       <tr><td>&nbsp;</td></tr>
-       <tr><td class="dvtCellInfo">{$MOD.LBL_AF_HDR1}<br /><br />
-	<li style="margin-left:30px;">{$MOD.LBL_AF_HDR2}</li>
-	<li style="margin-left:30px;">{$MOD.LBL_AF_HDR3}</li>
-	<br /><br />
-       </td></tr>
-       <tr><td>
-	<table width="75%" border="0" cellpadding="5" cellspacing="0" align="center">
-	  <tr><td colspan="3" class="detailedViewHeader"><b>{$MOD.LBL_RULE}</b></td></tr>
-	  
-	  <tr class="dvtCellLabel">
-          <td><nobr><select name="fcol1" id="fcol1" onchange="updatefOptions(this, 'fop1');" class="small">
-              <option value="">{$MOD.LBL_NONE}</option>
-              {foreach item=filteroption key=label from=$BLOCK1}
-                <optgroup label="{$label}" class=\"select\" style=\"border:none\">
-                {foreach item=text from=$filteroption}
-                  <option {$text.selected} value={$text.value}>{$text.text}</option>
-                {/foreach}
-              {/foreach}
-              </select> &nbsp; <select name="fop1" id="fop1" class="small">
-              <option value="">{$MOD.LBL_NONE}</option>
-              {foreach item=criteria from=$FOPTION1}
-                <option {$criteria.selected} value={$criteria.value}>{$criteria.text}</option>
-              {/foreach}
-              </select>&nbsp; <input name="fval1" id="fval1" type="text" size=30 maxlength=80 value="{$VALUE1}" class="small">
-	      <span id="andfcol1">{$AND_TEXT1}</span></nobr>
-            </td>
-        </tr>
-	<tr class="dvtCellInfo">
-          <td><nobr><select name="fcol2" id="fcol2" onchange="updatefOptions(this, 'fop2');" class="small">
-              <option value="">{$MOD.LBL_NONE}</option>
-              {foreach item=filteroption key=label from=$BLOCK2}
-                <optgroup label="{$label}" class=\"select\" style=\"border:none\">
-                {foreach item=text from=$filteroption}
-                  <option {$text.selected} value={$text.value}>{$text.text}</option>
-                {/foreach}
-              {/foreach}
-              </select> &nbsp; <select name="fop2" id="fop2" class="small">
-              <option value="">{$MOD.LBL_NONE}</option>
-              {foreach item=criteria from=$FOPTION2}
-                <option {$criteria.selected} value={$criteria.value}>{$criteria.text}</option>
-              {/foreach}
-              </select>&nbsp; <input name="fval2" id="fval2" type="text" size=30 maxlength=80 value="{$VALUE2}" class="small">
-	      <span id="andfcol2">{$AND_TEXT2}</span></nobr>
-            </td>
-        </tr>
-	<tr class="dvtCellLabel">
-          <td><nobr><select name="fcol3" id="fcol3" onchange="updatefOptions(this, 'fop3');" class="small">
-              <option value="">{$MOD.LBL_NONE}</option>
-              {foreach item=filteroption key=label from=$BLOCK3}
-                <optgroup label="{$label}" class=\"select\" style=\"border:none\">
-                {foreach item=text from=$filteroption}
-                  <option {$text.selected} value={$text.value}>{$text.text}</option>
-                {/foreach}
-              {/foreach}
-              </select> &nbsp; <select name="fop3" id="fop3" class="small">
-              <option value="">{$MOD.LBL_NONE}</option>
-              {foreach item=criteria from=$FOPTION3}
-                <option {$criteria.selected} value={$criteria.value}>{$criteria.text}</option>
-              {/foreach}
-              </select>&nbsp; <input name="fval3" id="fval3" type="text" size=30 maxlength=80 value="{$VALUE3}" class="small">
-	      <span id="andfcol3">{$AND_TEXT3}</span></nobr>
-            </td>
-        </tr>
-	<tr class="dvtCellInfo">
-          <td><nobr><select name="fcol4" id="fcol4" onchange="updatefOptions(this, 'fop4');" class="small">
-              <option value="">{$MOD.LBL_NONE}</option>
-              {foreach item=filteroption key=label from=$BLOCK4}
-                <optgroup label="{$label}" class=\"select\" style=\"border:none\">
-                {foreach item=text from=$filteroption}
-                  <option {$text.selected} value={$text.value}>{$text.text}</option>
-                {/foreach}
-              {/foreach}
-              </select> &nbsp; <select name="fop4" id="fop4" class="small">
-              <option value="">{$MOD.LBL_NONE}</option>
-              {foreach item=criteria from=$FOPTION4}
-                <option {$criteria.selected} value={$criteria.value}>{$criteria.text}</option>
-              {/foreach}
-              </select>&nbsp; <input name="fval4" id="fval4" type="text" size=30 maxlength=80 value="{$VALUE4}" class="small">
-	      <span id="andfcol4">{$AND_TEXT4}</span></nobr>
-            </td>
-        </tr>
-	<tr class="dvtCellLabel">
-          <td><nobr><select name="fcol5" id="fcol5" onchange="updatefOptions(this, 'fop5');" class="small">
-              <option value="">{$MOD.LBL_NONE}</option>
-              {foreach item=filteroption key=label from=$BLOCK5}
-                <optgroup label="{$label}" class=\"select\" style=\"border:none\">
-                {foreach item=text from=$filteroption}
-                  <option {$text.selected} value={$text.value}>{$text.text}</option>
-                {/foreach}
-              {/foreach}
-              </select> &nbsp; <select name="fop5" id="fop5" class="small">
-              <option value="">{$MOD.LBL_NONE}</option>
-              {foreach item=criteria from=$FOPTION5}
-                <option {$criteria.selected} value={$criteria.value}>{$criteria.text}</option>
-              {/foreach}
-              </select>&nbsp; <input name="fval5" id="fval5" type="text" size=30 maxlength=80 value="{$VALUE5}" class="small">
-	      <span id="andfcol5">{$AND_TEXT5}</span></nobr>
-            </td>
-        </tr>
-
-	  {*section name=advancedFilter start=1 loop=6 step=1}
-	  <tr class="{cycle values="dvtCellInfo,dvtCellLabel"}">
-	    <td align="left" width="33%">
-	      <select name="fcol{$smarty.section.advancedFilter.index}" id="fcol{$smarty.section.advancedFilter.index}" onchange="updatefOptions(this, 'fop{$smarty.section.advancedFilter.index}'); class="detailedViewTextBox">
-	      <option value="">{$MOD.LBL_NONE}</option>
-	      {foreach item=filteroption key=label from=$BLOCK}
-		<optgroup label="{$label}" class=\"select\" style=\"border:none\">
-		{foreach item=text from=$filteroption}
-		  <option {$text.selected} value={$text.value}>{$text.text}</option>
-		{/foreach}
-	      {/foreach}
-	      </select>
-	    </td>
-	    <td align="left" width="33%">
-	      <select name="fcol{$smarty.section.advancedFilter.index}" id="fcol{$smarty.section.advancedFilter.index}" class="detailedViewTextBox">
-	      <option value="">{$MOD.LBL_NONE}</option>
-	      {foreach item=criteria from=$FOPTION}
-		<option {$criteria.selected} value={$criteria.value}>{$criteria.text}</option>
-	      {/foreach}
-	      </select>
-	    </td>
-	    <td width="34%" nowrap><input name="txt" value="" class="detailedViewTextBox" type="text"  onfocus="this.className='detailedViewTextBoxOn'" onblur="this.className='detailedViewTextBox'"/>&nbsp;And</td>
-	  </tr>
-	  {/section*}
+   		<table width="100%" cellspacing="0" cellpadding="5" class="dvtContentSpace">
+			<tr><td><br>
+			<table width="75%" border="0" cellpadding="5" cellspacing="0" align="center">
+			<tr>
+				<td>
+					{include file='AdvanceFilter.tpl' SOURCE='customview'}
+				</td>
+			</tr>
+			</table>
+			</td>
+			</tr>
+		</table>
+	</div>
+	</td>
+	</tr>
 	</table>
-       </td></tr>
-       <tr><td>&nbsp;</td></tr>
-     </table>
-   </div>
-  </td></tr>
-  </table>
-  </td></tr>
+	</td>
+	</tr>
   <tr><td colspan="4">&nbsp;</td></tr>
   <tr><td colspan="4" style="padding: 5px;">
 	<div align="center">
-	  <input title="{$APP.LBL_SAVE_BUTTON_LABEL} [Alt+S]" accesskey="S" class="crmbutton small save"  name="button2" value="{$APP.LBL_SAVE_BUTTON_LABEL}" style="width: 70px;" type="submit" onClick="return checkDuplicate();"/>
+	  <input title="{$APP.LBL_SAVE_BUTTON_LABEL} [Alt+S]" accesskey="S" class="crmbutton small save"  name="button2" value="{$APP.LBL_SAVE_BUTTON_LABEL}" style="width: 70px;" type="submit" onClick="return validateCV();"/>
 	  <input title="{$APP.LBL_CANCEL_BUTTON_LABEL} [Alt+X]" accesskey="X" class="crmbutton small cancel" name="button2" onclick='window.history.back()' value="{$APP.LBL_CANCEL_BUTTON_LABEL}" style="width: 70px;" type="button" />
 	</div>
   </td></tr>
@@ -729,59 +591,52 @@ var k;
 var colOpts;
 var manCheck = new Array({$MANDATORYCHECK});
 {literal}
-if(document.CustomView.record.value == '')
-{
-  for(k=0;k<manCheck.length;k++)
-  {
-      selname = "column"+(k+1);
-      colOpts = document.getElementById(selname).options;
-      for (l=0;l<colOpts.length;l++)
-      {
-        if(colOpts[l].value == manCheck[k])
-        {
-          colOpts[l].selected = true;
-        }
-      }
-  }
+if(document.CustomView.record.value == '') {
+	for(k=0;k<manCheck.length;k++) {
+		selname = "column"+(k+1);
+		selelement = document.getElementById(selname);
+		if(selelement == null || typeof selelement == 'undefined') continue;
+		colOpts = selelement.options;
+		for (l=0;l<colOpts.length;l++) {
+			if(colOpts[l].value == manCheck[k]) {
+				colOpts[l].selected = true;
+			}
+		}
+	}
 }
-function checkDuplicate()
-{
-	if(getObj('viewName').value.toLowerCase() == 'all')
-	{
+
+function validateCV() {
+	if(checkDuplicate()) {
+		return checkAdvancedFilter();
+	}
+	return false;
+}
+
+function checkDuplicate() {
+	if(getObj('viewName').value.toLowerCase() == 'all') {
 		alert(alert_arr.ALL_FILTER_CREATION_DENIED);
 		return false;
 	}
 	var cvselect_array = new Array('column1','column2','column3','column4','column5','column6','column7','column8','column9')
-		for(var loop=0;loop < cvselect_array.length-1;loop++)
-		{
-			selected_cv_columnvalue = $(cvselect_array[loop]).options[$(cvselect_array[loop]).selectedIndex].value;
-			if(selected_cv_columnvalue != '')
-			{	
-				for(var iloop=0;iloop < cvselect_array.length;iloop++)
-				{
-					if(iloop == loop)
-						iloop++;
-					selected_cv_icolumnvalue = $(cvselect_array[iloop]).options[$(cvselect_array[iloop]).selectedIndex].value;	
-					if(selected_cv_columnvalue == selected_cv_icolumnvalue)
-					{
-						{/literal}
-                                                alert('{$APP.COLUMNS_CANNOT_BE_DUPLICATED}');
-                                                $(cvselect_array[iloop]).selectedIndex = 0;
-                                                return false;
-                                                {literal}
-					}
-
+	for(var loop=0;loop < cvselect_array.length-1;loop++) {
+		selected_cv_columnvalue = $(cvselect_array[loop]).options[$(cvselect_array[loop]).selectedIndex].value;
+		if(selected_cv_columnvalue != '') {	
+			for(var iloop=loop+1;iloop < cvselect_array.length;iloop++) {
+				selected_cv_icolumnvalue = $(cvselect_array[iloop]).options[$(cvselect_array[iloop]).selectedIndex].value;
+				if(selected_cv_columnvalue == selected_cv_icolumnvalue) {
+					{/literal}				
+                        alert('{$APP.COLUMNS_CANNOT_BE_DUPLICATED}');
+                        $(cvselect_array[iloop]).selectedIndex = 0;
+                        return false;
+					{literal}
 				}
+
 			}
 		}
-
-if(!checkval())
-	return false;
-
-
-		return true;
+	}
+	return true;
 }
-checkDuplicate();
+
 function stdfilterdateValidate()
 {
 	if(!dateValidate("startdate",alert_arr.STDFILTER+" - "+alert_arr.STARTDATE,"OTH"))
@@ -801,12 +656,6 @@ function stdfilterdateValidate()
                         return false
                 } else return true;
 	}
-}
-for(var i=1;i<=5;i++)
-{
-	var obj=document.getElementById("fcol"+i);
-	if(obj.selectedIndex != 0)
-		updatefOptions(obj, 'fop'+i);
 }
 standardFilterDisplay();
 {/literal}

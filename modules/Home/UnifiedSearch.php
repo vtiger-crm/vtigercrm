@@ -20,6 +20,7 @@ $total_record_count = 0;
 
 $query_string = trim($_REQUEST['query_string']);
 $curModule = vtlib_purify($_REQUEST['module']);
+$search_tag  = vtlib_purify($_REQUEST['search_tag']);
 
 if(isset($query_string) && $query_string != ''){
 	// Was the search limited by user for specific modules?
@@ -45,7 +46,7 @@ if(isset($query_string) && $query_string != ''){
 	
 	$search_val = $query_string;
 	$search_module = $_REQUEST['search_module'];
-
+	
 	if($curModule=='Home') {
 		getSearchModulesComboList($search_module);
 	}
@@ -57,6 +58,8 @@ if(isset($query_string) && $query_string != ''){
 			if(isPermitted($module,"index") == "yes"){
 				$smarty = new vtigerCRM_Smarty;
 	
+				if(!file_exists("modules/$module/language/".$current_language.".lang.php")) $current_language = 'en_us';
+				
 				require_once("modules/$module/language/".$current_language.".lang.php");
 				global $mod_strings;
 				global $app_strings;
@@ -66,6 +69,7 @@ if(isset($query_string) && $query_string != ''){
 				$smarty->assign("THEME", $theme);
 				$smarty->assign("IMAGE_PATH",$image_path);
 				$smarty->assign("MODULE",$module);
+				$smarty->assign("TAG_SEARCH",$search_tag);
 				$smarty->assign("SEARCH_MODULE",vtlib_purify($_REQUEST['search_module']));
 				$smarty->assign("SINGLE_MOD",$module);
 				$smarty->assign("SEARCH_STRING",htmlentities($search_val, ENT_QUOTES, $default_charset));
@@ -89,9 +93,9 @@ if(isset($query_string) && $query_string != ''){
 	                	$oCustomView->list_fields_name['Close']='status';
 	                }
 	            }
-	
-				if($search_module != ''){//This is for Tag search
-					$where = getTagWhere($search_val,$current_user->id);
+				
+				if($search_module != '' || $search_tag != ''){//This is for Tag search
+					$where = getTagWhere($search_val,$current_user->id);					
 					$search_msg =  $app_strings['LBL_TAG_SEARCH'];
 					$search_msg .=	"<b>".to_html($search_val)."</b>";
 				}else{			//This is for Global search
@@ -142,7 +146,7 @@ if(isset($query_string) && $query_string != ''){
 				}
 				$list_result = $adb->query($listquery);
 				
-				$moduleRecordCount[$module]['recordListRangeMessage'] = getRecordRangeMessage($list_result, $limitStartRecord);
+				$moduleRecordCount[$module]['recordListRangeMessage'] = getRecordRangeMessage($list_result, $limitStartRecord, $noofrows);
 
 				$info_message='&recordcount='.$_REQUEST['recordcount'].'&noofrows='.$_REQUEST['noofrows'].'&message='.$_REQUEST['message'].'&skipped_record_count='.$_REQUEST['skipped_record_count'];
 				$url_string = '&modulename='.$_REQUEST['modulename'].'&nav_module='.$module_name.$info_message;
@@ -192,34 +196,6 @@ document.getElementById("global_search_total_count").innerHTML = " <?php echo $a
 else {
 	echo "<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>".$mod_strings['ERR_ONE_CHAR']."</em>";
 }
-
-/**	
- * Function to get the Tags where condition
- * @param  string $search_val -- entered search string value
- * @param  string $current_user_id     -- current user id
- * @return string $where      -- where condition with the list of crmids, will like vtiger_crmentity.crmid in (1,3,4,etc.,)
- */
-function getTagWhere($search_val,$current_user_id){
-	require_once('include/freetag/freetag.class.php');
-
-	$freetag_obj = new freetag();
-	$crmid_array = $freetag_obj->get_objects_with_tag_all($search_val,$current_user_id);
-
-	$where = " vtiger_crmentity.crmid IN (";
-	if(count($crmid_array) > 0){
-		foreach($crmid_array as $index => $crmid){
-			$where .= $crmid.',';
-		}
-		$where = trim($where,',').')';
-	} 
-	//If there are no records has the search tag we need to add the condition like crmid is none. If dont add condition at all search will return all the values. 
-	// Fix for #5571
-	else {
-		$where .= '0)';
-	}
-	return $where;
-}
-
 
 /**	
  * Function to get the the List of Searchable Modules as a combo list which will be displayed in right corner under the Header

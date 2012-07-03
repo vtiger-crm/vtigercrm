@@ -14,7 +14,7 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header$
- * Description:  Defines the English language pack
+ * Description:  Defines the English language pack for Help Desk
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.
  * All Rights Reserved.
  * Contributor(s): ______________________________________..
@@ -24,7 +24,7 @@ $mod_strings = Array(
 // Added in release 4.0
 'LBL_MODULE_NAME'=>'Trouble Tickets',
 'LBL_GROUP'=>'Group',
-'LBL_ACCOUNT_NAME'=>'Account Name',
+'LBL_ACCOUNT_NAME'=>'Organization Name',
 'LBL_CONTACT_NAME'=>'Contact Name',
 'LBL_SUBJECT'=>'Subject',
 'LBL_NEW_FORM_TITLE' => 'New Ticket',
@@ -33,13 +33,13 @@ $mod_strings = Array(
 'LBL_CUSTOM_FIELD_SETTINGS'=>'Custom Field Settings:',
 'LBL_PICKLIST_FIELD_SETTINGS'=>'Picklist Field Settings:',
 'Leads'=>'Lead',
-'Accounts'=>'Account',
+'Accounts'=>'Organization',
 'Contacts'=>'Contact',
 'Opportunities'=>'Opportunity',
 'LBL_CUSTOM_INFORMATION'=>'Custom Information',
 'LBL_DESCRIPTION_INFORMATION'=>'Description Information',
 
-'LBL_ACCOUNT'=>'Account',
+'LBL_ACCOUNT'=>'Organization',
 'LBL_OPPURTUNITY'=>'Oppurtunity',
 'LBL_PRODUCT'=>'Product',
 
@@ -187,7 +187,9 @@ $mod_strings = Array(
 'link' => 'You can use the following link to view the replies made:',
 'Thanks' => 'Thanks',
 'Support_team' => 'Vtiger Support Team',
-
+'The comments are' => 'The comments are',
+'Ticket Title' => 'Ticket Title',
+'Re' => 'Re :',
 // Added/Updated for vtiger CRM 5.0.4
 
 //this label for customerportal.
@@ -219,6 +221,9 @@ $mod_strings = Array(
 
 'Hours' => 'Hours',
 'Days' => 'Days',
+
+'From Portal' => 'From Portal',
+'HelpDesk ID' => 'Trouble Tickets ID',
 );
 
 ?>

@@ -17,19 +17,19 @@
 			</td>
 		</tr>
 	</table>
-	
+
 	<table border=0 cellspacing=0 cellpadding=5>
 		<tr>
 		<td valign=top align=left>
 			<b>{$MOD.LBL_SELECT_TO_EDIT}</b>
 			<br>
 			<select id="edit_availPickList" name="availList" size="10" style="width:250px;border:1px solid #666666;font-family:Arial, Helvetica, sans-serif;font-size:11px;" onchange="selectForEdit();">
-				{foreach item=pick_val from=$PICKVAL}
-					<option value="{$pick_val}">{$pick_val}</option>
+				{foreach item=pick_val key=pick_key from=$PICKVAL}
+					<option value="{$pick_key}">{$pick_val}</option>
 				{/foreach}
 			</select>
-			
-			{if is_array($NONEDITPICKLIST)}				
+
+			{if is_array($NONEDITPICKLIST)}
 			<table border=0 cellspacing=0 cellpadding=0 width=100%>
 				<tr><td><b>{$MOD.LBL_NON_EDITABLE_PICKLIST_ENTRIES} :</b></td></tr>
 				<tr><td><b>
@@ -39,8 +39,8 @@
 								{$nonedit}
 							</span><br>
 						{/foreach}
-					</div>							
-				</b></td></tr>	
+					</div>
+				</b></td></tr>
 			</table>
 			{/if}
 		</td>
@@ -48,14 +48,14 @@
 		<tr>
 			<td>
 				<b>{$MOD.LBL_EDIT_HERE}</b>&nbsp;
-				<input type="text" id="replaceVal" class="small" style="width: 60%" onkeyup="pushEditedValue(event)"/>
+				<input type="text" id="replaceVal" class="small" style="width: 60%" onchange="pushEditedValue(event)"/>
 			</td>
 		</tr>
 		<tr>
 			<td valign=top>
 				<input type="button" value="{$APP.LBL_APPLY_BUTTON_LABEL}" name="apply" class="crmButton small edit" onclick="validateEdit('{$FIELDNAME}','{$MODULE}');">
 				<input type="button" value="{$APP.LBL_CANCEL_BUTTON_LABEL}" name="cancel" class="crmButton small cancel" onclick="fnhide('actiondiv');">
-			</td>			
+			</td>
 		</tr>
 	</table>
 </div>

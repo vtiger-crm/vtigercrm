@@ -24,6 +24,7 @@
 
 require("class.smtp.php");
 require("class.phpmailer.php");
+require_once 'include/utils/CommonUtils.php';
 
 function sendmail($to,$from,$subject,$contents,$mail_server,$mail_server_username,$mail_server_password,$filename,$smtp_auth='')
 {
@@ -50,7 +51,7 @@ function sendmail($to,$from,$subject,$contents,$mail_server,$mail_server_usernam
 	$mail->IsHTML(true);                                  // set email format to HTML
 	
 	$mail->AltBody = "This is the body in plain text for non-HTML mail clients";
-
+	$mail->Sender= getReturnPath($mail->Host);
 	if(!$mail->Send()) 
 	{
 	   echo "Message could not be sent. <p>";

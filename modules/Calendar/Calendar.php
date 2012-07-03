@@ -82,10 +82,11 @@ class Calendar
 				break;
 			case 'week':
 				$weekview_days = 7;
-				for($i=0;$i<$weekview_days;$i++)
+				for($i=1;$i<=$weekview_days;$i++)
 				{
 					$layout = new Layout('day',$this->date_time->getThisweekDaysbyIndex($i));
 					$this->week_array[$layout->start_time->get_formatted_date()] = $layout;
+
 					for($h=-1;$h<=23;$h++)
 					{
 						if($h == -1)
@@ -96,7 +97,7 @@ class Calendar
 						}
 						else
 						{
-						      	$hour_list = new Layout('hour',$this->date_time->getTodayDatetimebyIndex($h,$layout->start_time->day,$layout->start_time->month,$layout->start_time->year));
+						    $hour_list = new Layout('hour',$this->date_time->getTodayDatetimebyIndex($h,$layout->start_time->day,$layout->start_time->month,$layout->start_time->year));
 							$this->week_slice[$layout->start_time->get_formatted_date().':'.$hour_list->start_time->z_hour] = $hour_list;
 							array_push($this->week_hour_slices,  $layout->start_time->get_formatted_date().":".$hour_list->start_time->z_hour);
 						}
@@ -186,11 +187,10 @@ class Calendar
 		{
 			$this->day_end_hour=23;
 		}
-		if ( $this->view == 'week')
-		{
-			$start_datetime = $this->date_time->getThisweekDaysbyIndex(0);
-			$end_datetime = $this->date_time->getThisweekDaysbyIndex(6);
-                } elseif($this->view == 'month') {
+		if ( $this->view == 'week'){
+			$start_datetime = $this->date_time->getThisweekDaysbyIndex(1);
+			$end_datetime = $this->date_time->getThisweekDaysbyIndex(7);
+        } elseif($this->view == 'month') {
 			$start_datetime = $this->date_time->getThismonthDaysbyIndex(0);
 			$end_datetime = $this->date_time->getThismonthDaysbyIndex($this->date_time->daysinmonth-1);
 		} elseif($this->view == 'year'){
@@ -209,18 +209,30 @@ class Calendar
 			{
 				if($this->view == 'day')
 				{
+					if(empty($this->day_slice[$value->formatted_datetime]->activities)) {
+						$this->day_slice[$value->formatted_datetime]->activities = array();
+					}
 					array_push($this->day_slice[$value->formatted_datetime]->activities, $value);
 				}
 				elseif($this->view == 'week')
 				{
+					if(empty($this->week_slice[$value->formatted_datetime]->activities)) {
+						$this->week_slice[$value->formatted_datetime]->activities = array();
+					}
 					array_push($this->week_slice[$value->formatted_datetime]->activities, $value);
 				}
 				elseif($this->view == 'month')
 				{
+					if(empty($this->month_array[$value->formatted_datetime]->activities)) {
+						$this->month_array[$value->formatted_datetime]->activities = array();
+					}
 					array_push($this->month_array[$value->formatted_datetime]->activities,$value);
 				}
 				elseif($this->view == 'year')
 				{
+					if(empty($this->year_array[$value->formatted_datetime]->activities)) {
+						$this->year_array[$value->formatted_datetime]->activities = array();
+					}
 					array_push($this->year_array[$value->formatted_datetime]->activities,$value);
 				}
 				else
@@ -236,7 +248,7 @@ class Layout
 {
 	var $view = 'day';
 	var $start_time;
-        var $end_time;
+    var $end_time;
 	var $activities = Array();
 	
 	/**
@@ -282,13 +294,14 @@ function getCalendarDaysInMonth($date_time){
 	$firstday_of_month = $date_time->getThisMonthsDayByIndex(0);
 	$fdom = $firstday_of_month;
 	
-	$num_of_prev_days = ($fdom->dayofweek+1)%7-1;
+	$num_of_prev_days = ($fdom->dayofweek+7)%7-1;
 	for($i=-$num_of_prev_days;$i<42;$i++){
 		$pd = $date_time->getThisMonthsDayByIndex($i);
 		
 		$layout = new Layout('day', $pd);
-		$month_array[$layout->start_time->get_formatted_date()] = $layout;
-		array_push($slices,  $layout->start_time->get_formatted_date());
+		$date = $layout->start_time->get_formatted_date();
+		$month_array[$date] = $layout;
+		array_push($slices,  $date);
 	}
 	
 	$result = array("month_array"=>$month_array, "slices"=>$slices, "date_time"=>$date_time);

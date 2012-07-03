@@ -14,6 +14,8 @@
 
 <form border="0" action="index.php" method="post" name="form" id="form">
 <input type="hidden" name="module">
+<input name="maxrecords" type="hidden" value="{$MAX_RECORDS}" id='maxrecords'>
+<input id="recordid" type="hidden" value="{$RECORDID}">
 <input type="hidden" name="mode">
 <input type="hidden" name="return_module" id="return_module" value="{$MODULE}">
 <input type="hidden" name="RLreturn_module" id="RLreturn_module" value="{$MODULE}">

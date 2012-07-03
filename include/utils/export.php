@@ -236,7 +236,10 @@ function export($type){
 }
 
 /** Send the output header and invoke function for contents output */
-header("Content-Disposition:attachment;filename={$_REQUEST['module']}.csv");
+$moduleName = $_REQUEST['module'];
+$moduleName = getTranslatedString($moduleName, $moduleName);
+$moduleName = str_replace(" ","_",$moduleName);
+header("Content-Disposition:attachment;filename=$moduleName.csv");
 header("Content-Type:text/csv;charset=UTF-8");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT" );
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT" );
@@ -289,9 +292,6 @@ class ExportUtils{
 					$this->picklistValues[$fieldname] = getAssignedPicklistValues($fieldname, $roleid, $adb);
 				}
 				$value = trim($value);
-				if(!empty($this->picklistValues[$fieldname]) && !in_array($value, $this->picklistValues[$fieldname]) && !empty($value)){
-					$value = getTranslatedString("LBL_NOT_ACCESSIBLE");
-				}
 			}elseif($uitype == 10){
 				//have to handle uitype 10
 				$value = trim($value);

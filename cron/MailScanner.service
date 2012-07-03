@@ -9,34 +9,6 @@
  *
  ********************************************************************************/
 
-require_once('config.inc.php');
-
-/** Verify the script call is from trusted place. */
-global $application_unique_key;
-if($_REQUEST['app_key'] != $application_unique_key) {
-	echo "Access denied!";
-	exit;
-}
-
-/**
- * Check if instance of this service is already running?
- */
-$svcname = $_REQUEST['service'];
-// We need to make sure the PIDfile name is unqique
-$servicePIDFile = "logs/$svcname-". $_REQUEST['scannername']. '-service.pid';
-
-if(file_exists($servicePIDFile)) {
-	echo "Service $svcname already running! Check $servicePIDFile";
-	exit;
-} else {
-	$servicePIDFp = fopen($servicePIDFile, 'a');
-}
-
-/**
- * Turn-off PHP error reporting.
- */
-try { error_reporting(0); } catch (Exception $e) { }
-
 require_once('include/utils/utils.php');
 require_once('include/logging.php');
 require_once('include/database/PearDatabase.php');
@@ -108,18 +80,4 @@ if(isset($_REQUEST['scannername'])) {
 	}	
 }
 
-echo "Scanning " . $scannerinfo->server . " in progress\n";
-
-/** Start the scanning. */
-$scanner = new Vtiger_MailScanner($scannerinfo);
-$scanner->debug = $debug;
-$scanner->performScanNow();
-
-echo "\nScanning " . $scannerinfo->server . " completed\n";
-
-/** Close and remove the PID file. */
-if($servicePIDFp) {
-	fclose($servicePIDFp);
-	unlink($servicePIDFile);
-}
 ?>

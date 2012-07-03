@@ -11,6 +11,7 @@
 require_once('include/database/PearDatabase.php');
 require_once('data/CRMEntity.php');
 require_once('include/utils/UserInfoUtil.php');
+require_once 'modules/Reports/ReportUtils.php';
 global $calpath;
 global $app_strings,$mod_strings;
 global $app_list_strings;
@@ -101,7 +102,7 @@ class Reports extends CRMEntity{
 
 	var $advft_criteria;
 	var $adv_rel_fields = Array();
-	
+
 	var $module_list = Array();
 
 	/** Function to set primodule,secmodule,reporttype,reportname,reportdescription,folderid for given vtiger_reportid
@@ -115,15 +116,15 @@ class Reports extends CRMEntity{
 		$this->initListOfModules();
 		if($reportid != "")
 		{
-			// Lookup information in cache first			
+			// Lookup information in cache first
 			$cachedInfo = VTCacheUtils::lookupReport_Info($current_user->id, $reportid);
 			$subordinate_users = VTCacheUtils::lookupReport_SubordinateUsers($reportid);
-			
+
 			if($cachedInfo === false) {
 				$ssql = "select vtiger_reportmodules.*,vtiger_report.* from vtiger_report inner join vtiger_reportmodules on vtiger_report.reportid = vtiger_reportmodules.reportmodulesid";
 				$ssql .= " where vtiger_report.reportid = ?";
 				$params = array($reportid);
-			
+
 				require_once('include/utils/GetUserGroups.php');
 				require('user_privileges/user_privileges_'.$current_user->id.'.php');
 				$userGroups = new GetUserGroups();
@@ -136,24 +137,24 @@ class Reports extends CRMEntity{
 
 				$non_admin_query = " vtiger_report.reportid IN (SELECT reportid from vtiger_reportsharing WHERE $user_group_query (shareid=? AND setype='users'))";
 				if($is_admin==false){
-					$ssql .= " and ( (".$non_admin_query.") or vtiger_report.sharingtype='Public' or vtiger_report.owner = ? or vtiger_report.owner in(select vtiger_user2role.userid from vtiger_user2role inner join vtiger_users on vtiger_users.id=vtiger_user2role.userid inner join vtiger_role on vtiger_role.roleid=vtiger_user2role.roleid where vtiger_role.parentrole like '".$current_user_parent_role_seq."::%'))";			
+					$ssql .= " and ( (".$non_admin_query.") or vtiger_report.sharingtype='Public' or vtiger_report.owner = ? or vtiger_report.owner in(select vtiger_user2role.userid from vtiger_user2role inner join vtiger_users on vtiger_users.id=vtiger_user2role.userid inner join vtiger_role on vtiger_role.roleid=vtiger_user2role.roleid where vtiger_role.parentrole like '".$current_user_parent_role_seq."::%'))";
 					array_push($params, $current_user->id);
 					array_push($params, $current_user->id);
 				}
-					
+
 				$query = $adb->pquery("select userid from vtiger_user2role inner join vtiger_users on vtiger_users.id=vtiger_user2role.userid inner join vtiger_role on vtiger_role.roleid=vtiger_user2role.roleid where vtiger_role.parentrole like '".$current_user_parent_role_seq."::%'",array());
 				$subordinate_users = Array();
 				for($i=0;$i<$adb->num_rows($query);$i++){
 					$subordinate_users[] = $adb->query_result($query,$i,'userid');
 				}
-				
+
 				// Update subordinate user information for re-use
 				VTCacheUtils::updateReport_SubordinateUsers($reportid, $subordinate_users);
-				
+
 				$result = $adb->pquery($ssql, $params);
 				if($result && $adb->num_rows($result)) {
 					$reportmodulesrow = $adb->fetch_array($result);
-				
+
 					// Update information in cache now
 					VTCacheUtils::updateReport_Info(
 						$current_user->id, $reportid, $reportmodulesrow["primarymodule"],
@@ -162,11 +163,11 @@ class Reports extends CRMEntity{
 						$reportmodulesrow["folderid"], $reportmodulesrow["owner"]
 					);
 				}
-				
+
 				// Re-look at cache to maintain code-consistency below
-				$cachedInfo = VTCacheUtils::lookupReport_Info($current_user->id, $reportid);				
+				$cachedInfo = VTCacheUtils::lookupReport_Info($current_user->id, $reportid);
 			}
-			
+
 			if($cachedInfo) {
 				$this->primodule = $cachedInfo["primarymodule"];
 				$this->secmodule = $cachedInfo["secondarymodules"];
@@ -181,25 +182,25 @@ class Reports extends CRMEntity{
 			} else {
 				if($_REQUEST['mode'] != 'ajax')
 				{
-					include('themes/'.$theme.'/header.php');
-				}	
+					include('modules/Vtiger/header.php');
+				}
 				echo "<table border='0' cellpadding='5' cellspacing='0' width='100%' height='450px'><tr><td align='center'>";
 				echo "<div style='border: 3px solid rgb(153, 153, 153); background-color: rgb(255, 255, 255); width: 80%; position: relative; z-index: 10000000;'>
-		
+
 				<table border='0' cellpadding='5' cellspacing='0' width='98%'>
 				<tbody><tr>
 				<td rowspan='2' width='11%'><img src='". vtiger_imageurl('denied.gif', $theme) ."' ></td>
 				<td style='border-bottom: 1px solid rgb(204, 204, 204);' nowrap='nowrap' width='70%'><span class='genHeaderSmall'>You are not allowed to View this Report </span></td>
 				</tr>
 				<tr>
-				<td class='small' align='right' nowrap='nowrap'>			   	
+				<td class='small' align='right' nowrap='nowrap'>
 				<a href='javascript:window.history.back();'>$app_strings[LBL_GO_BACK]</a><br>								   		     </td>
 				</tr>
-				</tbody></table> 
+				</tbody></table>
 				</div>";
 				echo "</td></tr></table>";
 				break;
-				
+
 			}
 		}
 	}
@@ -209,10 +210,10 @@ class Reports extends CRMEntity{
 		global $adb;
 		if (!isset($module)) return;
 		require_once('include/utils/utils.php');
-		$tabid = getTabid($module); 
+		$tabid = getTabid($module);
 		if ($module == 'Calendar') {
 			$tabid = array(9, 16);
-		} 
+		}
 		$sql = "SELECT blockid, blocklabel FROM vtiger_blocks WHERE tabid IN (". generateQuestionMarks($tabid) .")";
 		$res = $adb->pquery($sql, array($tabid));
 		$noOfRows = $adb->num_rows($res);
@@ -225,63 +226,63 @@ class Reports extends CRMEntity{
 			$this->module_list[$module][$blocklabel] = $blockid;
 		}
 	}
-	
+
 	// Initializes the module list for listing columns for report creation.
 	function initListOfModules() {
 		global $adb, $current_user, $old_related_modules;
-		
+
 		$restricted_modules = array('Emails','Events','Webmails');
 		$restricted_blocks = array('LBL_IMAGE_INFORMATION','LBL_COMMENTS','LBL_COMMENT_INFORMATION');
-		
+
 		$this->module_id = array();
 		$this->module_list = array();
-		
+
 		// Prefetch module info to check active or not and also get list of tabs
 		$modulerows = vtlib_prefetchModuleActiveInfo(false);
-		
+
 		$cachedInfo = VTCacheUtils::lookupReport_ListofModuleInfos();
-		
+
 		if($cachedInfo !== false) {
 			$this->module_list = $cachedInfo['module_list'];
 			$this->related_modules = $cachedInfo['related_modules'];
-			
+
 		} else {
-			
+
 			if($modulerows) {
 				foreach($modulerows as $resultrow) {
 					if($resultrow['presence'] == '1') continue;      // skip disabled modules
 					if($resultrow['isentitytype'] != '1') continue;  // skip extension modules
 					if(in_array($resultrow['name'], $restricted_modules)) { // skip restricted modules
-						continue; 
+						continue;
 					}
 					if($resultrow['name']!='Calendar'){
 						$this->module_id[$resultrow['tabid']] = $resultrow['name'];
 					} else {
 						$this->module_id[9] = $resultrow['name'];
 						$this->module_id[16] = $resultrow['name'];
-						
+
 					}
 					$this->module_list[$resultrow['name']] = array();
 				}
-				
+
 				$moduleids = array_keys($this->module_id);
-				$reportblocks = 
+				$reportblocks =
 					$adb->pquery("SELECT blockid, blocklabel, tabid FROM vtiger_blocks WHERE tabid IN (" .generateQuestionMarks($moduleids) .")",
 						array($moduleids));
-				$prev_block_label = '';		
+				$prev_block_label = '';
 				if($adb->num_rows($reportblocks)) {
 					while($resultrow = $adb->fetch_array($reportblocks)) {
 						$blockid = $resultrow['blockid'];
 						$blocklabel = $resultrow['blocklabel'];
 						$module = $this->module_id[$resultrow['tabid']];
-						
+
 						if(in_array($blocklabel, $restricted_blocks) ||
-							in_array($blockid, $this->module_list[$module]) || 
+							in_array($blockid, $this->module_list[$module]) ||
 							isset($this->module_list[$module][getTranslatedString($blocklabel,$module)])
 						) {
 							continue;
 						}
-						
+
 						if(!empty($blocklabel)){
 							if($module == 'Calendar' && $blocklabel == 'LBL_CUSTOM_INFORMATION')
 								$this->module_list[$module][$blockid] = getTranslatedString($blocklabel,$module);
@@ -293,30 +294,36 @@ class Reports extends CRMEntity{
 						}
 					}
 				}
-				
+
 				$relatedmodules = $adb->pquery(
-					"SELECT vtiger_tab.name, vtiger_relatedlists.tabid FROM vtiger_tab 
-					INNER JOIN vtiger_relatedlists on vtiger_tab.tabid=vtiger_relatedlists.related_tabid 
-					WHERE vtiger_tab.isentitytype=1 
-					AND vtiger_tab.name NOT IN(".generateQuestionMarks($restricted_modules).") 
-					AND vtiger_tab.presence=0 AND vtiger_relatedlists.label!='Activity History'",
-					array($restricted_modules)
+					"SELECT vtiger_tab.name, vtiger_relatedlists.tabid FROM vtiger_tab
+					INNER JOIN vtiger_relatedlists on vtiger_tab.tabid=vtiger_relatedlists.related_tabid
+					WHERE vtiger_tab.isentitytype=1
+					AND vtiger_tab.name NOT IN(".generateQuestionMarks($restricted_modules).")
+					AND vtiger_tab.presence = 0 AND vtiger_relatedlists.label!='Activity History'
+					UNION
+					SELECT module, vtiger_tab.tabid FROM vtiger_fieldmodulerel
+					INNER JOIN vtiger_tab on vtiger_tab.name = vtiger_fieldmodulerel.relmodule
+					WHERE vtiger_tab.isentitytype = 1
+					AND vtiger_tab.name NOT IN(".generateQuestionMarks($restricted_modules).")
+					AND vtiger_tab.presence = 0",
+					array($restricted_modules,$restricted_modules)
 				);
 				if($adb->num_rows($relatedmodules)) {
 					while($resultrow = $adb->fetch_array($relatedmodules)) {
 						$module = $this->module_id[$resultrow['tabid']];
-						
+
 						if(!isset($this->related_modules[$module])) {
 							$this->related_modules[$module] = array();
 						}
-						
+
 						if($module != $resultrow['name']) {
 							$this->related_modules[$module][] = $resultrow['name'];
 						}
-						
+
 						// To achieve Backward Compatability with Report relations
-						if(isset($old_related_modules[$module])){						
-							
+						if(isset($old_related_modules[$module])){
+
 							$rel_mod = array();
 							foreach($old_related_modules[$module] as $key=>$name){
 								if(vtlib_isModuleActive($name) && isPermitted($name,'index','')){
@@ -324,12 +331,12 @@ class Reports extends CRMEntity{
 								}
 							}
 							if(!empty($rel_mod)){
-								$this->related_modules[$module] = array_merge($this->related_modules[$module],$rel_mod);	
+								$this->related_modules[$module] = array_merge($this->related_modules[$module],$rel_mod);
 								$this->related_modules[$module] = array_unique($this->related_modules[$module]);
 							}
 						}
 					}
-				} 
+				}
 				// Put the information in cache for re-use
 				VTCacheUtils::updateReport_ListofModuleInfos($this->module_list, $this->related_modules);
 			}
@@ -337,11 +344,11 @@ class Reports extends CRMEntity{
 	}
 	// END
 
-	
+
 	/** Function to get the Listview of Reports
 	 *  This function accepts no argument
 	 *  This generate the Reports view page and returns a string
-	 *  contains HTML 
+	 *  contains HTML
 	 */
 
 	function sgetRptFldr($mode='')
@@ -356,16 +363,16 @@ class Reports extends CRMEntity{
 		{
 			// Fetch detials of all reports of folder at once
 			$reportsInAllFolders = $this->sgetRptsforFldr(false);
-			
+
 			do
 			{
 				if($reportfldrow["state"] == $mode)
 				{
-					$details = Array();	
-					$details['state'] = $reportfldrow["state"]; 
-					$details['id'] = $reportfldrow["folderid"]; 
-					$details['name'] = ($mod_strings[$reportfldrow["foldername"]] == '' ) ? $reportfldrow["foldername"]:$mod_strings[$reportfldrow["foldername"]]; 
-					$details['description'] = $reportfldrow["description"]; 
+					$details = Array();
+					$details['state'] = $reportfldrow["state"];
+					$details['id'] = $reportfldrow["folderid"];
+					$details['name'] = ($mod_strings[$reportfldrow["foldername"]] == '' ) ? $reportfldrow["foldername"]:$mod_strings[$reportfldrow["foldername"]];
+					$details['description'] = $reportfldrow["description"];
 					$details['fname'] = popup_decode_html($details['name']);
 					$details['fdescription'] = popup_decode_html($reportfldrow["description"]);
 					$details['details'] = $reportsInAllFolders[$reportfldrow["folderid"]];
@@ -376,11 +383,11 @@ class Reports extends CRMEntity{
 		{
 			do
 			{
-				$details = Array();	
-				$details['state'] = $reportfldrow["state"]; 
-				$details['id'] = $reportfldrow["folderid"]; 
-				$details['name'] = ($mod_strings[$reportfldrow["foldername"]] == '' ) ? $reportfldrow["foldername"]:$mod_strings[$reportfldrow["foldername"]]; 
-				$details['description'] = $reportfldrow["description"]; 
+				$details = Array();
+				$details['state'] = $reportfldrow["state"];
+				$details['id'] = $reportfldrow["folderid"];
+				$details['name'] = ($mod_strings[$reportfldrow["foldername"]] == '' ) ? $reportfldrow["foldername"]:$mod_strings[$reportfldrow["foldername"]];
+				$details['description'] = $reportfldrow["description"];
 				$details['fname'] = popup_decode_html($details['name']);
 				$details['fdescription'] = popup_decode_html($reportfldrow["description"]);
 				$returndata[] = $details;
@@ -393,7 +400,7 @@ class Reports extends CRMEntity{
 
 	/** Function to get the Reports inside each modules
 	 *  This function accepts the folderid
-	 *  This Generates the Reports under each Reports module 
+	 *  This Generates the Reports under each Reports module
 	 *  This Returns a HTML sring
 	 */
 
@@ -411,13 +418,13 @@ class Reports extends CRMEntity{
 		$sql .= " inner join vtiger_reportmodules on vtiger_reportmodules.reportmodulesid = vtiger_report.reportid";
 
 		$params = array();
-		
+
 		// If information is required only for specific report folder?
 		if($rpt_fldr_id !== false) {
 			$sql .= " where vtiger_reportfolder.folderid=?";
 			$params[] = $rpt_fldr_id;
 		}
-		
+
 		require('user_privileges/user_privileges_'.$current_user->id.'.php');
 		require_once('include/utils/GetUserGroups.php');
 		$userGroups = new GetUserGroups();
@@ -427,10 +434,10 @@ class Reports extends CRMEntity{
 			$user_group_query = " (shareid IN (".generateQuestionMarks($user_groups).") AND setype='groups') OR";
 			array_push($params, $user_groups);
 		}
-	
+
 		$non_admin_query = " vtiger_report.reportid IN (SELECT reportid from vtiger_reportsharing WHERE $user_group_query (shareid=? AND setype='users'))";
 		if($is_admin==false){
-			$sql .= " and ( (".$non_admin_query.") or vtiger_report.sharingtype='Public' or vtiger_report.owner = ? or vtiger_report.owner in(select vtiger_user2role.userid from vtiger_user2role inner join vtiger_users on vtiger_users.id=vtiger_user2role.userid inner join vtiger_role on vtiger_role.roleid=vtiger_user2role.roleid where vtiger_role.parentrole like '".$current_user_parent_role_seq."::%'))";			
+			$sql .= " and ( (".$non_admin_query.") or vtiger_report.sharingtype='Public' or vtiger_report.owner = ? or vtiger_report.owner in(select vtiger_user2role.userid from vtiger_user2role inner join vtiger_users on vtiger_users.id=vtiger_user2role.userid inner join vtiger_role on vtiger_role.roleid=vtiger_user2role.roleid where vtiger_role.parentrole like '".$current_user_parent_role_seq."::%'))";
 			array_push($params, $current_user->id);
 			array_push($params, $current_user->id);
 		}
@@ -440,7 +447,7 @@ class Reports extends CRMEntity{
 			$subordinate_users[] = $adb->query_result($query,$i,'userid');
 		}
 		$result = $adb->pquery($sql, $params);
-		
+
 		$report = $adb->fetch_array($result);
 		if(count($report)>0)
 		{
@@ -459,12 +466,12 @@ class Reports extends CRMEntity{
 					$report_details ['editable'] = 'true';
 				else
 					$report_details['editable'] = 'false';
-				
+
 				if(isPermitted($report["primarymodule"],'index') == "yes")
-					$returndata [$report["folderid"]][] = $report_details; 
+					$returndata [$report["folderid"]][] = $report_details;
 			}while($report = $adb->fetch_array($result));
 		}
-		
+
 		if($rpt_fldr_id !== false) {
 			$returndata = $returndata[$rpt_fldr_id];
 		}
@@ -487,8 +494,8 @@ class Reports extends CRMEntity{
 		return $srptfldr_js;
 	}
 
-	/** Function to set the Primary module vtiger_fields for the given Report 
-	 *  This function sets the primary module columns for the given Report 
+	/** Function to set the Primary module vtiger_fields for the given Report
+	 *  This function sets the primary module columns for the given Report
 	 *  It accepts the Primary module as the argument and set the vtiger_fields of the module
 	 *  to the varialbe pri_module_columnslist and returns true if sucess
 	 */
@@ -526,27 +533,50 @@ class Reports extends CRMEntity{
 			{
 				//$this->updateModuleList($secmodule[$i]);
 				if($this->module_list[$secmodule[$i]]){
-					foreach($this->module_list[$secmodule[$i]] as $key=>$value)
-					{
-						$temp = $this->getColumnsListbyBlock($secmodule[$i],$key);
-						if(!empty($ret_module_list[$secmodule[$i]][$value])){
-							if(!empty($temp)){
-								$ret_module_list[$secmodule[$i]][$value] = array_merge($ret_module_list[$secmodule[$i]][$value],$temp);
-							}
-						} else {
-							$ret_module_list[$secmodule[$i]][$value] = $this->getColumnsListbyBlock($secmodule[$i],$key);
+					$this->sec_module_columnslist[$secmodule[$i]] = $this->getModuleFieldList(
+							$secmodule[$i]);
+					if($this->module_list[$secmodule[$i]] == 'Calendar') {
+						if($this->module_list['Events']){
+							$this->sec_module_columnslist['Events'] = $this->getModuleFieldList(
+									'Events');
 						}
 					}
-					$this->sec_module_columnslist[$secmodule[$i]] = $ret_module_list[$secmodule[$i]];
 				}
 			}
 		}
 		return true;
 	}
 
+	/**
+	 *
+	 * @param String $module
+	 * @param type $blockIdList
+	 * @param Array $currentFieldList
+	 * @return Array
+	 */
+	public function getBlockFieldList($module, $blockIdList, $currentFieldList) {
+		if(!empty($currentFieldList)){
+			$temp = $this->getColumnsListbyBlock($module,$blockIdList);
+			if(!empty($temp)){
+				$currentFieldList = array_merge($currentFieldList,$temp);
+			}
+		} else {
+			$currentFieldList = $this->getColumnsListbyBlock($module,$blockIdList);
+		}
+		return $currentFieldList;
+	}
+
+	public function getModuleFieldList($module) {
+		foreach($this->module_list[$module] as $key=>$value) {
+			$ret_module_list[$module][$value] = $this->getBlockFieldList(
+					$module, $key, $ret_module_list[$module][$value]);
+		}
+		return $ret_module_list[$module];
+	}
+
 	/** Function to get vtiger_fields for the given module and block
 	 *  This function gets the vtiger_fields for the given module
-	 *  It accepts the module and the block as arguments and 
+	 *  It accepts the module and the block as arguments and
 	 *  returns the array column lists
 	 *  Array module_columnlist[ vtiger_fieldtablename:fieldcolname:module_fieldlabel1:fieldname:fieldtypeofdata]=fieldlabel
 	 */
@@ -564,9 +594,9 @@ class Reports extends CRMEntity{
 			$tabid = array('9','16');
 		}
 		$params = array($tabid, $block);
-		
+
 		require('user_privileges/user_privileges_'.$current_user->id.'.php');
-		//Security Check 
+		//Security Check
 		if($is_admin == true || $profileGlobalPermission[1] == 0 || $profileGlobalPermission[2] ==0)
 		{
 			$sql = "select * from vtiger_field where vtiger_field.tabid in (". generateQuestionMarks($tabid) .") and vtiger_field.block in (". generateQuestionMarks($block) .") and vtiger_field.displaytype in (1,2,3) and vtiger_field.presence in (0,2) ";
@@ -575,25 +605,25 @@ class Reports extends CRMEntity{
 			if($module == "Calendar")
 				$sql.=" group by vtiger_field.fieldlabel order by sequence";
 			else
-				$sql.=" order by sequence";
+			$sql.=" order by sequence";
 		}
 		else
 		{
-			
+
 			$profileList = getCurrentUserProfileList();
 			$sql = "select * from vtiger_field inner join vtiger_profile2field on vtiger_profile2field.fieldid=vtiger_field.fieldid inner join vtiger_def_org_field on vtiger_def_org_field.fieldid=vtiger_field.fieldid where vtiger_field.tabid in (". generateQuestionMarks($tabid) .")  and vtiger_field.block in (". generateQuestionMarks($block) .") and vtiger_field.displaytype in (1,2,3) and vtiger_profile2field.visible=0 and vtiger_def_org_field.visible=0 and vtiger_field.presence in (0,2)";
 			if (count($profileList) > 0) {
-				$sql .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";	
+				$sql .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";
 				array_push($params, $profileList);
 			}
 
 			//fix for Ticket #4016
 			if($module == "Calendar")
-				$sql.=" group by vtiger_field.fieldid,vtiger_field.fieldlabel order by sequence";
+				$sql.=" group by vtiger_field.fieldlabel order by sequence";
 			else
-				$sql.=" group by vtiger_field.fieldid order by sequence";			
+				$sql.=" group by vtiger_field.fieldid order by sequence";
 		}
-		
+
 		$result = $adb->pquery($sql, $params);
 		$noofrows = $adb->num_rows($result);
 		for($i=0; $i<$noofrows; $i++)
@@ -608,7 +638,7 @@ class Reports extends CRMEntity{
 
 			//Here we Changing the displaytype of the field. So that its criteria will be displayed correctly in Reports Advance Filter.
 			$fieldtypeofdata=ChangeTypeOfData_Filter($fieldtablename,$fieldcolname,$fieldtypeofdata);
-			
+
 			if($uitype == 68 || $uitype == 59)
 			{
 				$fieldtypeofdata = 'V';
@@ -622,67 +652,16 @@ class Reports extends CRMEntity{
 				$fieldtablename = "vtiger_users".$module;
 				$fieldcolname = "user_name";
 			}
-			if($fieldname == "account_id")
-			{
-				$fieldtablename = "vtiger_account".$module;
-				$fieldcolname = "accountname";
-			}
-			if($fieldname == "contact_id")
-			{
-				$fieldtablename = "vtiger_contactdetails".$module;
-				$fieldcolname = "lastname";
-			}
-			if($fieldname == "parent_id")
-			{
-				$fieldtablename = "vtiger_crmentityRel".$module;
-				$fieldcolname = "setype";
-			}
-			if($fieldname == "vendor_id")
-			{
-				$fieldtablename = "vtiger_vendorRel".$module;
-				$fieldcolname = "vendorname";
-			}
-			if($fieldname == "potential_id")
-			{
-				$fieldtablename = "vtiger_potentialRel".$module;
-				$fieldcolname = "potentialname";
-			}
 			if($fieldname == "assigned_user_id1")
 			{
 				$fieldtablename = "vtiger_usersRel1";
 				$fieldcolname = "user_name";
 			}
-			if($fieldname == 'quote_id')
-			{
-				$fieldtablename = "vtiger_quotes".$module;
-				$fieldcolname = "subject";
-			}
-			
-			$product_id_tables = array(
-				"vtiger_troubletickets"=>"vtiger_productsRel",
-				"vtiger_campaign"=>"vtiger_productsCampaigns",
-				"vtiger_faq"=>"vtiger_productsFaq",
-				);
-			if($fieldname == 'product_id' && isset($product_id_tables[$fieldtablename]))
-			{
-				$fieldtablename = $product_id_tables[$fieldtablename];
-				$fieldcolname = "productname";
-			}
-			if($fieldname == 'campaignid' && $module=='Potentials')
-			{
-				$fieldtablename = "vtiger_campaign".$module;
-				$fieldcolname = "campaignname";
-			}
-			if($fieldname == 'currency_id' && $fieldtablename=='vtiger_pricebook')
-			{
-				$fieldtablename = "vtiger_currency_info".$module;
-				$fieldcolname = "currency_name";
-			}
 
 			$fieldlabel = $adb->query_result($result,$i,"fieldlabel");
 			$fieldlabel1 = str_replace(" ","_",$fieldlabel);
 			$optionvalue = $fieldtablename.":".$fieldcolname.":".$module."_".$fieldlabel1.":".$fieldname.":".$fieldtypeofdata;
-			$this->adv_rel_fields[$fieldtypeofdata][] = '$'.$module.'#'.$fieldname.'$'."::".getTranslatedString($module,$module)." ".$fieldlabel;
+			$this->adv_rel_fields[$fieldtypeofdata][] = '$'.$module.'#'.$fieldname.'$'."::".getTranslatedString($module,$module)." ".getTranslatedString($fieldlabel,$module);
 			//added to escape attachments fields in Reports as we have multiple attachments
                         if($module != 'HelpDesk' || $fieldname !='filename')
 				$module_columnlist[$optionvalue] = $fieldlabel;
@@ -717,11 +696,10 @@ class Reports extends CRMEntity{
 	/** Function to set the standard filter vtiger_fields for the given vtiger_report
 	 *  This function gets the standard filter vtiger_fields for the given vtiger_report
 	 *  and set the values to the corresponding variables
-	 *  It accepts the repordid as argument 
+	 *  It accepts the repordid as argument
 	 */
 
-	function getSelectedStandardCriteria($reportid)
-	{
+	function getSelectedStandardCriteria($reportid) {
 		global $adb;
 		$sSQL = "select vtiger_reportdatefilter.* from vtiger_reportdatefilter inner join vtiger_report on vtiger_report.reportid = vtiger_reportdatefilter.datefilterid where vtiger_report.reportid=?";
 		$result = $adb->pquery($sSQL, array($reportid));
@@ -730,22 +708,21 @@ class Reports extends CRMEntity{
 		$this->stdselectedcolumn = $selectedstdfilter["datecolumnname"];
 		$this->stdselectedfilter = $selectedstdfilter["datefilter"];
 
-		if($selectedstdfilter["datefilter"] == "custom")
-		{
-			if($selectedstdfilter["startdate"] != "0000-00-00")
-			{
-				$this->startdate = $selectedstdfilter["startdate"]; 
+		if($selectedstdfilter["datefilter"] == "custom") {
+			if($selectedstdfilter["startdate"] != "0000-00-00") {
+				$startDateTime = new DateTimeField($selectedstdfilter["startdate"].' '. date('H:i:s'));
+				$this->startdate = $startDateTime->getDisplayDate();
 			}
-			if($selectedstdfilter["enddate"] != "0000-00-00")
-			{
-				$this->enddate = $selectedstdfilter["enddate"]; 
+			if($selectedstdfilter["enddate"] != "0000-00-00") {
+				$endDateTime = new DateTimeField($selectedstdfilter["enddate"].' '. date('H:i:s'));
+				$this->enddate = $endDateTime->getDisplayDate();
 			}
 		}
 	}
 
 	/** Function to get the combo values for the standard filter
 	 *  This function get the combo values for the standard filter for the given vtiger_report
-	 *  and return a HTML string 
+	 *  and return a HTML string
 	 */
 
 	function getSelectedStdFilterCriteria($selecteddatefilter = "")
@@ -778,25 +755,25 @@ class Reports extends CRMEntity{
 		return $sshtml;
 	}
 
-	/** Function to get the selected standard filter columns 
-	 *  This function returns the selected standard filter criteria 
+	/** Function to get the selected standard filter columns
+	 *  This function returns the selected standard filter criteria
 	 *  which is selected for vtiger_reports as an array
 	 *  Array stdcriteria_list[fieldtablename:fieldcolname:module_fieldlabel1]=fieldlabel
 	 */
 
 	function getStdCriteriaByModule($module)
-	{	
+	{
 		global $adb;
 		global $log;
 		global $current_user;
-		require('user_privileges/user_privileges_'.$current_user->id.'.php');		
+		require('user_privileges/user_privileges_'.$current_user->id.'.php');
 
 		$tabid = getTabid($module);
 		foreach($this->module_list[$module] as $key=>$blockid)
 		{
 			$blockids[] = $blockid;
-		}	
-		$blockids = implode(",",$blockids);	
+		}
+		$blockids = implode(",",$blockids);
 
 		$params = array($tabid, $blockids);
 		if($is_admin == true || $profileGlobalPermission[1] == 0 || $profileGlobalPermission[2] == 0)
@@ -837,263 +814,282 @@ class Reports extends CRMEntity{
 
 	}
 
-	/** Function to form a javascript to determine the start date and end date for a standard filter 
+	/** Function to form a javascript to determine the start date and end date for a standard filter
 	 *  This function is to form a javascript to determine
 	 *  the start date and End date from the value selected in the combo lists
 	 */
 
 	function getCriteriaJS()
 	{
-		$today = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d"), date("Y")));
+
+		$todayDateTime = new DateTimeField(date('Y-m-d H:i:s'));
+
 		$tomorrow  = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")+1, date("Y")));
+		$tomorrowDateTime = new DateTimeField($tomorrow.' '. date('H:i:s'));
+
 		$yesterday  = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")-1, date("Y")));
+		$yesterdayDateTime = new DateTimeField($yesterday.' '. date('H:i:s'));
 
 		$currentmonth0 = date("Y-m-d",mktime(0, 0, 0, date("m"), "01",   date("Y")));
+		$currentMonthStartDateTime = new DateTimeField($currentmonth0.' '. date('H:i:s'));
 		$currentmonth1 = date("Y-m-t");
+		$currentMonthEndDateTime = new DateTimeField($currentmonth1.' '. date('H:i:s'));
+
 		$lastmonth0 = date("Y-m-d",mktime(0, 0, 0, date("m")-1, "01",   date("Y")));
+		$lastMonthStartDateTime = new DateTimeField($lastmonth0.' '. date('H:i:s'));
 		$lastmonth1 = date("Y-m-t", strtotime("-1 Month"));
+		$lastMonthEndDateTime = new DateTimeField($lastmonth1.' '. date('H:i:s'));
+
 		$nextmonth0 = date("Y-m-d",mktime(0, 0, 0, date("m")+1, "01",   date("Y")));
+		$nextMonthStartDateTime = new DateTimeField($nextmonth0.' '. date('H:i:s'));
 		$nextmonth1 = date("Y-m-t", strtotime("+1 Month"));
+		$nextMonthEndDateTime = new DateTimeField($nextmonth1.' '. date('H:i:s'));
 
 		$lastweek0 = date("Y-m-d",strtotime("-2 week Sunday"));
+		$lastWeekStartDateTime = new DateTimeField($lastweek0.' '. date('H:i:s'));
 		$lastweek1 = date("Y-m-d",strtotime("-1 week Saturday"));
+		$lastWeekEndDateTime = new DateTimeField($lastweek1.' '. date('H:i:s'));
 
 		$thisweek0 = date("Y-m-d",strtotime("-1 week Sunday"));
+		$thisWeekStartDateTime = new DateTimeField($thisweek0.' '. date('H:i:s'));
 		$thisweek1 = date("Y-m-d",strtotime("this Saturday"));
+		$thisWeekEndDateTime = new DateTimeField($thisweek1.' '. date('H:i:s'));
 
 		$nextweek0 = date("Y-m-d",strtotime("this Sunday"));
+		$nextWeekStartDateTime = new DateTimeField($nextweek0.' '. date('H:i:s'));
 		$nextweek1 = date("Y-m-d",strtotime("+1 week Saturday"));
+		$nextWeekEndDateTime = new DateTimeField($nextweek1.' '. date('H:i:s'));
 
 		$next7days = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")+6, date("Y")));
+		$next7DaysDateTime = new DateTimeField($next7days.' '. date('H:i:s'));
+
 		$next30days = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")+29, date("Y")));
+		$next30DaysDateTime = new DateTimeField($next30days.' '. date('H:i:s'));
+
 		$next60days = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")+59, date("Y")));
+		$next60DaysDateTime = new DateTimeField($next60days.' '. date('H:i:s'));
+
 		$next90days = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")+89, date("Y")));
+		$next90DaysDateTime = new DateTimeField($next90days.' '. date('H:i:s'));
+
 		$next120days = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")+119, date("Y")));
+		$next120DaysDateTime = new DateTimeField($next120days.' '. date('H:i:s'));
 
 		$last7days = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")-6, date("Y")));
+		$last7DaysDateTime = new DateTimeField($last7days.' '. date('H:i:s'));
+
 		$last30days = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")-29, date("Y")));
+		$last30DaysDateTime = new DateTimeField($last30days.' '. date('H:i:s'));
+
 		$last60days = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")-59, date("Y")));
+		$last60DaysDateTime = new DateTimeField($last60days.' '. date('H:i:s'));
+
 		$last90days = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")-89, date("Y")));
+		$last90DaysDateTime = new DateTimeField($last90days.' '. date('H:i:s'));
+
 		$last120days = date("Y-m-d",mktime(0, 0, 0, date("m")  , date("d")-119, date("Y")));
+		$last120DaysDateTime = new DateTimeField($last120days.' '. date('H:i:s'));
 
 		$currentFY0 = date("Y-m-d",mktime(0, 0, 0, "01", "01",   date("Y")));
+		$currentFYStartDateTime = new DateTimeField($currentFY0.' '. date('H:i:s'));
 		$currentFY1 = date("Y-m-t",mktime(0, 0, 0, "12", date("d"),   date("Y")));
+		$currentFYEndDateTime = new DateTimeField($currentFY1.' '. date('H:i:s'));
+
 		$lastFY0 = date("Y-m-d",mktime(0, 0, 0, "01", "01",   date("Y")-1));
+		$lastFYStartDateTime = new DateTimeField($lastFY0.' '. date('H:i:s'));
 		$lastFY1 = date("Y-m-t", mktime(0, 0, 0, "12", date("d"), date("Y")-1));
+		$lastFYEndDateTime = new DateTimeField($lastFY1.' '. date('H:i:s'));
+
 		$nextFY0 = date("Y-m-d",mktime(0, 0, 0, "01", "01",   date("Y")+1));
+		$nextFYStartDateTime = new DateTimeField($nextFY0.' '. date('H:i:s'));
 		$nextFY1 = date("Y-m-t", mktime(0, 0, 0, "12", date("d"), date("Y")+1));
+		$nextFYEndDateTime = new DateTimeField($nextFY1.' '. date('H:i:s'));
 
-		if(date("m") <= 3)
-		{
+		if(date("m") <= 3) {
 			$cFq = date("Y-m-d",mktime(0, 0, 0, "01","01",date("Y")));
+			$cFqStartDateTime = new DateTimeField($cFq.' '. date('H:i:s'));
 			$cFq1 = date("Y-m-d",mktime(0, 0, 0, "03","31",date("Y")));
+			$cFqEndDateTime = new DateTimeField($cFq1.' '. date('H:i:s'));
+
 			$nFq = date("Y-m-d",mktime(0, 0, 0, "04","01",date("Y")));
+			$nFqStartDateTime = new DateTimeField($nFq.' '. date('H:i:s'));
 			$nFq1 = date("Y-m-d",mktime(0, 0, 0, "06","30",date("Y")));
+			$nFqEndDateTime = new DateTimeField($nFq1.' '. date('H:i:s'));
+
 			$pFq = date("Y-m-d",mktime(0, 0, 0, "10","01",date("Y")-1));
+			$pFqStartDateTime = new DateTimeField($pFq.' '. date('H:i:s'));
 			$pFq1 = date("Y-m-d",mktime(0, 0, 0, "12","31",date("Y")-1));
-		}else if(date("m") > 3 and date("m") <= 6)
-		{
+			$pFqEndDateTime = new DateTimeField($pFq1.' '. date('H:i:s'));
+
+		} else if(date("m") > 3 and date("m") <= 6) {
+
 			$pFq = date("Y-m-d",mktime(0, 0, 0, "01","01",date("Y")));
+			$pFqStartDateTime = new DateTimeField($pFq.' '. date('H:i:s'));
 			$pFq1 = date("Y-m-d",mktime(0, 0, 0, "03","31",date("Y")));
+			$pFqEndDateTime = new DateTimeField($pFq1.' '. date('H:i:s'));
+
 			$cFq = date("Y-m-d",mktime(0, 0, 0, "04","01",date("Y")));
+			$cFqStartDateTime = new DateTimeField($cFq.' '. date('H:i:s'));
 			$cFq1 = date("Y-m-d",mktime(0, 0, 0, "06","30",date("Y")));
+			$cFqEndDateTime = new DateTimeField($cFq1.' '. date('H:i:s'));
+
 			$nFq = date("Y-m-d",mktime(0, 0, 0, "07","01",date("Y")));
+			$nFqStartDateTime = new DateTimeField($nFq.' '. date('H:i:s'));
 			$nFq1 = date("Y-m-d",mktime(0, 0, 0, "09","30",date("Y")));
+			$nFqEndDateTime = new DateTimeField($nFq1.' '. date('H:i:s'));
 
-		}else if(date("m") > 6 and date("m") <= 9)
-		{
+		} else if(date("m") > 6 and date("m") <= 9) {
+
 			$nFq = date("Y-m-d",mktime(0, 0, 0, "10","01",date("Y")));
+			$nFqStartDateTime = new DateTimeField($nFq.' '. date('H:i:s'));
 			$nFq1 = date("Y-m-d",mktime(0, 0, 0, "12","31",date("Y")));
-			$pFq = date("Y-m-d",mktime(0, 0, 0, "04","01",date("Y")));
-			$pFq1 = date("Y-m-d",mktime(0, 0, 0, "06","30",date("Y")));
-			$cFq = date("Y-m-d",mktime(0, 0, 0, "07","01",date("Y")));
-			$cFq1 = date("Y-m-d",mktime(0, 0, 0, "09","30",date("Y")));
-		}
-		else if(date("m") > 9 and date("m") <= 12)
-		{
-			$nFq = date("Y-m-d",mktime(0, 0, 0, "01","01",date("Y")+1));
-			$nFq1 = date("Y-m-d",mktime(0, 0, 0, "03","31",date("Y")+1));
-			$pFq = date("Y-m-d",mktime(0, 0, 0, "07","01",date("Y")));
-			$pFq1 = date("Y-m-d",mktime(0, 0, 0, "09","30",date("Y")));
-			$cFq = date("Y-m-d",mktime(0, 0, 0, "10","01",date("Y")));
-			$cFq1 = date("Y-m-d",mktime(0, 0, 0, "12","31",date("Y")));
+			$nFqEndDateTime = new DateTimeField($nFq1.' '. date('H:i:s'));
 
+			$pFq = date("Y-m-d",mktime(0, 0, 0, "04","01",date("Y")));
+			$pFqStartDateTime = new DateTimeField($pFq.' '. date('H:i:s'));
+			$pFq1 = date("Y-m-d",mktime(0, 0, 0, "06","30",date("Y")));
+			$pFqEndDateTime = new DateTimeField($pFq1.' '. date('H:i:s'));
+
+			$cFq = date("Y-m-d",mktime(0, 0, 0, "07","01",date("Y")));
+			$cFqStartDateTime = new DateTimeField($cFq.' '. date('H:i:s'));
+			$cFq1 = date("Y-m-d",mktime(0, 0, 0, "09","30",date("Y")));
+			$cFqEndDateTime = new DateTimeField($cFq1.' '. date('H:i:s'));
+
+		} else if(date("m") > 9 and date("m") <= 12) {
+			$nFq = date("Y-m-d",mktime(0, 0, 0, "01","01",date("Y")+1));
+			$nFqStartDateTime = new DateTimeField($nFq.' '. date('H:i:s'));
+			$nFq1 = date("Y-m-d",mktime(0, 0, 0, "03","31",date("Y")+1));
+			$nFqEndDateTime = new DateTimeField($nFq1.' '. date('H:i:s'));
+
+			$pFq = date("Y-m-d",mktime(0, 0, 0, "07","01",date("Y")));
+			$pFqStartDateTime = new DateTimeField($pFq.' '. date('H:i:s'));
+			$pFq1 = date("Y-m-d",mktime(0, 0, 0, "09","30",date("Y")));
+			$pFqEndDateTime = new DateTimeField($pFq1.' '. date('H:i:s'));
+
+			$cFq = date("Y-m-d",mktime(0, 0, 0, "10","01",date("Y")));
+			$cFqStartDateTime = new DateTimeField($cFq.' '. date('H:i:s'));
+			$cFq1 = date("Y-m-d",mktime(0, 0, 0, "12","31",date("Y")));
+			$cFqEndDateTime = new DateTimeField($cFq1.' '. date('H:i:s'));
 		}
 
 		$sjsStr = '<script language="JavaScript" type="text/javaScript">
-			function showDateRange( type )
-			{
-				if (type!="custom")
-				{
+			function showDateRange( type ) {
+				if (type!="custom") {
 					document.NewReport.startdate.readOnly=true
 					document.NewReport.enddate.readOnly=true
 					getObj("jscal_trigger_date_start").style.visibility="hidden"
 					getObj("jscal_trigger_date_end").style.visibility="hidden"
-				}
-				else
-				{
+				} else {
 					document.NewReport.startdate.readOnly=false
 					document.NewReport.enddate.readOnly=false
 					getObj("jscal_trigger_date_start").style.visibility="visible"
 					getObj("jscal_trigger_date_end").style.visibility="visible"
 				}
-				if( type == "today" )
-				{
+				if( type == "today" ) {
+					document.NewReport.startdate.value = "'.$todayDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$todayDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($today).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($today).'";
-				}
-				else if( type == "yesterday" )
-				{
+				} else if( type == "yesterday" ) {
+					document.NewReport.startdate.value = "'.$yesterdayDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$yesterdayDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($yesterday).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($yesterday).'";
-				}
-				else if( type == "tomorrow" )
-				{
+				} else if( type == "tomorrow" ) {
+					document.NewReport.startdate.value = "'.$tomorrowDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$tomorrowDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($tomorrow).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($tomorrow).'";
-				}        
-				else if( type == "thisweek" )
-				{
+				} else if( type == "thisweek" ) {
+					document.NewReport.startdate.value = "'.$thisWeekStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$thisWeekEndDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($thisweek0).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($thisweek1).'";
-				}                
-				else if( type == "lastweek" )
-				{
+				} else if( type == "lastweek" ) {
+					document.NewReport.startdate.value = "'.$lastWeekStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$lastWeekEndDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($lastweek0).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($lastweek1).'";
-				}                
-				else if( type == "nextweek" )
-				{
+				} else if( type == "nextweek" ) {
+					document.NewReport.startdate.value = "'.$nextWeekStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$nextWeekEndDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($nextweek0).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($nextweek1).'";
-				}                
+				} else if( type == "thismonth" ) {
+					document.NewReport.startdate.value = "'.$currentMonthStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$currentMonthEndDateTime->getDisplayDate().'";
 
-				else if( type == "thismonth" )
-				{
+				} else if( type == "lastmonth" ) {
+					document.NewReport.startdate.value = "'.$lastMonthStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$lastMonthEndDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($currentmonth0).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($currentmonth1).'";
-				}                
+				} else if( type == "nextmonth" ) {
+					document.NewReport.startdate.value = "'.$nextMonthStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$nextMonthEndDateTime->getDisplayDate().'";
 
-				else if( type == "lastmonth" )
-				{
+				} else if( type == "next7days" ) {
+					document.NewReport.startdate.value = "'.$todayDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$next7DaysDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($lastmonth0).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($lastmonth1).'";
-				}             
-				else if( type == "nextmonth" )
-				{
+				} else if( type == "next30days" ) {
+					document.NewReport.startdate.value = "'.$todayDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$next30DaysDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($nextmonth0).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($nextmonth1).'";
-				}           
-				else if( type == "next7days" )
-				{
+				} else if( type == "next60days" ) {
+					document.NewReport.startdate.value = "'.$todayDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$next60DaysDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($today).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($next7days).'";
-				}                
-				else if( type == "next30days" )
-				{
+				} else if( type == "next90days" ) {
+					document.NewReport.startdate.value = "'.$todayDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$next90DaysDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($today).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($next30days).'";
-				}                
-				else if( type == "next60days" )
-				{
+				} else if( type == "next120days" ) {
+					document.NewReport.startdate.value = "'.$todayDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$next120DaysDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($today).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($next60days).'";
-				}                
-				else if( type == "next90days" )
-				{
+				} else if( type == "last7days" ) {
+					document.NewReport.startdate.value = "'.$last7DaysDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value =  "'.$todayDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($today).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($next90days).'";
-				}        
-				else if( type == "next120days" )
-				{
+				} else if( type == "last30days" ) {
+					document.NewReport.startdate.value = "'.$last30DaysDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$todayDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($today).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($next120days).'";
-				}        
-				else if( type == "last7days" )
-				{
+				} else if( type == "last60days" ) {
+					document.NewReport.startdate.value = "'.$last60DaysDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$todayDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($last7days).'";
-					document.NewReport.enddate.value =  "'.getDisplayDate($today).'";
-				}                        
-				else if( type == "last30days" )
-				{
+				} else if( type == "last90days" ) {
+					document.NewReport.startdate.value = "'.$last90DaysDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$todayDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($last30days).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($today).'";
-				}                
-				else if( type == "last60days" )
-				{
+				} else if( type == "last120days" ) {
+					document.NewReport.startdate.value = "'.$last120DaysDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$todayDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($last60days).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($today).'";
-				}        
-				else if( type == "last90days" )
-				{
+				} else if( type == "thisfy" ) {
+					document.NewReport.startdate.value = "'.$currentFYStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$currentFYEndDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($last90days).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($today).'";
-				}        
-				else if( type == "last120days" )
-				{
+				} else if( type == "prevfy" ) {
+					document.NewReport.startdate.value = "'.$lastFYStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$lastFYEndDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($last120days).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($today).'";
-				}        
-				else if( type == "thisfy" )
-				{
+				} else if( type == "nextfy" ) {
+					document.NewReport.startdate.value = "'.$nextFYStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$nextFYEndDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($currentFY0).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($currentFY1).'";
-				}                
-				else if( type == "prevfy" )
-				{
+				} else if( type == "nextfq" ) {
+					document.NewReport.startdate.value = "'.$nFqStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$nFqEndDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($lastFY0).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($lastFY1).'";
-				}                
-				else if( type == "nextfy" )
-				{
+				} else if( type == "prevfq" ) {
+					document.NewReport.startdate.value = "'.$pFqStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$pFqEndDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($nextFY0).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($nextFY1).'";
-				}                
-				else if( type == "nextfq" )
-				{
+				} else if( type == "thisfq" ) {
+					document.NewReport.startdate.value = "'.$cFqStartDateTime->getDisplayDate().'";
+					document.NewReport.enddate.value = "'.$cFqEndDateTime->getDisplayDate().'";
 
-					document.NewReport.startdate.value = "'.getDisplayDate($nFq).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($nFq1).'";
-				}                        
-				else if( type == "prevfq" )
-				{
-
-					document.NewReport.startdate.value = "'.getDisplayDate($pFq).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($pFq1).'";
-				}                
-				else if( type == "thisfq" )
-				{
-					document.NewReport.startdate.value = "'.getDisplayDate($cFq).'";
-					document.NewReport.enddate.value = "'.getDisplayDate($cFq1).'";
-				}                
-				else
-				{
+				} else {
 					document.NewReport.startdate.value = "";
 					document.NewReport.enddate.value = "";
-				}        
-			}        
+				}
+			}
 		</script>';
 
 		return $sjsStr;
@@ -1124,14 +1120,14 @@ function getEscapedColumns($selectedfields)
 		global $current_user;
 		global $adb;
 		$access_fields = Array();
-		
+
 		$profileList = getCurrentUserProfileList();
 		$query = "select vtiger_field.fieldname from vtiger_field inner join vtiger_profile2field on vtiger_profile2field.fieldid=vtiger_field.fieldid inner join vtiger_def_org_field on vtiger_def_org_field.fieldid=vtiger_field.fieldid where";
 		$params = array();
 		if($module == "Calendar")
 		{
 			$query .= " vtiger_field.tabid in (9,16) and vtiger_field.displaytype in (1,2,3) and vtiger_profile2field.visible=0 and vtiger_def_org_field.visible=0 and vtiger_field.presence in (0,2)";
-			if (count($profileList) > 0) {				
+			if (count($profileList) > 0) {
 				$query .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";
 				array_push($params, $profileList);
 			}
@@ -1141,7 +1137,7 @@ function getEscapedColumns($selectedfields)
 		{
 			array_push($params, $this->primodule, $this->secmodule);
 			$query .= " vtiger_field.tabid in (select tabid from vtiger_tab where vtiger_tab.name in (?,?)) and vtiger_field.displaytype in (1,2,3) and vtiger_profile2field.visible=0 and vtiger_def_org_field.visible=0 and vtiger_field.presence in (0,2)";
-			if (count($profileList) > 0) {				
+			if (count($profileList) > 0) {
 				$query .= " and vtiger_profile2field.profileid in (". generateQuestionMarks($profileList) .")";
 				array_push($params, $profileList);
 			}
@@ -1149,7 +1145,7 @@ function getEscapedColumns($selectedfields)
 		}
 		$result = $adb->pquery($query, $params);
 
-		
+
 		while($collistrow = $adb->fetch_array($result))
 		{
 			$access_fields[] = $collistrow["fieldname"];
@@ -1208,10 +1204,10 @@ function getEscapedColumns($selectedfields)
 		$ssql .= " order by vtiger_selectcolumn.columnindex";
 		$result = $adb->pquery($ssql, array($reportid));
 		$permitted_fields = Array();
-	
+
 		$selected_mod = split(":",$this->secmodule);
 		array_push($selected_mod,$this->primodule);
-		
+
 		while($columnslistrow = $adb->fetch_array($result))
 		{
 			$fieldname ="";
@@ -1230,14 +1226,14 @@ function getEscapedColumns($selectedfields)
 				list($module,$field) = split("_",$module_field);
 				if(sizeof($permitted_fields) == 0 && $is_admin == false && $profileGlobalPermission[1] == 1 && $profileGlobalPermission[2] == 1)
 				{
-					$permitted_fields = $this->getaccesfield($module);	
+					$permitted_fields = $this->getaccesfield($module);
 				}
 				$querycolumns = $this->getEscapedColumns($selectedfields);
 				$fieldlabel = trim(str_replace($module," ",$module_field));
 				$mod_arr=explode('_',$fieldlabel);
 	                        $mod = ($mod_arr[0] == '')?$module:$mod_arr[0];
 				$fieldlabel = trim(str_replace("_"," ",$fieldlabel));
-				//modified code to support i18n issue 
+				//modified code to support i18n issue
 				$mod_lbl = getTranslatedString($mod,$module); //module
 				$fld_lbl = getTranslatedString($fieldlabel,$module); //fieldlabel
 				$fieldlabel = $mod_lbl." ".$fld_lbl;
@@ -1253,35 +1249,36 @@ function getEscapedColumns($selectedfields)
 			//end
 		}
 		$log->info("ReportRun :: Successfully returned getQueryColumnsList".$reportid);
-		return $shtml;		
+		return $shtml;
 	}
 	function getAdvancedFilterList($reportid)
 	{
 		global $adb;
 		global $modules;
 		global $log;
-		
+		global $current_user;
+
 		$advft_criteria = array();
-		
+
 		$sql = 'SELECT * FROM vtiger_relcriteria_grouping WHERE queryid = ? ORDER BY groupid';
 		$groupsresult = $adb->pquery($sql, array($reportid));
-		
+
 		$i = 1;
 		$j = 0;
 		while($relcriteriagroup = $adb->fetch_array($groupsresult)) {
 			$groupId = $relcriteriagroup["groupid"];
 			$groupCondition = $relcriteriagroup["group_condition"];
-			
-			$ssql = 'select vtiger_relcriteria.* from vtiger_report 
+
+			$ssql = 'select vtiger_relcriteria.* from vtiger_report
 						inner join vtiger_relcriteria on vtiger_relcriteria.queryid = vtiger_report.queryid
-						left join vtiger_relcriteria_grouping on vtiger_relcriteria.queryid = vtiger_relcriteria_grouping.queryid 
+						left join vtiger_relcriteria_grouping on vtiger_relcriteria.queryid = vtiger_relcriteria_grouping.queryid
 								and vtiger_relcriteria.groupid = vtiger_relcriteria_grouping.groupid';
 			$ssql.= " where vtiger_report.reportid = ? AND vtiger_relcriteria.groupid = ? order by vtiger_relcriteria.columnindex";
-	
+
 			$result = $adb->pquery($ssql, array($reportid, $groupId));
 			$noOfColumns = $adb->num_rows($result);
 			if($noOfColumns <= 0) continue;
-			
+
 			while($relcriteriarow = $adb->fetch_array($result)) {
 				$columnIndex = $relcriteriarow["columnindex"];
 				$criteria = array();
@@ -1289,27 +1286,53 @@ function getEscapedColumns($selectedfields)
 				$criteria['comparator'] = $relcriteriarow["comparator"];
 				$advfilterval = $relcriteriarow["value"];
 				$col = explode(":",$relcriteriarow["columnname"]);
+
+				$moduleFieldLabel = $col[2];
+				$fieldName = $col[3];
+
+				list($module, $fieldLabel) = explode('_', $moduleFieldLabel, 2);
+				$fieldInfo = getFieldByReportLabel($module, $fieldLabel);
+				$fieldType = null;
+				if(!empty($fieldInfo)) {
+					$field = WebserviceField::fromArray($adb, $fieldInfo);
+					$fieldType = $field->getFieldDataType();
+				}
+				if($fieldType == 'currency') {
+					if($field->getUIType() == '71') {
+						$advfilterval = CurrencyField::convertToUserFormat($advfilterval,$current_user);
+					} else if($field->getUIType() == '72') {
+						$advfilterval = CurrencyField::convertToUserFormat($advfilterval,$current_user,true);
+					}
+				}
+
 				$temp_val = explode(",",$relcriteriarow["value"]);
 				if($col[4] == 'D' || ($col[4] == 'T' && $col[1] != 'time_start' && $col[1] != 'time_end') || ($col[4] == 'DT')) {
 					$val = Array();
 					for($x=0;$x<count($temp_val);$x++) {
-						list($temp_date,$temp_time) = explode(" ",$temp_val[$x]);
-						$temp_date = getDisplayDate(trim($temp_date));
-						if(trim($temp_time) != '')
-							$temp_date .= ' '.$temp_time;
-						$val[$x]=$temp_date;
+                        if($col[4] == 'D') {
+							$date = new DateTimeField(trim($temp_val[$x]));
+							$val[$x] = $date->getDisplayDate();
+						} elseif($col[4] == 'DT') {
+							$date = new DateTimeField(trim($temp_val[$x]));
+							$val[$x] = $date->getDisplayDateTimeValue();
+						} else {
+							$date = new DateTimeField(trim($temp_val[$x]));
+							$val[$x] = $date->getDisplayTime();
+						}
 					}
 					$advfilterval = implode(",",$val);
 				}
 				$criteria['value'] = decode_html($advfilterval);
 				$criteria['column_condition'] = $relcriteriarow["column_condition"];
-				
+
 				$advft_criteria[$i]['columns'][$j] = $criteria;
 				$advft_criteria[$i]['condition'] = $groupCondition;
 				$j++;
 			}
 			$i++;
 		}
+		// Clear the condition (and/or) for last group, if any.
+		if(!empty($advft_criteria[$i-1]['condition'])) $advft_criteria[$i-1]['condition'] = '';
 		$this->advft_criteria = $advft_criteria;
 		$log->info("Reports :: Successfully returned getAdvancedFilterList");
 		return true;
@@ -1318,7 +1341,7 @@ function getEscapedColumns($selectedfields)
 
 	/** Function to get the list of vtiger_report folders when Save and run  the vtiger_report
 	 *  This function gets the vtiger_report folders from database and form
-	 *  a combo values of the folders and return 
+	 *  a combo values of the folders and return
 	 *  HTML of the combo values
 	 */
 
@@ -1340,8 +1363,8 @@ function getEscapedColumns($selectedfields)
 		return $shtml;
 	}
 
-	/** Function to get the column to total vtiger_fields in Reports 
-	 *  This function gets columns to total vtiger_field 
+	/** Function to get the column to total vtiger_fields in Reports
+	 *  This function gets columns to total vtiger_field
 	 *  and generated the html for that vtiger_fields
 	 *  It returns the HTML of the vtiger_fields along with the check boxes
 	 */
@@ -1387,7 +1410,7 @@ function getEscapedColumns($selectedfields)
 
 				}while($reportsummaryrow = $adb->fetch_array($result));
 			}
-		}	
+		}
 		$options []= $this->sgetColumnstoTotalHTML($primarymodule,0);
 		if($secondarymodule != "")
 		{
@@ -1400,10 +1423,10 @@ function getEscapedColumns($selectedfields)
 
 		$log->info("Reports :: Successfully returned sgetColumntoTotalSelected");
 		return $options;
-	
+
 	}
 
-	/** Function to form the HTML for columns to total	
+	/** Function to form the HTML for columns to total
 	 *  This function formulates the HTML format of the
 	 *  vtiger_fields along with four checkboxes
 	 *  It returns the HTML of the vtiger_fields along with the check boxes
@@ -1412,7 +1435,7 @@ function getEscapedColumns($selectedfields)
 
 	function sgetColumnstoTotalHTML($module)
 	{
-		//retreive the vtiger_tabid	
+		//retreive the vtiger_tabid
 		global $adb;
 		global $log;
 		global $current_user;
@@ -1422,7 +1445,7 @@ function getEscapedColumns($selectedfields)
 		$sparams = array($tabid);
 		if($is_admin == true || $profileGlobalPermission[1] == 0 || $profileGlobalPermission[2] ==0)
 		{
-			$ssql = "select * from vtiger_field inner join vtiger_tab on vtiger_tab.tabid = vtiger_field.tabid where vtiger_field.uitype != 50 and vtiger_field.tabid=? and vtiger_field.displaytype in (1,2,3) and vtiger_field.presence in (0,2) ";		
+			$ssql = "select * from vtiger_field inner join vtiger_tab on vtiger_tab.tabid = vtiger_field.tabid where vtiger_field.uitype != 50 and vtiger_field.tabid=? and vtiger_field.displaytype in (1,2,3) and vtiger_field.presence in (0,2) ";
 		}
 		else
 		{
@@ -1434,7 +1457,7 @@ function getEscapedColumns($selectedfields)
 			}
 		}
 
-		//Added to avoid display the Related fields (Account name,Vandor name,product name, etc) in Report Calculations(SUM,AVG..)			
+		//Added to avoid display the Related fields (Account name,Vandor name,product name, etc) in Report Calculations(SUM,AVG..)
 		switch($tabid)
 		{
 			case 2://Potentials
@@ -1454,7 +1477,7 @@ function getEscapedColumns($selectedfields)
 				$ssql.= " and vtiger_field.fieldname not in ('parent_id','product_id')";
 				break;
 			case 14://Products
-				$ssql.= " and vtiger_field.fieldname not in ('vendor_id','product_id','handler')";
+				$ssql.= " and vtiger_field.fieldname not in ('vendor_id','product_id')";
 				break;
 			case 20://Quotes
 				$ssql.= " and vtiger_field.fieldname not in ('potential_id','assigned_user_id1','account_id','currency_id')";
@@ -1478,7 +1501,7 @@ function getEscapedColumns($selectedfields)
 
 		$result = $adb->pquery($ssql, $sparams);
 		$columntototalrow = $adb->fetch_array($result);
-		$options_list = Array();	
+		$options_list = Array();
 		do
 		{
 			$typeofdata = explode("~",$columntototalrow["typeofdata"]);
@@ -1509,13 +1532,13 @@ function getEscapedColumns($selectedfields)
 					if(isset($_REQUEST["record"]) && $_REQUEST["record"] != '')
 					{
 						$options['label'][] = getTranslatedString($columntototalrow['tablabel'],$columntototalrow['tablabel']).' -'.getTranslatedString($columntototalrow['fieldlabel'],$columntototalrow['tablabel']);
-					}	
+					}
 
 					$columntototalrow['fieldlabel'] = str_replace(" ","_",$columntototalrow['fieldlabel']);
 					$options []= getTranslatedString($columntototalrow['tablabel'],$columntototalrow['tablabel']).' - '.getTranslatedString($columntototalrow['fieldlabel'],$columntototalrow['tablabel']);
 					if($selectedcolumn1[2] == "cb:".$columntototalrow['tablename'].':'.$columntototalrow['columnname'].':'.$columntototalrow['fieldlabel']."_SUM:2")
 					{
-						$options []=  '<input checked name="cb:'.$columntototalrow['tablename'].':'.$columntototalrow['columnname'].':'.$columntototalrow['fieldlabel'].'_SUM:2" type="checkbox" value="">';					    
+						$options []=  '<input checked name="cb:'.$columntototalrow['tablename'].':'.$columntototalrow['columnname'].':'.$columntototalrow['fieldlabel'].'_SUM:2" type="checkbox" value="">';
 					}else
 					{
 						$options []=  '<input name="cb:'.$columntototalrow['tablename'].':'.$columntototalrow['columnname'].':'.$columntototalrow['fieldlabel'].'_SUM:2" type="checkbox" value="">';
@@ -1549,7 +1572,7 @@ function getEscapedColumns($selectedfields)
 					$options []= '<input name="cb:'.$columntototalrow['tablename'].':'.$columntototalrow['columnname'].':'.$columntototalrow['fieldlabel'].'_SUM:2" type="checkbox" value="">';
 					$options []= '<input name="cb:'.$columntototalrow['tablename'].':'.$columntototalrow['columnname'].':'.$columntototalrow['fieldlabel'].'_AVG:3" type="checkbox" value="" >';
 					$options []= '<input name="cb:'.$columntototalrow['tablename'].':'.$columntototalrow['columnname'].':'.$columntototalrow['fieldlabel'].'_MIN:4"type="checkbox" value="" >';
-					$options [] ='<input name="cb:'.$columntototalrow['tablename'].':'.$columntototalrow['columnname'].':'.$columntototalrow['fieldlabel'].'_MAX:5" type="checkbox" value="" >';	
+					$options [] ='<input name="cb:'.$columntototalrow['tablename'].':'.$columntototalrow['columnname'].':'.$columntototalrow['fieldlabel'].'_MAX:5" type="checkbox" value="" >';
 				}
 				$options_list [] = $options;
 			}
@@ -1558,33 +1581,50 @@ function getEscapedColumns($selectedfields)
 		$log->info("Reports :: Successfully returned sgetColumnstoTotalHTML");
 		return $options_list;
 	}
+
+	/** Function to get the  advanced filter criteria for an option
+	 *  This function accepts The option in the advenced filter as an argument
+	 *  This generate filter criteria for the advanced filter
+	 *  It returns a HTML string of combo values
+	 */
+	public static function getAdvCriteriaHTML($selected="") {
+		global $adv_filter_options;
+
+		foreach($adv_filter_options as $key=>$value) {
+			if($selected == $key) {
+				$shtml .= "<option selected value=\"".$key."\">".$value."</option>";
+			} else {
+				$shtml .= "<option value=\"".$key."\">".$value."</option>";
+			}
+		}
+		return $shtml;
+	}
 }
 
 /** Function to get the primary module list in vtiger_reports
  *  This function generates the list of primary modules in vtiger_reports
- *  and returns an array of permitted modules 
+ *  and returns an array of permitted modules
  */
 
 function getReportsModuleList($focus)
 {
 	global $adb;
 	global $app_list_strings;
-	//global $report_modules;	
+	//global $report_modules;
 	global $mod_strings;
 	$modules = Array();
-	foreach($focus->module_list as $key=>$value)
-	{
-			if(isPermitted($key,'index') == "yes")
-			{
-				$count_flag = 1;
-				$modules [$key] = getTranslatedString($key,$key);
-			}
+	foreach($focus->module_list as $key=>$value) {
+		if(isPermitted($key,'index') == "yes") {
+			$count_flag = 1;
+			$modules [$key] = getTranslatedString($key,$key);
+		}
 	}
+	asort($modules);
 	return $modules;
 }
 /** Function to get the Related module list in vtiger_reports
  *  This function generates the list of secondary modules in vtiger_reports
- *  and returns the related module as an Array 
+ *  and returns the related module as an Array
  */
 
 function getReportRelatedModules($module,$focus)
@@ -1599,7 +1639,7 @@ function getReportRelatedModules($module,$focus)
 			{
 				if(isPermitted($rel_modules,'index') == "yes")
 				{
-					$optionhtml []= $rel_modules;		
+					$optionhtml []= $rel_modules;
 				}
 			}
 		}
@@ -1609,5 +1649,87 @@ function getReportRelatedModules($module,$focus)
 	return $optionhtml;
 }
 
+function updateAdvancedCriteria($reportid, $advft_criteria, $advft_criteria_groups) {
 
+	global $adb, $log;
+
+	$idelrelcriteriasql = "delete from vtiger_relcriteria where queryid=?";
+	$idelrelcriteriasqlresult = $adb->pquery($idelrelcriteriasql, array($reportid));
+
+	$idelrelcriteriagroupsql = "delete from vtiger_relcriteria_grouping where queryid=?";
+	$idelrelcriteriagroupsqlresult = $adb->pquery($idelrelcriteriagroupsql, array($reportid));
+
+	if(empty($advft_criteria)) return;
+
+	foreach($advft_criteria as $column_index => $column_condition) {
+
+		if(empty($column_condition)) continue;
+
+		$adv_filter_column = $column_condition["columnname"];
+		$adv_filter_comparator = $column_condition["comparator"];
+		$adv_filter_value = $column_condition["value"];
+		$adv_filter_column_condition = $column_condition["columncondition"];
+		$adv_filter_groupid = $column_condition["groupid"];
+
+		$column_info = explode(":",$adv_filter_column);
+		$moduleFieldLabel = $column_info[2];
+		$fieldName = $column_info[3];
+
+		list($module, $fieldLabel) = explode('_', $moduleFieldLabel, 2);
+		$fieldInfo = getFieldByReportLabel($module, $fieldLabel);
+		$fieldType = null;
+		if(!empty($fieldInfo)) {
+			$field = WebserviceField::fromArray($adb, $fieldInfo);
+			$fieldType = $field->getFieldDataType();
+		}
+		if($fieldType == 'currency') {
+			// Some of the currency fields like Unit Price, Total, Sub-total etc of Inventory modules, do not need currency conversion
+			if($field->getUIType() == '72') {
+				$adv_filter_value = CurrencyField::convertToDBFormat($adv_filter_value, null, true);
+			} else {
+				$adv_filter_value = CurrencyField::convertToDBFormat($adv_filter_value);
+			}
+		}
+
+		$temp_val = explode(",",$adv_filter_value);
+		if(($column_info[4] == 'D' || ($column_info[4] == 'T' && $column_info[1] != 'time_start' && $column_info[1] != 'time_end') || ($column_info[4] == 'DT')) && ($column_info[4] != '' && $adv_filter_value != '' ))
+		{
+			$val = Array();
+			for($x=0;$x<count($temp_val);$x++) {
+				if(trim($temp_val[$x]) != '') {
+					$date = new DateTimeField(trim($temp_val[$x]));
+					if($column_info[4] == 'D') {
+						$val[$x] = DateTimeField::convertToUserFormat(
+								trim($temp_val[$x]));
+					} elseif($column_info[4] == 'DT') {
+						$val[$x] = $date->getDBInsertDateTimeValue();
+					} else {
+						$val[$x] = $date->getDBInsertTimeValue();
+					}
+				}
+			}
+			$adv_filter_value = implode(",",$val);
+		}
+
+		$irelcriteriasql = "insert into vtiger_relcriteria(QUERYID,COLUMNINDEX,COLUMNNAME,COMPARATOR,VALUE,GROUPID,COLUMN_CONDITION) values (?,?,?,?,?,?,?)";
+		$irelcriteriaresult = $adb->pquery($irelcriteriasql, array($reportid, $column_index, $adv_filter_column, $adv_filter_comparator, $adv_filter_value, $adv_filter_groupid, $adv_filter_column_condition));
+
+		// Update the condition expression for the group to which the condition column belongs
+		$groupConditionExpression = '';
+		if(!empty($advft_criteria_groups[$adv_filter_groupid]["conditionexpression"])) {
+			$groupConditionExpression = $advft_criteria_groups[$adv_filter_groupid]["conditionexpression"];
+		}
+		$groupConditionExpression = $groupConditionExpression .' '. $column_index .' '. $adv_filter_column_condition;
+		$advft_criteria_groups[$adv_filter_groupid]["conditionexpression"] = $groupConditionExpression;
+	}
+
+	foreach($advft_criteria_groups as $group_index => $group_condition_info) {
+
+		if(empty($group_condition_info)) continue;
+		if(empty($group_condition_info["conditionexpression"])) continue; // Case when the group doesn't have any column criteria
+
+		$irelcriteriagroupsql = "insert into vtiger_relcriteria_grouping(GROUPID,QUERYID,GROUP_CONDITION,CONDITION_EXPRESSION) values (?,?,?,?)";
+		$irelcriteriagroupresult = $adb->pquery($irelcriteriagroupsql, array($group_index, $reportid, $group_condition_info["groupcondition"], $group_condition_info["conditionexpression"]));
+	}
+}
 ?>

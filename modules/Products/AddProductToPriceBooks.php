@@ -19,7 +19,7 @@ $productid = $_REQUEST['return_id'];
 $parenttab = getParentTab();
 $theme_path="themes/".$theme."/";
 $image_path=$theme_path."images/";
-require_once($theme_path.'layout_utils.php');
+require_once('modules/Vtiger/layout_utils.php');
 $productNameArr = getEntityName($currentModule, array($productid));
 $productname = $productNameArr[$productid];
 
@@ -132,11 +132,11 @@ for($i=0; $i<$num_rows; $i++)
 		$pk_currency_name = $adb->query_result($list_result,$i,"currency_name");
 		$unit_price = $prod_cur_price[$pk_currency_id];
 		$field_name = $entity_id."_listprice";
-		$unit_price_array[]="'".$unit_price."'";
+		$unit_price_array[]='"'.$unit_price.'"';
 		$field_name_array[]="'".$field_name."'";
 		
 		$list_body .= '<tr class="lvtColData" onmouseover="this.className=\'lvtColDataHover\'" onmouseout="this.className=\'lvtColData\'" bgcolor="white">';
-		$list_body .= '<td><INPUT type=checkbox NAME="selected_id" id="check_'.$entity_id.'" value= '.$entity_id.' onClick=\'toggleSelectAll(this.name,"selectall");updateListPrice("'.$unit_price.'","'.$field_name.'",this)\'></td>';
+		$list_body .= '<td><INPUT type=checkbox NAME="selected_id" id="check_'.$entity_id.'" value= '.$entity_id.' onClick=\'toggleSelectAll(this.name,"selectall");updateListPriceForField("'.$field_name.'",this)\'></td>';
 		$list_body .= '<td>'.$adb->query_result($list_result,$i,"bookname").'</td>';
 		$list_body .= '<td>'.$pk_currency_name.'</td>';
 		$list_body .= '<td>'.$unit_price.'</td>';

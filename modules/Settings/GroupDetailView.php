@@ -128,7 +128,7 @@ function getStdOutput($groupInfoArr,$groupId, $mod_strings)
 			}
 			elseif($memberType == 'users')
 			{
-				$memberName=getUserName($memberId);
+				$memberName=getUserFullName($memberId);
 				$memberAction="DetailView";
 				$memberActionParameter="record";
 				$memberDisplayType="User";

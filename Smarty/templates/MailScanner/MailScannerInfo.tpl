@@ -48,6 +48,26 @@ function performScanNow(app_key, scannername) {
 				</tr>
 				<tr>
 					<td valign=top class="small">{$MOD.LBL_MAIL_SCANNER_DESCRIPTION}</td>
+					<td  align="right" class="small" width='40%'>
+						<b>
+						{if $CRON_TASK->isDisabled() }{'LBL_DISABLED'|@getTranslatedString:$MODULE}{/if}
+						{if $CRON_TASK->isRunning() }{'LBL_RUNNING'|@getTranslatedString:$MODULE}{/if}
+						{if $CRON_TASK->isEnabled()}
+							{if $CRON_TASK->hadTimedout}
+								{'LBL_LAST_SCAN_TIMED_OUT'|@getTranslatedString:$MODULE}.
+							{elseif $CRON_TASK->getLastEndDateTime() neq ''}
+								{'LBL_LAST_SCAN_AT'|@getTranslatedString:$MODULE}
+								{$CRON_TASK->getLastEndDateTime()}
+								&
+								{'LBL_TIME_TAKEN'|@getTranslatedString:$MODULE}:
+								{$CRON_TASK->getTimeDiff()}
+								{'LBL_SHORT_SECONDS'|@getTranslatedString:$MODULE}
+							{else}
+								
+							{/if}
+						{/if}
+						</b>
+					</td>
 				</tr>
 				</table>
 				
@@ -58,7 +78,7 @@ function performScanNow(app_key, scannername) {
 					<td>
 						<table border=0 cellspacing=0 cellpadding=2 width=100% class="tableHeading">
 						<tr>
-							<td class="big" width="70%"><strong>{$MOD.LBL_MAILBOX}</strong></td>
+							<td class="big" width="60%"><strong>{$MOD.LBL_MAILBOX}</strong></td>
 							<td width="30%" nowrap align="right">
 								<a href="index.php?module=Settings&action=MailScanner&parenttab=Settings&mode=edit&scannername="><img src="{'btnL3Add.gif'|@vtiger_imageurl:$THEME}" border="0" /></a>
 							</td>								

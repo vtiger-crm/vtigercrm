@@ -25,7 +25,7 @@ require_once('data/Tracker.php');
 require_once('include/CustomFieldUtil.php');
 require_once('include/utils/utils.php');
 require_once('include/FormValidationUtil.php');
-require_once('modules/Calendar/calendarLayout.php'); 
+require_once('modules/Calendar/calendarLayout.php');
 require_once("modules/Emails/mail.php");
 include_once 'modules/Calendar/header.php';
 global $app_strings;
@@ -43,7 +43,7 @@ $activity_mode = vtlib_purify($_REQUEST['activity_mode']);
 if($activity_mode == 'Task')
 {
 	$tab_type = 'Calendar';
-	$taskcheck = true;	
+	$taskcheck = true;
 	$smarty->assign("SINGLE_MOD",$mod_strings['LBL_TODO']);
 }
 elseif($activity_mode == 'Events')
@@ -54,95 +54,91 @@ elseif($activity_mode == 'Events')
 }
 
 if(isset($_REQUEST['record']) && $_REQUEST['record']!='') {
-    $focus->id = $_REQUEST['record'];
+    $focus->id = vtlib_purify($_REQUEST['record']);
     $focus->mode = 'edit';
-    $focus->retrieve_entity_info($_REQUEST['record'],$tab_type);		
+    $focus->retrieve_entity_info($_REQUEST['record'],$tab_type);
     $focus->name=$focus->column_fields['subject'];
-    $sql = 'select vtiger_users.user_name,vtiger_invitees.* from vtiger_invitees left join vtiger_users on vtiger_invitees.inviteeid=vtiger_users.id where activityid=?';
+    $sql = 'select vtiger_users.*,vtiger_invitees.* from vtiger_invitees left join vtiger_users on vtiger_invitees.inviteeid=vtiger_users.id where activityid=?';
     $result = $adb->pquery($sql, array($focus->id));
     $num_rows=$adb->num_rows($result);
     $invited_users=Array();
     for($i=0;$i<$num_rows;$i++)
     {
 	    $userid=$adb->query_result($result,$i,'inviteeid');
-	    $username=$adb->query_result($result,$i,'user_name');
+	    $username = getFullNameFromQResult($result, $i, 'Users');
 	    $invited_users[$userid]=$username;
     }
     $smarty->assign("INVITEDUSERS",$invited_users);
     $smarty->assign("UPDATEINFO",updateInfo($focus->id));
     $related_array = getRelatedListsInformation("Calendar", $focus);
     $cntlist = $related_array['Contacts']['entries'];
-	$is_fname_permitted = getFieldVisibilityPermission("Contacts", $current_user->id, 'firstname');
-    $cnt_idlist = '';
-    $cnt_namelist = '';
-    if($cntlist != '')
-    {
-	    $i = 0;
-	    foreach($cntlist as $key=>$cntvalue)
-	    {
-		    if($i != 0)
-		    {
-			    $cnt_idlist .= ';';
-			    $cnt_namelist .= "\n";
-		    }
-		    $cnt_idlist .= $key;
-		    $contName = preg_replace("/(<a[^>]*>)(.*)(<\/a>)/i", "\\2", $cntvalue[0]);
-			if ($is_fname_permitted == '0') $contName .= ' '.preg_replace("/(<a[^>]*>)(.*)(<\/a>)/i", "\\2", $cntvalue[1]);
-		    $cnt_namelist .= '<option value="'.$key.'">'.$contName.'</option>';
-		    $i++;
-	    }
-    }
-    $smarty->assign("CONTACTSID",$cnt_idlist);
+
+	$entityIds = array_keys($cntlist);
+	$cnt_namelist = array();
+	$displayValueArray = getEntityName('Contacts', $entityIds);
+	if (!empty($displayValueArray)) {
+		foreach ($displayValueArray as $key => $field_value) {
+			$cnt_namelist[$key] =  $field_value;
+		}
+	}
+	$cnt_idlist = array_keys($cnt_namelist);
+    $smarty->assign("CONTACTSID",  implode(';', $cnt_idlist));
     $smarty->assign("CONTACTSNAME",$cnt_namelist);
-    $query = 'select vtiger_recurringevents.recurringfreq,vtiger_recurringevents.recurringinfo from vtiger_recurringevents where vtiger_recurringevents.activityid = ?';
-    $res = $adb->pquery($query, array($focus->id));
+    $query = 'SELECT vtiger_recurringevents.*, vtiger_activity.date_start, vtiger_activity.time_start, vtiger_activity.due_date, vtiger_activity.time_end
+				FROM vtiger_recurringevents
+					INNER JOIN vtiger_activity ON vtiger_activity.activityid = vtiger_recurringevents.activityid
+					WHERE vtiger_recurringevents.activityid = ?';
+	$res = $adb->pquery($query, array($focus->id));
     $rows = $adb->num_rows($res);
-    if($rows != 0)
-    {
+    if($rows > 0) {
+		$recurringObject = RecurringType::fromDBRequest($adb->query_result_rowdata($res, 0));
+
 	    $value['recurringcheck'] = 'Yes';
-	    $value['repeat_frequency'] = $adb->query_result($res,0,'recurringfreq');
-	    $recurringinfo =  explode("::",$adb->query_result($res,0,'recurringinfo'));
-	    $value['eventrecurringtype'] = $recurringinfo[0];
-	    if($recurringinfo[0] == 'Weekly')
-	    {
-		   for($i=0;$i<6;$i++)
-		   {
-			   $label = 'week'.$recurringinfo[$i+1];
-			   $value[$label] = 'checked';
-		   }
-	    }
-	    elseif($recurringinfo[0] == 'Monthly')
-	    {
-		    $value['repeatMonth'] = $recurringinfo[1];
-		    if($recurringinfo[1] == 'date')
-		    {
-			    $value['repeatMonth_date'] = $recurringinfo[2];
-		    }
-		    else
-		    {
-			    $value['repeatMonth_daytype'] = $recurringinfo[2];
-			    $value['repeatMonth_day'] = $recurringinfo[3];
-		    }
-	    }
-    }
-    else
-    {
+	    $value['repeat_frequency'] = $recurringObject->getRecurringFrequency();
+		$value['eventrecurringtype'] = $recurringObject->getRecurringType();
+		$recurringInfo = $recurringObject->getUserRecurringInfo();
+
+		if($recurringObject->getRecurringType() == 'Weekly') {
+			$noOfDays = count($recurringInfo['dayofweek_to_repeat']);
+			for ($i = 0; $i < $noOfDays; ++$i) {
+				$value['week'.$recurringInfo['dayofweek_to_repeat'][$i]] = 'checked';
+			}
+
+		   } elseif ($recurringObject->getRecurringType() == 'Monthly') {
+			$value['repeatMonth'] = $recurringInfo['repeatmonth_type'];
+			if ($recurringInfo['repeatmonth_type'] == 'date') {
+				$value['repeatMonth_date'] = $recurringInfo['repeatmonth_date'];
+			} else {
+				$value['repeatMonth_daytype'] = $recurringInfo['repeatmonth_daytype'];
+				$value['repeatMonth_day'] = $recurringInfo['dayofweek_to_repeat'][0];
+			}
+		}
+    } else {
 	    $value['recurringcheck'] = 'No';
     }
 
 }else
 {
 	if(isset($_REQUEST['contact_id']) && $_REQUEST['contact_id']!=''){
-		$smarty->assign("CONTACTSID",$_REQUEST['contact_id']);
-		$contact_name = "<option value=".$_REQUEST['contact_id'].">".getContactName($_REQUEST['contact_id'])."</option>";
-		$smarty->assign("CONTACTSNAME",$contact_name);
-		$account_id = $_REQUEST['account_id'];
-                $account_name = getAccountName($account_id);
-	}	
+		$contactId = vtlib_purify($_REQUEST['contact_id']);
+		$entityIds = array($contactId);
+		$displayValueArray = getEntityName('Contacts', $entityIds);
+		if (!empty($displayValueArray)) {
+			foreach ($displayValueArray as $key => $field_value) {
+				$cnt_namelist[$key] =  $field_value;
+			}
+		}
+		$cnt_idlist = array_keys($cnt_namelist);
+		$smarty->assign("CONTACTSID",  implode(';', $cnt_idlist));
+		$smarty->assign("CONTACTSNAME",$cnt_namelist);
+		
+		$account_id = vtlib_purify($_REQUEST['account_id']);
+		$account_name = getAccountName($account_id);
+	}
 }
 if(isset($_REQUEST['isDuplicate']) && $_REQUEST['isDuplicate'] == 'true') {
 	$focus->id = "";
-    	$focus->mode = ''; 	
+    	$focus->mode = '';
 }
 if(empty($_REQUEST['record']) && $focus->mode != 'edit'){
 	setObjectValuesFromRequest($focus);
@@ -156,7 +152,7 @@ if($disp_view == 'edit_view')
 {
 	$act_data = getBlocks($tab_type,$disp_view,$mode,$focus->column_fields);
 }
-else	
+else
 {
 	$act_data = getBlocks($tab_type,$disp_view,$mode,$focus->column_fields,'BAS');
 }
@@ -232,6 +228,7 @@ if($focus->mode == 'edit')
 {
         $smarty->assign("MODE", $focus->mode);
 }
+$smarty->assign('CREATEMODE', vtlib_purify($_REQUEST['createmode']));
 
 $category = getParentTab();
 $smarty->assign("CATEGORY",$category);
@@ -240,6 +237,9 @@ $smarty->assign("CATEGORY",$category);
 $smarty->assign("CALENDAR_LANG", $app_strings['LBL_JSCALENDAR_LANG']);
 $smarty->assign("CALENDAR_DATEFORMAT", parse_calendardate($app_strings['NTC_DATE_FORMAT']));
 
+$isContactIdEditable = getFieldVisibilityPermission($tab_type, $current_user->id, 'contact_id', 'readwrite');
+$smarty->assign("IS_CONTACTS_EDIT_PERMITTED", (($isContactIdEditable == '0')? true : false));
+
 if (isset($_REQUEST['return_module']))
 	$smarty->assign("RETURN_MODULE", vtlib_purify($_REQUEST['return_module']));
 if (isset($_REQUEST['return_action']))
@@ -247,9 +247,9 @@ if (isset($_REQUEST['return_action']))
 if (isset($_REQUEST['return_id']))
 	$smarty->assign("RETURN_ID", vtlib_purify($_REQUEST['return_id']));
 if (isset($_REQUEST['ticket_id']))
-	$smarty->assign("TICKETID", $_REQUEST['ticket_id']);
+	$smarty->assign("TICKETID", vtlib_purify($_REQUEST['ticket_id']));
 if (isset($_REQUEST['product_id']))
-	$smarty->assign("PRODUCTID", $_REQUEST['product_id']);
+	$smarty->assign("PRODUCTID", vtlib_purify($_REQUEST['product_id']));
 if (isset($_REQUEST['return_viewname']))
 	$smarty->assign("RETURN_VIEWNAME", vtlib_purify($_REQUEST['return_viewname']));
 if(isset($_REQUEST['view']) && $_REQUEST['view']!='')
@@ -268,8 +268,8 @@ if(isset($_REQUEST['subtab']) && $_REQUEST['subtab']!='')
 	$smarty->assign("subtab",vtlib_purify($_REQUEST['subtab']));
 if(isset($_REQUEST['maintab']) && $_REQUEST['maintab']!='')
 	$smarty->assign("maintab",vtlib_purify($_REQUEST['maintab']));
-	
-	
+
+
 $smarty->assign("THEME", $theme);
 $smarty->assign("IMAGE_PATH", $image_path);
 $smarty->assign("PRINT_URL", "phprint.php?jt=".session_id().$GLOBALS['request_string']);
@@ -291,6 +291,13 @@ if ($activity_mode == 'Task') {
 $smarty->assign("CUSTOM_FIELDS_DATA", $custom_fields_data);
 
 $smarty->assign("REPEAT_LIMIT_DATEFORMAT", parse_calendardate($app_strings['NTC_DATE_FORMAT']));
+
+$picklistDependencyDatasource = Vtiger_DependencyPicklist::getPicklistDependencyDatasource($tab_type);
+$smarty->assign("PICKIST_DEPENDENCY_DATASOURCE", Zend_Json::encode($picklistDependencyDatasource));
+
+// Gather the help information associated with fields
+$smarty->assign('FIELDHELPINFO', vtlib_getFieldHelpInfo($currentModule));
+// END
 
 $smarty->display("ActivityEditView.tpl");
 

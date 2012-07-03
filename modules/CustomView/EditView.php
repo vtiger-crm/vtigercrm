@@ -41,52 +41,41 @@ $smarty->assign("CVMODULE", $cv_module);
 $smarty->assign("CUSTOMVIEWID",$recordid);
 $smarty->assign("DATEFORMAT",$current_user->date_format);
 $smarty->assign("JS_DATEFORMAT",parse_calendardate($app_strings['NTC_DATE_FORMAT']));
-$smarty->assign("DATE_JS", '<script>userDateFormat = "'.$current_user->date_format.'" </script>');
-if($recordid == "")
-{
+
+if($recordid == "") {
 	$oCustomView = new CustomView();
 	$modulecollist = $oCustomView->getModuleColumnsList($cv_module);
 	$log->info('CustomView :: Successfully got ColumnsList for the module'.$cv_module);
-	if(isset($modulecollist))
-	{
-		$choosecolhtml = getByModule_ColumnsHTML($cv_module,$modulecollist);
+	if(isset($modulecollist)) {
+		$choosecolslist = getByModule_ColumnsList($cv_module,$modulecollist);
 	}
-	//step2
+	for($i=1;$i<10;$i++) {
+		$smarty->assign("CHOOSECOLUMN".$i,$choosecolslist);
+	}
+	
 	$stdfilterhtml = $oCustomView->getStdFilterCriteria();
-	$log->info('CustomView :: Successfully got StandardFilter for the module'.$cv_module);
 	$stdfiltercolhtml = getStdFilterHTML($cv_module);
 	$stdfilterjs = $oCustomView->getCriteriaJS();
-
-	//step4
-	$advfilterhtml = getAdvCriteriaHTML();
-	for($i=1;$i<10;$i++)
-	{
-		$smarty->assign("CHOOSECOLUMN".$i,$choosecolhtml);
-	}
-	$log->info('CustomView :: Successfully got AdvancedFilter for the module'.$cv_module);
-	for($i=1;$i<6;$i++)
-	{
-		$smarty->assign("FOPTION".$i,$advfilterhtml);
-		$smarty->assign("BLOCK".$i,$choosecolhtml);
-	}
 
 	$smarty->assign("STDFILTERCOLUMNS",$stdfiltercolhtml);
 	$smarty->assign("STDCOLUMNSCOUNT",count($stdfiltercolhtml));
 	$smarty->assign("STDFILTERCRITERIA",$stdfilterhtml);
 	$smarty->assign("STDFILTER_JAVASCRIPT",$stdfilterjs);
+	
+	$advfilterhtml = getAdvCriteriaHTML();
+	$modulecolumnshtml = getByModule_ColumnsHTML($cv_module,$modulecollist);
+	$smarty->assign("FOPTION",$advfilterhtml);
+	$smarty->assign("COLUMNS_BLOCK",$modulecolumnshtml);
 
 	$smarty->assign("MANDATORYCHECK",implode(",",array_unique($oCustomView->mandatoryvalues)));
 	$smarty->assign("SHOWVALUES",implode(",",$oCustomView->showvalues));
-        $data_type[] = $oCustomView->data_type;
-        $smarty->assign("DATATYPE",$data_type);
+    $data_type[] = $oCustomView->data_type;
+    $smarty->assign("DATATYPE",$data_type);
         
-}
-else
-{
+} else {
 	$oCustomView = new CustomView($cv_module);
 	$now_action = vtlib_purify($_REQUEST['action']);
-	if($oCustomView->isPermittedCustomView($recordid,$now_action,$oCustomView->customviewmodule) == 'yes')
-	{
+	if($oCustomView->isPermittedCustomView($recordid,$now_action,$oCustomView->customviewmodule) == 'yes') {
 		$customviewdtls = $oCustomView->getCustomViewByCvid($recordid);
 		$log->info('CustomView :: Successfully got ViewDetails for the Viewid'.$recordid);
 		$modulecollist = $oCustomView->getModuleColumnsList($cv_module);
@@ -95,21 +84,18 @@ else
 	
 		$smarty->assign("VIEWNAME",$customviewdtls["viewname"]);
 	
-		if($customviewdtls["setdefault"] == 1)
-		{
+		if($customviewdtls["setdefault"] == 1) {
 			$smarty->assign("CHECKED","checked");
 		}
-		if($customviewdtls["setmetrics"] == 1)
-		{
+		if($customviewdtls["setmetrics"] == 1) {
 			$smarty->assign("MCHECKED","checked");
 		}
 		$status = $customviewdtls["status"];
 		$smarty->assign("STATUS",$status);
 
-		for($i=1;$i<10;$i++)
-		{
-			$choosecolhtml = getByModule_ColumnsHTML($cv_module,$modulecollist,$selectedcolumnslist[$i-1]);
-			$smarty->assign("CHOOSECOLUMN".$i,$choosecolhtml);
+		for($i=1;$i<10;$i++) {
+			$choosecolslist = getByModule_ColumnsList($cv_module,$modulecollist,$selectedcolumnslist[$i-1]);
+			$smarty->assign("CHOOSECOLUMN".$i,$choosecolslist);
 		}
 	
 		$stdfilterlist = $oCustomView->getStdFilterByCvid($recordid);
@@ -119,43 +105,21 @@ else
 		$stdfiltercolhtml = getStdFilterHTML($cv_module,$stdfilterlist["columnname"]);
 		$stdfilterjs = $oCustomView->getCriteriaJS();
 	
-		if(isset($stdfilterlist["startdate"]) && isset($stdfilterlist["enddate"]))
-		{
-			$smarty->assign("STARTDATE",getDisplayDate($stdfilterlist["startdate"]));
-			$smarty->assign("ENDDATE",getDisplayDate($stdfilterlist["enddate"]));
-		}
-		else{
-			$smarty->assign("STARTDATE",$stdfilterlist["startdate"]);
-			$smarty->assign("ENDDATE",$stdfilterlist["enddate"]);
-		}	
-	
-		$advfilterlist = $oCustomView->getAdvFilterByCvid($recordid);
-		$log->info('CustomView :: Successfully got Advanced Filter for the Viewid'.$recordid,'info');
-		for($i=1;$i<6;$i++)
-		{
-			$advfilterhtml = getAdvCriteriaHTML($advfilterlist[$i-1]["comparator"]);
-			$advcolumnhtml = getByModule_ColumnsHTML($cv_module,$modulecollist,$advfilterlist[$i-1]["columnname"]);
-			$smarty->assign("FOPTION".$i,$advfilterhtml);
-			$smarty->assign("BLOCK".$i,$advcolumnhtml);
-			$col = explode(":",$advfilterlist[$i-1]["columnname"]);
-			$temp_val = explode(",",$advfilterlist[$i-1]["value"]);
-			$and_text = "&nbsp;".$mod_strings['LBL_AND'];
-			if($col[4] == 'D' || ($col[4] == 'T' && $col[1] != 'time_start' && $col[1] != 'time_end') || $col[4] == 'DT')
-			{
-				$val = Array();
-				for($x=0;$x<count($temp_val);$x++)
-					if(trim($temp_val[$x] != ""))
-						$val[$x] = getDisplayDate(trim($temp_val[$x]));
-				$advfilterlist[$i-1]["value"] = implode(", ",$val);
-				$and_text = "<em old='(yyyy-mm-dd)'>(".$current_user->date_format.")</em>&nbsp;".$mod_strings['LBL_AND'];
-			}
-			$smarty->assign("VALUE".$i,$advfilterlist[$i-1]["value"]);
-			$smarty->assign("AND_TEXT".$i,$and_text);
-		}
+		$smarty->assign("STARTDATE",$stdfilterlist["startdate"]);
+		$smarty->assign("ENDDATE",$stdfilterlist["enddate"]);
+		
 		$smarty->assign("STDFILTERCOLUMNS",$stdfiltercolhtml);
 		$smarty->assign("STDCOLUMNSCOUNT",count($stdfiltercolhtml));
 		$smarty->assign("STDFILTERCRITERIA",$stdfilterhtml);
 		$smarty->assign("STDFILTER_JAVASCRIPT",$stdfilterjs);
+	
+		$advfilterlist = $oCustomView->getAdvFilterByCvid($recordid);
+		$advfilterhtml = getAdvCriteriaHTML();
+		$modulecolumnshtml = getByModule_ColumnsHTML($cv_module,$modulecollist);
+		$smarty->assign("FOPTION",$advfilterhtml);
+		$smarty->assign("COLUMNS_BLOCK",$modulecolumnshtml);
+		$smarty->assign("CRITERIA_GROUPS",$advfilterlist);		
+		
 		$smarty->assign("MANDATORYCHECK",implode(",",array_unique($oCustomView->mandatoryvalues)));
 		$smarty->assign("SHOWVALUES",implode(",",$oCustomView->showvalues));
 		$smarty->assign("EXIST","true");
@@ -205,8 +169,24 @@ $smarty->assign("RETURN_ACTION", $return_action);
 
 $smarty->display("CustomView.tpl");
 
-function getByModule_ColumnsHTML($module,$columnslist,$selected="")
-{
+function getByModule_ColumnsHTML($module,$columnslist,$selected="") {
+	$columnsList = getByModule_ColumnsList($module,$columnslist,$selected);
+	return generateSelectColumnsHTML($columnsList,$module);
+}
+
+function generateSelectColumnsHTML($columnsList, $module) {
+	$shtml = '';
+	
+	foreach($columnsList as $blocklabel=>$blockcolumns) {
+    	$shtml .= "<optgroup label='".getTranslatedString($blocklabel,$module)."' class='select' style='border:none'>";
+    	foreach($blockcolumns as $columninfo) {
+      		$shtml .= "<option ".$columninfo['selected']." value='".$columninfo['value']."'>".$columninfo['text']."</option>";
+    	}
+  	}
+  	return $shtml;	
+}
+
+function getByModule_ColumnsList($module,$columnslist,$selected="") {
 	global $oCustomView, $current_language,$theme;
 	global $app_list_strings;
 	$advfilter = array();
@@ -367,25 +347,19 @@ function getStdFilterHTML($module,$selected="")
 	*/
 function getAdvCriteriaHTML($selected="")
 {
-	global $adv_filter_options;
-	global $app_list_strings;
-	$AdvCriteria = array();
-	foreach($adv_filter_options as $key=>$value)
-	{
+	 global $adv_filter_options;
+		
+	 foreach($adv_filter_options as $key=>$value)
+	 {
 		if($selected == $key)
 		{
-			$advfilter_criteria['value'] = $key;
-			$advfilter_criteria['text'] = $value; 
-			$advfilter_criteria['selected'] = "selected";
+			$shtml .= "<option selected value=\"".$key."\">".$value."</option>";
 		}else
 		{
-			$advfilter_criteria['value'] = $key;
-			$advfilter_criteria['text'] = $value;
-			$advfilter_criteria['selected'] = "";
+			$shtml .= "<option value=\"".$key."\">".$value."</option>";
 		}
-		$AdvCriteria[] = $advfilter_criteria;
-	}
-
-	return $AdvCriteria;
+	 }
+	
+    return $shtml;
 }
 ?>

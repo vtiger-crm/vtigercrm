@@ -72,7 +72,7 @@ for($patch_count=0;$patch_count<count($temp);$patch_count++)
 	$empty_tag = "<tr><td colspan='3'>&nbsp;</td></tr>";
 	$start_tag = "<tr><td colspan='3'><b><font color='red'>&nbsp;";
 	$end_tag = "</font></b></td></tr>";
-	
+
 	if(is_file($filename))
 	{
 		echo $empty_tag.$start_tag.$temp[$patch_count]." ==> ".$temp[$patch_count+1]." Database changes -- Starts.".$end_tag;
@@ -93,16 +93,16 @@ for($patch_count=0;$patch_count<count($temp);$patch_count++)
 	if($adb->isMySQL()) {
 		@include_once('modules/Migration/Performance/'.$temp[$patch_count+1].'_mysql.php');
 	} elseif($adb->isPostgres()) {
-		@include_once('modules/Migration/Performance/'.$temp[$patch_count+1].'_postgres.php');		
+		@include_once('modules/Migration/Performance/'.$temp[$patch_count+1].'_postgres.php');
 	}
 }
-	
+
 	if(getMigrationCharsetFlag() == MIG_CHARSET_PHP_UTF8_DB_UTF8)
 	{
 		echo '</table><br><br>';
 		include("modules/Migration/HTMLtoUTF8Conversion.php");
 	}
-	
+
 if(!isset($continue_42P2))//This variable is used in MigrationInfo.php to avoid display the table tag
 {
 	echo '</table>';
@@ -168,7 +168,7 @@ function ExecuteQuery($query)
 	else
 		$status = $adb->query($query);
 
-	$query_count++;	
+	$query_count++;
 	if(is_object($status))
 	{
 		echo '
@@ -192,6 +192,5 @@ function ExecuteQuery($query)
 		$migrationlog->debug("Query Failed ==> $query \n Error is ==> [".$adb->database->ErrorNo()."]".$adb->database->ErrorMsg());
 	}
 }
-
 
 ?>

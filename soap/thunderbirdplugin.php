@@ -234,7 +234,7 @@ function track_email($user_name,$password,$contact_ids, $date_sent, $email_subje
 		$emailsubject = str_replace("'", "''",$email_subject);
 		$datesent = substr($date_sent,1,10);
 		$mydate = date('Y-m-d',$datesent);
-		$mydate = getDBInsertDateValue($mydate);
+		$mydate = DateTimeField::convertToDBFormat($mydate);
 		$email->column_fields[subject] = $emailsubject;
 		$email->column_fields[assigned_user_id] = $user_id;
 		$email->column_fields[date_start] = $mydate;

@@ -37,7 +37,7 @@ $focus->load_user($user_password);
 
 if($focus->is_authenticated())
 {
-
+	session_regenerate_id();
 	//Inserting entries for audit trail during login
 	
 	if($audit_trail == 'true')
@@ -75,24 +75,16 @@ if($focus->is_authenticated())
 	$_SESSION['app_unique_key'] = $application_unique_key;
 
 	// store the user's theme in the session
-	if (isset($_REQUEST['login_theme'])) {
-		$authenticated_user_theme = vtlib_purify($_REQUEST['login_theme']);
-	}
-	elseif (isset($_REQUEST['ck_login_theme']))  {
-		$authenticated_user_theme = vtlib_purify($_REQUEST['ck_login_theme']);
-	}
-	else {
+	if(!empty($focus->column_fields["theme"])) {
+		$authenticated_user_theme = $focus->column_fields["theme"];
+	} else {
 		$authenticated_user_theme = $default_theme;
 	}
 	
 	// store the user's language in the session
-	if (isset($_REQUEST['login_language'])) {
-		$authenticated_user_language = vtlib_purify($_REQUEST['login_language']);
-	}
-	elseif (isset($_REQUEST['ck_login_language']))  {
-		$authenticated_user_language = vtlib_purify($_REQUEST['ck_login_language']);
-	}
-	else {
+	if(!empty($focus->column_fields["language"])) {
+		$authenticated_user_language = $focus->column_fields["language"];
+	} else {
 		$authenticated_user_language = $default_language;
 	}
 
@@ -127,7 +119,7 @@ if($focus->is_authenticated())
 	}
 	$arr = $_SESSION['lastpage'];
 	if(isset($_SESSION['lastpage']))
-		header("Location: index.php?".$arr[0]);
+		header("Location: index.php?".$arr);
 	else
 		header("Location: index.php");
 }
@@ -138,7 +130,8 @@ else
 	$rowList = $result->GetRows();
 	foreach ($rowList as $row) {
 		$cryptType = $row['crypt_type'];
-		if(strtolower($cryptType) == 'md5' && version_compare(PHP_VERSION, '5.3.0') >= 0) {
+		/* PHP 5.3 WIN implementation of crypt API not compatible with earlier version */
+		if(strtolower($cryptType) == 'md5' && version_compare(PHP_VERSION, '5.3.0') >= 0 && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ) {
 			header("Location: modules/Migration/PHP5.3_PasswordHelp.php");
 			die;
 		}

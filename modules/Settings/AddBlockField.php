@@ -16,7 +16,7 @@ global $mod_strings,$app_strings,$app_list_strings,$theme,$adb,$log;
 
 $theme_path="themes/".$theme."/";
 
-require_once($theme_path.'layout_utils.php');
+require_once('modules/Vtiger/layout_utils.php');
 $tabid=vtlib_purify($_REQUEST['tabid']);
 $mode = vtlib_purify($_REQUEST['mode']);
 $fieldid=vtlib_purify($_REQUEST['fieldselect']);

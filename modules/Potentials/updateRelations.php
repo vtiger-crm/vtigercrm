@@ -31,23 +31,8 @@ if(!empty($_REQUEST['idlist'])) {
 	$storearray = array($_REQUEST['entityid']);
 }
 $focus = CRMEntity::getInstance($currentModule);
-foreach($storearray as $id)
-{
-	if($id != '')
-	{			
-		if($dest_mod == 'Contacts') { //When we select contact from potential related list
-			$sql = "insert into vtiger_contpotentialrel values (?,?)";
-			$adb->pquery($sql, array($id, $forCRMRecord));
-		} elseif($dest_mod == 'Products') {//when we select product from potential related list
-			$sql = "insert into vtiger_seproductsrel values (?,?,?)";
-			$adb->pquery($sql, array($forCRMRecord, $id,'Potentials'));
-		} elseif($dest_mod == 'Documents') {
-			$sql = "insert into vtiger_senotesrel values (?,?)";
-			$adb->pquery($sql, array($forCRMRecord, $id));
-		} else {
-			$focus->save_related_module($currentModule, $forCRMRecord, $dest_mod, $id);
-		}
-	}
+if(!empty($storearray)) {
+	relateEntities($focus, $currentModule, $forCRMRecord, $dest_mod, $storearray);
 }
 
 header("Location: index.php?action=$action&module=$currentModule&record=".$forCRMRecord."&parenttab=".$parenttab);

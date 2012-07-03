@@ -23,19 +23,21 @@ require_once("modules/Users/Users.php");
 
 class VTCreateTodoTask extends VTTask{
 	public $executeImmediately = true;
-	
+
 	public function getFieldNames(){return array('todo', 'description', 'sendNotification', 'time', 'date', 'status', 'priority', 'days', 'direction', 'datefield', 'sendNotification');}
-	
+
 	function getAdmin(){
-		$user = new Users();
-		$user->retrieveCurrentUserInfoFromFile(1);
+		$user = Users::getActiveAdminUser();
 		global $current_user;
 		$this->originalUser = $current_user;
 		$current_user = $user;
 		return $user;
 	}
-	
+
 	public function doTask($entityData){
+		if(!vtlib_isModuleActive('Calendar')) {
+			return;
+		}
 		global $adb, $current_user;
 		$userId = $entityData->get('assigned_user_id');
 		if($userId===null){
@@ -43,6 +45,9 @@ class VTCreateTodoTask extends VTTask{
 		}
 
 		$baseDate = $entityData->get($this->datefield);
+		if($baseDate == '') {
+			$baseDate = date('Y-m-d');
+		}
 		$time = explode(' ',$baseDate);
 		if(count($time) < 2) {
 			$time[] = date('H:i');
@@ -50,6 +55,8 @@ class VTCreateTodoTask extends VTTask{
 		preg_match('/\d\d\d\d-\d\d-\d\d/', $baseDate, $match);
 		$baseDate = strtotime($match[0]);
 		$date = strftime('%Y-%m-%d', $baseDate+$this->days*24*60*60*($this->directions=='Before'?-1:1));
+		$startDate = new DateTimeField($date.' '.$time[1]);
+		$date = $startDate->getDisplayDate();
 		$fields = array(
 			'activitytype'=>'Task',
 			'description'=>$this->description,
@@ -57,7 +64,7 @@ class VTCreateTodoTask extends VTTask{
 			'taskpriority'=>$this->priority,
 			'taskstatus'=>$this->status,
 			'assigned_user_id'=>$userId,
-			'time_start'=>$time[1],
+			'time_start'=> $startDate->getDisplayTime(),
 			'sendnotification'=>($this->sendNotification!='' && $this->sendNotification!='N')?
 					true: false,
 			'date_start'=>$date,
@@ -70,7 +77,7 @@ class VTCreateTodoTask extends VTTask{
 		$id = $entityData->getId();
 		if($moduleName=='Contacts'){
 			$fields['contact_id'] = $id;
-		}else{ 
+		}else{
 			$data = vtws_describe('Calendar', $adminUser);
 			$fieldInfo = $data['fields'];
 			foreach($fieldInfo as $field){
@@ -79,12 +86,12 @@ class VTCreateTodoTask extends VTTask{
 				}
 			}
 			$refersTo = $parentIdField['type']['refersTo'];
-			
+
 			if(in_array($moduleName, $refersTo)){
 				$fields['parent_id'] = $id;
 			}
 		}
-		
+
 		vtws_create('Calendar', $fields, $adminUser);
 		global $current_user;
 		$current_user = $this->originalUser;
@@ -100,5 +107,10 @@ class VTCreateTodoTask extends VTTask{
 		}
 		return str_pad($hours, 2, '0', STR_PAD_LEFT).':'.str_pad($arr[2], 2, '0', STR_PAD_LEFT);
 	}
+
+	public function getTimeFieldList() {
+		return array('time');
+	}
+
 }
 ?>

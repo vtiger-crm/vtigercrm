@@ -72,6 +72,14 @@ if(isset($_REQUEST['seldeftype']) && $_REQUEST['seldeftype']!=""){
 	$oHomestuff->defaulttitle=str_replace("#"," ",$deftitlehash);
 }
 
+if(isset($_REQUEST['selreport']) && $_REQUEST['selreport']!=""){
+    $oHomestuff->selreport = $_REQUEST['selreport'];
+}
+
+if(isset($_REQUEST['selreportcharttype']) && $_REQUEST['selreportcharttype']!=""){
+    $oHomestuff->selreportcharttype = $_REQUEST['selreportcharttype'];
+}
+
 $loaddetail=$oHomestuff->addStuff();
 echo $loaddetail;	
 ?>

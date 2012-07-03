@@ -13,7 +13,7 @@ require_once('modules/com_vtiger_workflow/VTEmailRecipientsTemplate.inc');
 require_once('modules/Emails/mail.php');
 class VTEmailTask extends VTTask{
 	// Sending email takes more time, this should be handled via queue all the time.
-	public $executeImmediately = false; 
+	public $executeImmediately = false;
 
 	public function getFieldNames(){
 		return array("subject", "content", "recepient", 'emailcc', 'emailbcc');

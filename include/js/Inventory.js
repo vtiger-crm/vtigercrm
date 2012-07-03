@@ -77,15 +77,25 @@ function productPickList(currObj,module, row_no) {
 	
 	var currencyid = document.getElementById("inventory_currency").value;
 	popuptype = 'inventory_prod';
-	if(module == 'PurchaseOrder')
+	if(module == 'PurchaseOrder') {
 		popuptype = 'inventory_prod_po';
-	var record_id = '';
-    if(document.getElementsByName("account_id").length != 0)
-    	record_id= document.EditView.account_id.value;
-    if(record_id != '')
-    	window.open("index.php?module=Products&action=Popup&html=Popup_picker&select=enable&form=HelpDeskEditView&popuptype="+popuptype+"&curr_row="+rowId+"&relmod_id="+record_id+"&parent_module=Accounts&return_module="+module+"&currencyid="+currencyid,"productWin","width=640,height=600,resizable=0,scrollbars=0,status=1,top=150,left=200");
-    else
-		window.open("index.php?module=Products&action=Popup&html=Popup_picker&select=enable&form=HelpDeskEditView&popuptype="+popuptype+"&curr_row="+rowId+"&return_module="+module+"&currencyid="+currencyid,"productWin","width=640,height=600,resizable=0,scrollbars=0,status=1,top=150,left=200");
+		module_string = "&parent_module=Vendor";
+		parent_id = document.EditView.vendor_id.value;
+		
+		if(parent_id != '')
+			window.open("index.php?module=Products&action=Popup&html=Popup_picker&select=enable&form=HelpDeskEditView&popuptype="+popuptype+"&curr_row="+rowId+"&return_module="+module+"&currencyid="+currencyid+"&relmod_id="+parent_id+module_string,"productWin","width=640,height=600,resizable=0,scrollbars=0,status=1,top=150,left=200");
+		else
+			window.open("index.php?module=Products&action=Popup&html=Popup_picker&select=enable&form=HelpDeskEditView&popuptype="+popuptype+"&curr_row="+rowId+"&return_module="+module+"&currencyid="+currencyid,"productWin","width=640,height=600,resizable=0,scrollbars=0,status=1,top=150,left=200");
+	}
+	else {
+		var record_id = '';
+		if(document.getElementsByName("account_id").length != 0)
+			record_id= document.EditView.account_id.value;
+		if(record_id != '')
+			window.open("index.php?module=Products&action=Popup&html=Popup_picker&select=enable&form=HelpDeskEditView&popuptype="+popuptype+"&curr_row="+rowId+"&relmod_id="+record_id+"&parent_module=Accounts&return_module="+module+"&currencyid="+currencyid,"productWin","width=640,height=600,resizable=0,scrollbars=0,status=1,top=150,left=200");
+		else
+			window.open("index.php?module=Products&action=Popup&html=Popup_picker&select=enable&form=HelpDeskEditView&popuptype="+popuptype+"&curr_row="+rowId+"&return_module="+module+"&currencyid="+currencyid,"productWin","width=640,height=600,resizable=0,scrollbars=0,status=1,top=150,left=200");
+	}
 }
 
 function priceBookPickList(currObj, row_no) {
@@ -196,13 +206,12 @@ function calcProductTotal(rowId) {
 
 			var totalAfterDiscount = eval(total-document.getElementById("discountTotal"+rowId).innerHTML);
 			getObj("totalAfterDiscount"+rowId).innerHTML=roundValue(totalAfterDiscount.toString())
-
 			
 			var tax_type = document.getElementById("taxtype").value;
 			//if the tax type is individual then add the tax with net price
 			if(tax_type == 'individual')
 			{	
-				callTaxCalc(i);
+				callTaxCalc(rowId);
 				netprice = totalAfterDiscount+eval(document.getElementById("taxTotal"+rowId).innerHTML);
 			}
 			else
@@ -235,6 +244,7 @@ function calcGrandTotal() {
 		}
 	}
 //	alert(netTotal);
+	netTotal = netTotal.toFixed(2);
 	document.getElementById("netTotal").innerHTML = netTotal;
 	document.getElementById("subtotal").value = netTotal;
 	setDiscount(this,'_final');
@@ -631,11 +641,11 @@ function fnAddProductRow(module,image_path){
 	//Delete link
 	colone.className = "crmTableRow small";
 	colone.id = row.id+"_col1";
-	colone.innerHTML='<img src="themes/images/delete.gif" border="0" onclick="deleteRow(\''+module+'\','+count+',\'themes/images/\')"><input id="deleted'+count+'" name="deleted'+count+'" type="hidden" value="0"><br/><br/>&nbsp;<a href="javascript:moveUpDown(\'UP\',\''+module+'\','+count+')" title="Move Upward"><img src="themes/images/up_layout.gif" border="0"></a>';
+	colone.innerHTML='<img src="themes/images/delete.gif" border="0" onclick="deleteRow(\''+module+'\','+count+',\'themes/images/\')" style="cursor:pointer;"><input id="deleted'+count+'" name="deleted'+count+'" type="hidden" value="0"><br/><br/>&nbsp;<a href="javascript:moveUpDown(\'UP\',\''+module+'\','+count+')" title="Move Upward"><img src="themes/images/up_layout.gif" border="0"></a>';
 	/* Product Re-Ordering Feature Code Addition Starts */
 	if(iPrevCount != 1)
 	{
-		oPrevRow.cells[0].innerHTML = '<img src="themes/images/delete.gif" border="0" onclick="deleteRow(\''+module+'\','+iPrevCount+')"><input id="deleted'+iPrevCount+'" name="deleted'+iPrevCount+'" type="hidden" value="0"><br/><br/>&nbsp;<a href="javascript:moveUpDown(\'UP\',\''+module+'\','+iPrevCount+')" title="Move Upward"><img src="themes/images/up_layout.gif" border="0"></a>&nbsp;&nbsp;<a href="javascript:moveUpDown(\'DOWN\',\''+module+'\','+iPrevCount+')" title="Move Downward"><img src="themes/images/down_layout.gif" border="0"></a>';
+		oPrevRow.cells[0].innerHTML = '<img src="themes/images/delete.gif" border="0" onclick="deleteRow(\''+module+'\','+iPrevCount+')" style="cursor:pointer;"><input id="deleted'+iPrevCount+'" name="deleted'+iPrevCount+'" type="hidden" value="0"><br/><br/>&nbsp;<a href="javascript:moveUpDown(\'UP\',\''+module+'\','+iPrevCount+')" title="Move Upward"><img src="themes/images/up_layout.gif" border="0"></a>&nbsp;&nbsp;<a href="javascript:moveUpDown(\'DOWN\',\''+module+'\','+iPrevCount+')" title="Move Downward"><img src="themes/images/down_layout.gif" border="0"></a>';
 	}
 	else
 	{

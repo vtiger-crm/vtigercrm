@@ -16,7 +16,7 @@ require_once('modules/Calendar/Calendar.php');
 require_once('modules/Calendar/CalendarCommon.php');
 require_once("modules/Emails/mail.php");
 
- global $theme,$mod_strings,$app_strings,$current_user;
+ global $theme,$mod_strings,$app_strings,$current_user,$currentModule;
  $theme_path="themes/".$theme."/";
  $image_path=$theme_path."images/";
  $category = getParentTab();
@@ -165,6 +165,13 @@ function getAssignedToHTML($assignedto,$toggletype)
 	return $htmlStr;
 }
 
+$date = new DateTimeField(null);
+$endDate = new DateTimeField(date("Y-m-d H:i:s", (time() + (1 * 24 * 60 * 60))));
+list($startYear, $startMonth, $startDay) = DateTimeField::convertToDBFormat($date->getDisplayDate());
+list($startHour, $startMin) = explode(':', $date->getDisplayTime());
+list($startYear, $startMonth, $startDay) = DateTimeField::convertToDBFormat($date->getDisplayDate());
+list($startHour, $startMin) = explode(':', $date->getDisplayTime());
+
 ?>
        
 	<!-- Add Event DIV starts-->
@@ -223,18 +230,18 @@ function getAssignedToHTML($assignedto,$toggletype)
 			<tr>
 				<td nowrap align="right"><b><font color="red">*</font><?php echo $mod_strings['LBL_EVENTNAME']?></b></td>
 				<td align="left"><input name="subject" type="text" class="textbox" value="" style="width:50%">&nbsp;&nbsp;&nbsp; 
-			<?php if(getFieldVisibilityPermission('Events',$current_user->id,'visibility') == '0') { ?>	
+			<?php if(getFieldVisibilityPermission('Events',$current_user->id,'visibility', 'readwrite') == '0') { ?>	
 			<input name="visibility" value="Public" type="checkbox"><?php echo $mod_strings['LBL_PUBLIC']; ?>
 			<?php } ?>	
 			</td>
 			</tr>
-			<?php if(getFieldVisibilityPermission('Events',$current_user->id,'description') == '0') { ?>
+			<?php if(getFieldVisibilityPermission('Events',$current_user->id,'description', 'readwrite') == '0') { ?>
 			<tr>
 				<td valign="top" align="right"><b><?php echo $mod_strings['Description']?></b></td>
 				<td align="left"><textarea style = "width:100%; height : 60px;" name="description"></textarea></td>
 			</tr>
 			<?php } ?>
-			<?php if(getFieldVisibilityPermission('Events',$current_user->id,'location') == '0') { ?>
+			<?php if(getFieldVisibilityPermission('Events',$current_user->id,'location', 'readwrite') == '0') { ?>
 			<tr>
 				<td nowrap align="right"><b><?php echo $mod_strings['Location']?></b></td>
 				<td align="left"><input name="location" type="text" class="textbox" value="" style="width:50%"></td>
@@ -244,30 +251,30 @@ function getAssignedToHTML($assignedto,$toggletype)
 				<td colspan=2 width=80% align="center">
 					<table border=0 cellspacing=0 cellpadding=3 width=80%>
 					<tr>
-						<?php if(getFieldVisibilityPermission('Events',$current_user->id,'eventstatus') == '0')	{ ?>
+						<?php if(getFieldVisibilityPermission('Events',$current_user->id,'eventstatus', 'readwrite') == '0')	{ ?>
 						<td ><b><font color="red">*</font><?php echo $mod_strings['Status'] ; ?></b></td>
 						<?php } ?>
-						<?php if(getFieldVisibilityPermission('Events',$current_user->id,'assigned_user_id') == '0') { ?>
+						<?php if(getFieldVisibilityPermission('Events',$current_user->id,'assigned_user_id', 'readwrite') == '0') { ?>
 						<td ><b><?php echo $mod_strings['Assigned To']; ?></b></td>
 						<?php } ?>
 					</tr>
 					<tr>
-						<?php if(getFieldVisibilityPermission('Events',$current_user->id,'eventstatus') == '0') { ?>
+						<?php if(getFieldVisibilityPermission('Events',$current_user->id,'eventstatus', 'readwrite') == '0') { ?>
 						<td valign=top><?php echo getActFieldCombo('eventstatus','vtiger_eventstatus'); ?></td>
 						<?php } ?>	
 						<td valign=top rowspan=2>
-							<?php if(getFieldVisibilityPermission('Events',$current_user->id,'assigned_user_id') == '0') { ?>
+							<?php if(getFieldVisibilityPermission('Events',$current_user->id,'assigned_user_id', 'readwrite') == '0') { ?>
 							<?php echo getAssignedToHTML($eventassignedto,'event'); ?>
 							<br><?php }else{
 								?><input name="assigned_user_id" value="<?php echo $current_user->id ?>" type="hidden">
 							<?php } ?>
 
-								<?php if(getFieldVisibilityPermission('Events',$current_user->id,'sendnotification') == '0') { ?>
+								<?php if(getFieldVisibilityPermission('Events',$current_user->id,'sendnotification', 'readwrite') == '0') { ?>
 							<input type="checkbox" name="sendnotification" >&nbsp;<?php echo $mod_strings['LBL_SENDNOTIFICATION'] ?>
 							<?php } ?>
 						</td>
 					</tr>
-					<?php if(getFieldVisibilityPermission('Events',$current_user->id,'taskpriority') == '0') { ?>
+					<?php if(getFieldVisibilityPermission('Events',$current_user->id,'taskpriority', 'readwrite') == '0') { ?>
 					<tr>
 						<td valign=top><b><?php echo $mod_strings['Priority'] ; ?></b>
 							<br><?php echo getActFieldCombo('taskpriority','vtiger_taskpriority'); ?>
@@ -291,7 +298,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 						<?php echo  getTimeCombo($calendar_arr['calendar']->hour_format,'start');?>
 					</td></tr>
                                         <tr><td align="left">
-					<input type="text" name="date_start" id="jscal_field_date_start" class="textbox" style="width:90px" onChange="dochange('jscal_field_date_start','jscal_field_due_date');" value="<?php echo getDisplayDate($calendar_arr['calendar']->date_time->get_formatted_date()) ?>"></td><td width=100% align="left"><img border=0 src="<?php echo $image_path?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_date_start">
+												<input type="text" name="date_start" id="jscal_field_date_start" class="textbox" style="width:90px" onChange="dochange('jscal_field_date_start','jscal_field_due_date');" value="<?php echo $date->getDisplayDate(); ?>"></td><td width=100% align="left"><img border=0 src="<?php echo $image_path?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_date_start">
 						<script type="text/javascript">
                 					Calendar.setup ({
 								inputField : "jscal_field_date_start", ifFormat : "<?php  echo $date_format; ?>", showsTime : false, button : "jscal_trigger_date_start", singleClick : true, step : 1
@@ -307,7 +314,7 @@ function getAssignedToHTML($assignedto,$toggletype)
                                                 <?php echo getTimeCombo($calendar_arr['calendar']->hour_format,'end');?>
 					</td></tr>
 				        <tr><td align="left">
-					<input type="text" name="due_date" id="jscal_field_due_date" class="textbox" style="width:90px" value="<?php echo getDisplayDate($calendar_arr['calendar']->date_time->get_formatted_date()) ?>"></td><td width=100% align="left"><img border=0 src="<?php echo $image_path?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_due_date">
+								<input type="text" name="due_date" id="jscal_field_due_date" class="textbox" style="width:90px" value="<?php echo $endDate->getDisplayDate() ?>"></td><td width=100% align="left"><img border=0 src="<?php echo $image_path?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_due_date">
 					<script type="text/javascript">
                                                         Calendar.setup ({
                                                                 inputField : "jscal_field_due_date", ifFormat : "<?php echo $date_format; ?>", showsTime : false, button : "jscal_trigger_due_date", singleClick : true, step : 1
@@ -323,7 +330,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 					<?php echo getTimeCombo($calendar_arr['calendar']->hour_format,'followup_start');?>
 					</td></tr>
 					<tr><td align="left">
-						<input type="text" name="followup_date" id="jscal_field_followup_date" class="textbox" style="width:90px" value="<?php echo getDisplayDate($calendar_arr['calendar']->date_time->get_formatted_date()) ?>"></td><td width=100% align="left"><img border=0 src="<?php echo $image_path?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_followup_date">
+						<input type="text" name="followup_date" id="jscal_field_followup_date" class="textbox" style="width:90px" value="<?php echo $calendar_arr['calendar']->date_time->get_formatted_date() ?>"></td><td width=100% align="left"><img border=0 src="<?php echo $image_path?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_followup_date">
 						<script type="text/javascript">
 						Calendar.setup ({
 							inputField : "jscal_field_followup_date", ifFormat : "<?php echo $date_format; ?>", showsTime : false, button : "jscal_trigger_followup_date", singleClick : true, step : 1
@@ -384,10 +391,10 @@ function getAssignedToHTML($assignedto,$toggletype)
 					<td class="dvtTabCache" style="width:10px" nowrap>&nbsp;</td>
 					<td id="cellTabInvite" class="dvtSelectedCell" align=center nowrap><a href="javascript:doNothing()" onClick="switchClass('cellTabInvite','on');switchClass('cellTabAlarm','off');switchClass('cellTabRepeat','off');switchClass('cellTabRelatedto','off');ghide('addEventAlarmUI');gshow('addEventInviteUI','',document.EditView.date_start.value,document.EditView.due_date.value,document.EditView.starthr.value,document.EditView.startmin.value,document.EditView.startfmt.value,document.EditView.endhr.value,document.EditView.endmin.value,document.EditView.endfmt.value);ghide('addEventRepeatUI');ghide('addEventRelatedtoUI');"><?php echo $mod_strings['LBL_INVITE']?></a></td>
 					<td class="dvtTabCache" style="width:10px">&nbsp;</td>
-					<?php if(getFieldVisibilityPermission('Events',$current_user->id,'reminder_time') == '0') { ?>
+					<?php if(getFieldVisibilityPermission('Events',$current_user->id,'reminder_time', 'readwrite') == '0') { ?>
 					<td id="cellTabAlarm" class="dvtUnSelectedCell" align=center nowrap><a href="javascript:doNothing()" onClick="switchClass('cellTabInvite','off');switchClass('cellTabAlarm','on');switchClass('cellTabRepeat','off');switchClass('cellTabRelatedto','off');gshow('addEventAlarmUI','',document.EditView.date_start.value,document.EditView.due_date.value,document.EditView.starthr.value,document.EditView.startmin.value,document.EditView.startfmt.value,document.EditView.endhr.value,document.EditView.endmin.value,document.EditView.endfmt.value);ghide('addEventInviteUI');ghide('addEventRepeatUI');ghide('addEventRelatedtoUI');"><?php echo $mod_strings['LBL_REMINDER']?></a></td>
 					<td class="dvtTabCache" style="width:10px">&nbsp;</td>
-					<?php } if(getFieldVisibilityPermission('Events',$current_user->id,'recurringtype') == '0') {  ?>
+					<?php } if(getFieldVisibilityPermission('Events',$current_user->id,'recurringtype', 'readwrite') == '0') {  ?>
 					<td id="cellTabRepeat" class="dvtUnSelectedCell" align=center nowrap><a href="javascript:doNothing()" onClick="switchClass('cellTabInvite','off');switchClass('cellTabAlarm','off');switchClass('cellTabRepeat','on');switchClass('cellTabRelatedto','off');ghide('addEventAlarmUI');ghide('addEventInviteUI');gshow('addEventRepeatUI','',document.EditView.date_start.value,document.EditView.due_date.value,document.EditView.starthr.value,document.EditView.startmin.value,document.EditView.startfmt.value,document.EditView.endhr.value,document.EditView.endmin.value,document.EditView.endfmt.value);ghide('addEventRelatedtoUI');"><?php echo $mod_strings['LBL_REPEAT']?></a></td>
 					<?php } ?>
 					<td class="dvtTabCache" style="width:10px">&nbsp;</td>
@@ -454,7 +461,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 			
 			<!-- Reminder UI -->
 				<DIV id="addEventAlarmUI" style="display:none;width:100%">
-				<?php if(getFieldVisibilityPermission('Events',$current_user->id,'reminder_time') == '0') { ?>
+				<?php if(getFieldVisibilityPermission('Events',$current_user->id,'reminder_time', 'readwrite') == '0') { ?>
 				<table bgcolor="#FFFFFF">
 					<tr><td><?php echo $mod_strings['LBL_SENDREMINDER']?></td>
 						<td>
@@ -524,7 +531,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 				</DIV>
 			<!-- Repeat UI -->
 				<div id="addEventRepeatUI" style="display:none;width:100%">
-			<?php if(getFieldVisibilityPermission('Events',$current_user->id,'recurringtype') == '0') {  ?>
+			<?php if(getFieldVisibilityPermission('Events',$current_user->id,'recurringtype', 'readwrite') == '0') {  ?>
 				<table border=0 cellspacing=0 cellpadding=2  width=100% bgcolor="#FFFFFF">
 				<tr>
 					<td nowrap align=right width=20% valign=top>
@@ -557,7 +564,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 										<option value="Yearly"><?php echo $mod_strings['LBL_YEAR']; ?></option>
 									</select>
 									<!-- Limit for Repeating Event -->
-									<b><?php echo $mod_strings['LBL_UNTIL']; ?>:</b> <input type="text" name="calendar_repeat_limit_date" id="calendar_repeat_limit_date" class="textbox" style="width:90px" value="<?php echo getDisplayDate($calendar_arr['calendar']->date_time->get_formatted_date()) ?>" ></td><td align="left"><img border=0 src="<?php echo $image_path ?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_calendar_repeat_limit_date">
+									<b><?php echo $mod_strings['LBL_UNTIL']; ?>:</b> <input type="text" name="calendar_repeat_limit_date" id="calendar_repeat_limit_date" class="textbox" style="width:90px" value="<?php echo $endDate->getDisplayDate() ?>" ></td><td align="left"><img border=0 src="<?php echo $image_path ?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_calendar_repeat_limit_date">
 									<script type="text/javascript">
 									Calendar.setup ({
 										inputField : "calendar_repeat_limit_date", ifFormat : "<?php  echo $date_format; ?>", showsTime : false, button : "jscal_trigger_calendar_repeat_limit_date", singleClick : true, step : 1
@@ -635,7 +642,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 				</div>
 				<div id="addEventRelatedtoUI" style="display:none;width:100%">
 					<table width="100%" cellpadding="5" cellspacing="0" border="0" bgcolor="#FFFFFF">
-				<?php if(getFieldVisibilityPermission('Events',$current_user->id,'parent_id') == '0') {  ?>
+				<?php if(getFieldVisibilityPermission('Events',$current_user->id,'parent_id', 'readwrite') == '0') {  ?>
 						<tr>
 							<td width="15%"><b><?php echo $mod_strings['LBL_RELATEDTO']?></b></td>
 							<td>
@@ -646,6 +653,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 									<option value="Accounts"><?php echo $app_strings['Accounts']?></option>
 									<option value="Potentials"><?php echo $app_strings['Potentials']?></option>
 									<option value="HelpDesk"><?php echo $app_strings['HelpDesk']?></option>
+									<option value="Campaigns"><?php echo $app_strings['Campaigns']?></option>
 								</select>
 							</td>
 							<td>
@@ -657,6 +665,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 							</td>
 						</tr>
 					<?php } ?>
+					<?php if(getFieldVisibilityPermission('Events',$current_user->id,'contact_id', 'readwrite') == '0') { ?>	
 						<tr>
 						<td><b><?php echo $app_strings['Contacts'] ?></b></td>
 							<td colspan="2">
@@ -669,6 +678,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 								
 							</td>
 						</tr>
+					<?php } ?>
 					</table>
 				</div>
 			</td>
@@ -678,10 +688,8 @@ function getAssignedToHTML($assignedto,$toggletype)
 		</td>
 		</tr>
 	</table>
+		<br />
 	<table border=0 cellspacing=0 cellpadding=5 width=100% class="layerPopupTransport">
-		<br>
-		
-		
 		<tr>
 			<td valign=top></td>
 			<td  align=center>
@@ -703,7 +711,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 				if(isPermitted("Calendar","EditView") == "yes")
 				{
 				?>
-					<?php if(getFieldVisibilityPermission('Events',$current_user->id,'eventstatus') == '0') { ?>
+					<?php if(getFieldVisibilityPermission('Events',$current_user->id,'eventstatus', 'readwrite') == '0') { ?>
 						<a href="javascript:;" id="complete" onClick="fninvsh('eventcalAction')" class="calMnu">- <?php echo $mod_strings['LBL_HELD']?></a>
 						<a href="javascript:;" id="pending" onClick="fninvsh('eventcalAction')" class="calMnu">- <?php echo $mod_strings['LBL_NOTHELD']?></a>
 					<?php }?>		
@@ -715,7 +723,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 				if(isPermitted("Calendar","Delete") == "yes")	
 				{
 				?>
-				<a href="" id="actdelete" onclick ="fninvsh('eventcalAction');return confirm('Are you sure?');" class="calMnu">- <?php echo $mod_strings['LBL_DEL']?></a>
+				<a href="" id="actdelete" onclick ="fninvsh('eventcalAction');return confirm('<?php echo $mod_strings['LBL_ARE_YOU_SURE']?>');" class="calMnu">- <?php echo $mod_strings['LBL_DEL']?></a>
 				<?php
 				}
 				?>
@@ -793,7 +801,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 			<td width="20%" align="right"><b><font color="red">*</font><?php echo $mod_strings['LBL_TODONAME'] ?></b></td>
                         <td width="80%" align="left"><input name="task_subject" type="text" value="" class="textbox" style="width:70%"></td>
                 </tr>
-		<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'description') == '0') { ?>
+		<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'description', 'readwrite') == '0') { ?>
 		<tr>
 			<td align="right"><b><?php echo $mod_strings['Description'] ?></b></td>
 			<td align="left"><textarea style="width: 100%; height: 60px;" name="task_description"></textarea></td>
@@ -804,34 +812,34 @@ function getAssignedToHTML($assignedto,$toggletype)
 				<table border="0" cellpadding="3" cellspacing="0" width="80%">
 					<tr>
 						<td align="left">
-							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'taskstatus') == '0') { ?>
+							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'taskstatus', 'readwrite') == '0') { ?>
 							<b><?php echo $mod_strings['Status']; ?></b>
 							<?php } ?>
 						</td>
 						<td align="left">
-							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'taskpriority') == '0') { ?>
+							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'taskpriority', 'readwrite') == '0') { ?>
 							<b><?php echo $mod_strings['Priority']; ?></b>
 							<?php } ?>
 						</td>
 						<td align="left">
-							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'assigned_user_id') == '0') { ?>
+							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'assigned_user_id', 'readwrite') == '0') { ?>
 							<b><?php echo $mod_strings['Assigned To']; ?></b>
 							<?php } ?>
 						</td>
 					</tr>
 					<tr>
 						<td align="left" valign="top">
-							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'taskstatus') == '0') { ?>
+							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'taskstatus', 'readwrite') == '0') { ?>
 							<?php echo getActFieldCombo('taskstatus','vtiger_taskstatus'); ?>
 							<?php } ?>	
 						</td>
 						<td align="left" valign="top">
-							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'taskpriority') == '0') { ?>
+							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'taskpriority', 'readwrite') == '0') { ?>
 							<?php echo getActFieldCombo('taskpriority','vtiger_taskpriority'); ?>
 							<?php } ?>
 						</td>
 						<td align="left" valign="top">
-							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'assigned_user_id') == '0') { ?>
+							<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'assigned_user_id', 'readwrite') == '0') { ?>
 							<?php echo getAssignedToHTML($taskassignedto,'task'); ?>
 							<?php }else{
 						       	?><input name="task_assigned_user_id" value="<?php echo $current_user->id ?>" type="hidden">
@@ -851,7 +859,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 						<tr><td colspan=3 align="left"><b><?php echo $mod_strings['LBL_TODODATETIME'] ?></b></td></tr>
 						<tr><td colspan=3 align="left"><?php echo getTimeCombo($calendar_arr['calendar']->hour_format,'start','','','',true); ?></td></tr>
 						<tr><td align="left">
-							<input type="text" name="task_date_start" id="task_date_start" class="textbox" style="width:90px" onChange="dochange('task_date_start','task_due_date');" value="<?php echo getDisplayDate($calendar_arr['calendar']->date_time->get_formatted_date()) ?>" ></td><td width=100% align="left"><img border=0 src="<?php echo $image_path ?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_task_date_start">
+								<input type="text" name="task_date_start" id="task_date_start" class="textbox" style="width:90px" onChange="dochange('task_date_start','task_due_date');" value="<?php echo $date->getDisplayDate() ?>" ></td><td width=100% align="left"><img border=0 src="<?php echo $image_path ?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_task_date_start">
 						<script type="text/javascript">
 						Calendar.setup ({
 							inputField : "task_date_start", ifFormat : "<?php  echo $date_format; ?>", showsTime : false, button : "jscal_trigger_task_date_start", singleClick : true, step : 1
@@ -863,7 +871,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 						<table border="0" cellpadding="2" cellspacing="0" width="95%" align=center>
 							<tr><td colspan=3 align="left"><b><?php echo $mod_strings['Due Date'] ?></b></td></tr>
 							<tr><td align="left">
-								<input type="text" name="task_due_date" id="task_due_date" class="textbox" style="width:90px" value="<?php echo getDisplayDate($calendar_arr['calendar']->date_time->get_formatted_date()) ?>" ></td><td width=100% align="left"><img border=0 src="<?php echo $image_path ?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_task_due_date">
+									<input type="text" name="task_due_date" id="task_due_date" class="textbox" style="width:90px" value="<?php echo $endDate->getDisplayDate() ?>" ></td><td width=100% align="left"><img border=0 src="<?php echo $image_path ?>btnL3Calendar.gif" alt="<?php echo $mod_strings['LBL_SET_DATE']?>" title="<?php echo $mod_strings['LBL_SET_DATE']?>" id="jscal_trigger_task_due_date">
 						<script type="text/javascript">
 						Calendar.setup ({
 							inputField : "task_due_date", ifFormat : "<?php  echo $date_format; ?>", showsTime : false, button : "jscal_trigger_task_due_date", singleClick : true, step : 1
@@ -915,18 +923,18 @@ function getAssignedToHTML($assignedto,$toggletype)
 		<br />
 	<?php } ?>
 				
-	<?php if((getFieldVisibilityPermission('Calendar',$current_user->id,'sendnotification') == '0') || (getFieldVisibilityPermission('Calendar',$current_user->id,'parent_id') == '0') || (getFieldVisibilityPermission('Calendar',$current_user->id,'contact_id') == '0')) { ?>
+	<?php if((getFieldVisibilityPermission('Calendar',$current_user->id,'sendnotification', 'readwrite') == '0') || (getFieldVisibilityPermission('Calendar',$current_user->id,'parent_id', 'readwrite') == '0') || (getFieldVisibilityPermission('Calendar',$current_user->id,'contact_id', 'readwrite') == '0')) { ?>
 	<table align="center" border="0" cellpadding="0" cellspacing="0" width="95%" bgcolor="#FFFFFF">
 		<tr>
 			<td>
 				<table border=0 cellspacing=0 cellpadding=3 width=100%>
 					<tr>
 						<td class="dvtTabCache" style="width:10px" nowrap="nowrap">&nbsp;</td>
-						<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'sendnotification') == '0') { $classval = "dvtUnSelectedCell";  ?>
+						<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'sendnotification', 'readwrite') == '0') { $classval = "dvtUnSelectedCell";  ?>
 						<td id="cellTabNotification" class="dvtSelectedCell" align=center nowrap><a href="javascript:doNothing()" onClick="switchClass('cellTabNotification','on');switchClass('cellTabtodoRelatedto','off');gshow('addTaskAlarmUI','todo',document.createTodo.task_date_start.value,document.createTodo.task_due_date.value,document.createTodo.starthr.value,document.createTodo.startmin.value,document.createTodo.startfmt.value,'','','',document.createTodo.viewOption.value,document.createTodo.subtab.value);ghide('addTaskRelatedtoUI');"><?php echo $mod_strings['LBL_NOTIFICATION']?></a></td>
 						<?php } else { $classval = "dvtSelectedCell"; } ?>
 						<td class="dvtTabCache" style="width: 10px;" nowrap="nowrap">&nbsp;</td>
-						<?php if((getFieldVisibilityPermission('Calendar',$current_user->id,'parent_id') == '0') || (getFieldVisibilityPermission('Calendar',$current_user->id,'contact_id') == '0')) { ?>
+						<?php if((getFieldVisibilityPermission('Calendar',$current_user->id,'parent_id', 'readwrite') == '0') || (getFieldVisibilityPermission('Calendar',$current_user->id,'contact_id', 'readwrite') == '0')) { ?>
 						<td id="cellTabtodoRelatedto" class="<?php echo $classval ; ?>" align=center nowrap><a href="javascript:doNothing()" onClick="switchClass('cellTabtodoRelatedto','on'); switchClass('cellTabNotification','off');gshow('addTaskRelatedtoUI','todo',document.createTodo.task_date_start.value,document.createTodo.task_due_date.value,document.createTodo.starthr.value,document.createTodo.startmin.value,document.createTodo.startfmt.value,'','','',document.createTodo.viewOption.value,document.createTodo.subtab.value);ghide('addTaskAlarmUI');"><?php echo $mod_strings['LBL_RELATEDTO']?></a></td>					
 						<?php } ?>	
 						<td class="dvtTabCache" style="width: 100%;">&nbsp;</td>
@@ -938,7 +946,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 			<td width=100% valign=top align=left class="dvtContentSpace" style="padding:10px;height:120px">
 		<!-- Reminder UI -->
 		<DIV id="addTaskAlarmUI" style="display:block;width:100%">
-		<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'sendnotification') == '0') { ?>
+		<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'sendnotification', 'readwrite') == '0') { ?>
                 <table>
 			<tr><td><?php echo $mod_strings['LBL_SENDNOTIFICATION'] ?></td><td>
 				<input name="task_sendnotification" type="checkbox">
@@ -948,7 +956,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 		</DIV>
 		<div id="addTaskRelatedtoUI" style="display:<?php echo $vision; ?>;width:100%">
 			<table width="100%" cellpadding="5" cellspacing="0" border="0">
-			<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'parent_id') == '0') { ?>
+			<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'parent_id', 'readwrite') == '0') { ?>
 			<tr>
 				<td><b><?php echo $mod_strings['LBL_RELATEDTO']?></b></td>
 				<td>
@@ -958,12 +966,12 @@ function getAssignedToHTML($assignedto,$toggletype)
 						<option value="Leads"><?php echo $app_strings['Leads']?></option>
 						<option value="Accounts"><?php echo $app_strings['Accounts']?></option>
 						<option value="Potentials"><?php echo $app_strings['Potentials']?></option>
+						<option value="HelpDesk"><?php echo $app_strings['HelpDesk']?></option>
+						<option value="Campaigns"><?php echo $app_strings['Campaigns']?></option>
 						<option value="Quotes"><?php echo $app_strings['Quotes']?></option>
 						<option value="PurchaseOrder"><?php echo $app_strings['PurchaseOrder']?></option>
 						<option value="SalesOrder"><?php echo $app_strings['SalesOrder']?></option>
 						<option value="Invoice"><?php echo $app_strings['Invoice']?></option>
-						<option value="Campaigns"><?php echo $app_strings['Campaigns']?></option>
-						<option value="HelpDesk"><?php echo $app_strings['HelpDesk']?></option></select>
 						</select>
 				</td>
 				<td>
@@ -975,7 +983,7 @@ function getAssignedToHTML($assignedto,$toggletype)
 				</td>
 			</tr>
 			<?php } ?>
-			<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'contact_id') == '0') { ?>	
+			<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'contact_id', 'readwrite') == '0') { ?>	
 			<tr>
 			<td><b><?php echo $mod_strings['LBL_CONTACT_NAME'] ?></b></td>
 			<td colspan="2">
@@ -1071,7 +1079,7 @@ function getAssignedToHTML($assignedto,$toggletype)
                                 if(isPermitted("Calendar","EditView") == "yes")
                                 {
                                 ?>
-					<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'taskstatus') == '0') { ?>
+					<?php if(getFieldVisibilityPermission('Calendar',$current_user->id,'taskstatus', 'readwrite') == '0') { ?>
 	                                	<a href="" id="taskcomplete" onClick="fninvsh('taskcalAction');" class="calMnu">- <?php echo $mod_strings['LBL_COMPLETED']?></a>
         	                        	<a href="" id="taskpending" onClick="fninvsh('taskcalAction');" class="calMnu">- <?php echo $mod_strings['LBL_DEFERRED']?></a>
 					<?php } ?>		
@@ -1084,7 +1092,7 @@ function getAssignedToHTML($assignedto,$toggletype)
                                 if(isPermitted("Calendar","Delete") == "yes")
                                 {
                                 ?>
-                                <a href="" id="taskactdelete" onClick ="fninvsh('taskcalAction');return confirm('Are you sure?');" class="calMnu">- <?php echo $mod_strings['LBL_DEL']?></a>
+                                <a href="" id="taskactdelete" onClick ="fninvsh('taskcalAction');return confirm('<?php echo $mod_strings['LBL_ARE_YOU_SURE']?>');" class="calMnu">- <?php echo $mod_strings['LBL_DEL']?></a>
                                 <?php
                                 }
                                 ?>
@@ -1103,4 +1111,32 @@ function getAssignedToHTML($assignedto,$toggletype)
 	var theTodoHandle = document.getElementById("moveTodo");
 	var theTodoRoot   = document.getElementById("createTodo");
 	Drag.init(theTodoHandle, theTodoRoot);
+</script>
+
+<?php
+$picklistDependencyDSEvents = Vtiger_DependencyPicklist::getPicklistDependencyDatasource('Events');
+$picklistDependencyDSCalendar = Vtiger_DependencyPicklist::getPicklistDependencyDatasource('Calendar');
+?>
+<script type="text/javascript" src="include/js/FieldDependencies.js"></script>
+<script type="text/javascript" src="modules/com_vtiger_workflow/resources/jquery-1.2.6.js"></script>
+<script type="text/javascript">
+	jQuery.noConflict();
+</script>
+<script type="text/javascript">
+	jQuery(document).ready(function() { 
+		<?php if(!empty($picklistDependencyDSEvents)) { ?>
+		(new FieldDependencies(<?php echo Zend_Json::encode($picklistDependencyDSEvents) ?>)).init();
+		<?php } ?>
+		<?php if(!empty($picklistDependencyDSCalendar)) { ?>
+		(new FieldDependencies(<?php echo Zend_Json::encode($picklistDependencyDSCalendar) ?>)).init(document.forms['createTodo']);
+		<?php } ?>
+	});
+</script>
+<script type="text/javascript">
+function triggerOnChangeHandler(elementName, formName) {
+	if(typeof(formName) == 'undefined') {
+		formName = document.forms['EditView'];
+	}
+	jQuery('[name="'+elementName+'"]', formName).trigger('change');
+}
 </script>

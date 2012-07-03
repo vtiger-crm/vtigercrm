@@ -9,7 +9,8 @@
 <table border="0" align ="center" width ="95%">
 	<tr>
 		<td >
-            {if $DELETE eq 'Delete'}
+            {assign var='massDelete' value='LBL_MASS_DELETE'|getTranslatedString:$MODULE}
+            {if $DELETE eq $massDelete}
                  <input class="crmbutton small delete" type="button" value="{$APP.LBL_DELETE}" onclick="return delete_fields('{$MODULE}')"/>
             {/if}
         </td>

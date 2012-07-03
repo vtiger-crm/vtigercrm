@@ -26,9 +26,9 @@ require_once('modules/Users/Users.php');
 require_once('include/utils/utils.php');
 require_once('include/utils/UserInfoUtil.php');
 require_once('include/utils/GetUserGroups.php');
+require_once('modules/Users/UserTimeZonesArray.php');
 //to check audittrail if enable or not
 require_once('user_privileges/audit_trail.php');
-
 global $current_user;
 global $theme;
 global $default_language;
@@ -42,7 +42,7 @@ $focus = new Users();
 if(!empty($_REQUEST['record'])) 
 {
 	$focus->retrieve_entity_info($_REQUEST['record'],'Users');
-	$focus->id = $_REQUEST['record'];	
+	$focus->id = $_REQUEST['record'];
 }
 else
 {
@@ -55,7 +55,7 @@ else
 }
 
 if( $focus->user_name == "" )
-{  
+{
 
 	if(is_admin($current_user))
 	{
@@ -66,7 +66,7 @@ if( $focus->user_name == "" )
                         <b>User does not exist.</b>
                     </td>
 		    </tr>";
-	
+
     echo "
                 <tr>
                     <td>
@@ -77,7 +77,7 @@ if( $focus->user_name == "" )
 	    ";
     exit;
 	}
-  
+
 }
 
 
@@ -124,7 +124,7 @@ if(isset($focus->imagename) && $focus->imagename!='')
 	<p><script type='text/javascript' src='include/js/scale_demo.js'></script></p>";
 	//$smarty->assign("USER_IMAGE",$imagestring);
 }
-				
+
 if(isset($_REQUEST['modechk']) && $_REQUEST['modechk'] != '' )
 {
 	$modepref = $_REQUEST['modechk'];
@@ -140,7 +140,7 @@ if ((is_admin($current_user) || $_REQUEST['record'] == $current_user->id)
 		&& isset($default_user_name)
 		&& $default_user_name == $focus->user_name
 		&& isset($lock_default_user_name)
-		&& $lock_default_user_name == true	) {
+		&& $lock_default_user_name == true) {
 	$buttons = "<input title='".$app_strings['LBL_EDIT_BUTTON_TITLE']."' accessKey='".$app_strings['LBL_EDIT_BUTTON_KEY']."' class='crmButton small edit' onclick=\"this.form.return_module.value='Users'; this.form.return_action.value='DetailView'; this.form.return_id.value='$focus->id'; this.form.action.value='EditView';\" type='submit' name='Edit' value='  ".$app_strings['LBL_EDIT_BUTTON_LABEL']."  '>";
 	$smarty->assign('EDIT_BUTTON',$buttons);
 }
@@ -153,7 +153,7 @@ elseif (is_admin($current_user) || $_REQUEST['record'] == $current_user->id) {
 	
 	
 }
-if (is_admin($current_user)) 
+if (is_admin($current_user))
 {
 	$buttons = "<input title='".$app_strings['LBL_DUPLICATE_BUTTON_TITLE']."' accessKey='".$app_strings['LBL_DUPLICATE_BUTTON_KEY']."' class='crmButton small cancel' onclick=\"this.form.return_module.value='Users'; this.form.return_action.value='DetailView'; this.form.isDuplicate.value=true; this.form.return_id.value='".vtlib_purify($_REQUEST['record'])."';this.form.action.value='EditView'\" type='submit' name='Duplicate' value=' ".$app_strings['LBL_DUPLICATE_BUTTON_LABEL']."'   >";
 	$smarty->assign('DUPLICATE_BUTTON',$buttons);
@@ -194,15 +194,17 @@ $smarty->assign("HOMEORDER",$focus->getHomeStuffOrder($focus->id));
 //Added to provide User based Tagcloud
 $smarty->assign("TAGCLOUDVIEW",getTagCloudView($focus->id));
 $smarty->assign("BLOCKS", getBlocks($currentModule,"detail_view",'',$focus->column_fields));
-$smarty->assign("USERNAME",$focus->last_name.' '.$focus->first_name);
+$smarty->assign("USERNAME", getFullNameFromArray('Users', $focus->column_fields));
 $smarty->assign("HOUR_FORMAT",$focus->hour_format);
 $smarty->assign("START_HOUR",$focus->start_hour);
 $_SESSION['Users_FORM_TOKEN'] = rand(5, 2000) * rand(2, 7);
 $smarty->assign('FORM_TOKEN', $_SESSION['Users_FORM_TOKEN']);
 
+
 //for check audittrail if it is enable or not
 $smarty->assign("AUDITTRAIL",$audit_trail);
 
+$smarty->assign("view", null);
 $smarty->display("UserDetailView.tpl");
 }
 else

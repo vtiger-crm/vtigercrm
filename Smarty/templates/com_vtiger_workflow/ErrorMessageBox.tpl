@@ -19,6 +19,13 @@
 			<li id="invalid_date_range_message" style="display:none">
 				<b><font color="red">*</font> {$MOD.LBL_VALIDATION_INVALID_DATE_RANGE}</b>
 			</li>
+			<li id="duplicate_fields_selected_message" style="display:none">
+				<b><font color="red">*</font> {$MOD.LBL_VALIDATION_DUPLICATE_FIELDNAMES}</b>
+			</li>
+			<li id="invalid_field_values_message" style="display:none">
+				<b><font color="red">*</font> {$MOD.LBL_VALIDATION_INVALID_FIELD_VALUES}</b>
+				<ul id="invalid_field_values_fieldlist"></ul>
+			</li>
 		</ol>
 	</div>
 </div>

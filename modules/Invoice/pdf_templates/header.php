@@ -83,7 +83,7 @@ $pdf->addRecBlock($account_name, $app_strings["Customer Name"], $termBlock);
 
 // issue date block
 $issueBlock=array("80","37");
-$pdf->addRecBlock(getDisplayDate(date("Y-m-d")), $app_strings["Issue Date"],$issueBlock);
+$pdf->addRecBlock(DateTimeField::convertToUserFormat(date("Y-m-d")), $app_strings["Issue Date"],$issueBlock);
 
 // due date block
 $dueBlock=array("81","52");

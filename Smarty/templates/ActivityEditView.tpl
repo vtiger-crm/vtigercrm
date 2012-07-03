@@ -22,10 +22,20 @@
 <script type="text/javascript">
 var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 </script>
+<script type="text/javascript" src="include/js/FieldDependencies.js"></script>
+<script type="text/javascript" src="modules/com_vtiger_workflow/resources/jquery-1.2.6.js"></script>
+<script type="text/javascript">
+	jQuery.noConflict();
+</script>
+{if $PICKIST_DEPENDENCY_DATASOURCE neq ''}
+<script type="text/javascript">
+	jQuery(document).ready(function() {ldelim} (new FieldDependencies({$PICKIST_DEPENDENCY_DATASOURCE})).init() {rdelim});
+</script>
+{/if}
 
 {*<!-- Contents -->*}
-<form name="EditView" method="POST" action="index.php" 
-	{if $ACTIVITY_MODE neq 'Task'} onsubmit="if(check_form()){ldelim} VtigerJS_DialogBox.block(); {rdelim} else {ldelim} return false; {rdelim}" 
+<form name="EditView" method="POST" action="index.php"
+	{if $ACTIVITY_MODE neq 'Task'} onsubmit="if(check_form()){ldelim} VtigerJS_DialogBox.block(); {rdelim} else {ldelim} return false; {rdelim}"
 	{else} onsubmit="maintask_check_form();if(formValidate()) {ldelim} VtigerJS_DialogBox.block(); {rdelim} else {ldelim} return false; {rdelim}" {/if} >
 <input type="hidden" name="time_start" id="time_start">
 <input type="hidden" name="view" value="{$view}">
@@ -48,10 +58,10 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 
                 <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr><td>
-		
-				{if $OP_MODE eq 'edit_view'}   
+
+				{if $OP_MODE eq 'edit_view'}
 					<span class="lvtHeaderText"><font color="purple">[ {$ID} ] </font>{$NAME} - {$APP.LBL_EDITING} {$SINGLE_MOD} {$APP.LBL_INFORMATION}</span> <br>
-					<span class="small">{$UPDATEINFO}	 </span> 
+					<span class="small">{$UPDATEINFO}	 </span>
 				{/if}
 				{if $OP_MODE eq 'create_view'}
 					{if $DUPLICATE neq 'true'}
@@ -163,7 +173,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 							</tr>
 							{if $LABEL.description neq ''}
 							<tr>
-                        					<td class="cellLabel" valign="top" nowrap align="right"><b><font color="red">{$TYPEOFDATA.description}</font>{$LABEL.description}</b></td> 
+                        					<td class="cellLabel" valign="top" nowrap align="right"><b><font color="red">{$TYPEOFDATA.description}</font>{$LABEL.description}</b></td>
 								<td class="cellInfo" align="left"><textarea style="width:100%; height : 60px;" name="description">{$ACTIVITYDATA.description}</textarea></td>
                 					</tr>
 							{/if}
@@ -178,7 +188,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 								<td colspan=2 width=80% align="center">
 								<table border=0 cellspacing=0 cellpadding=3 width=80%>
 									<tr>
-										 <td >{if $LABEL.eventstatus neq ''}<b><font color="red">{$TYPEOFDATA.eventstatus}</font>{$LABEL.eventstatus}</b>{/if}</td>                                        
+										 <td >{if $LABEL.eventstatus neq ''}<b><font color="red">{$TYPEOFDATA.eventstatus}</font>{$LABEL.eventstatus}</b>{/if}</td>
                                                                                 <td >{if $LABEL.assigned_user_id != ''}<b>
 											{$LABEL.assigned_user_id}</b>
 											{/if}</td>
@@ -195,7 +205,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
                                                                                                         {$arr[0]}
                                                                                                 </option>
                                                                                         {/if}
-                                                                                        {/foreach} 
+                                                                                        {/foreach}
                                                                                 </select>
 										{/if}
                                                                         	</td>
@@ -226,7 +236,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
                                                 					<input type="radio" name="assigntype" {$select_group} value="T" onclick="toggleAssignType(this.value)">&nbsp;{$APP.LBL_GROUP}
                                         						{/if}
 											<span id="assign_user" style="{$style_user}">
-                                     				           			<select name="assigned_user_id">
+                                     				           			<select name="assigned_user_id" class="small">
                                                         					{foreach key=key_one item=arr from=$ACTIVITYDATA.assigned_user_id}
                                                                 				{foreach key=sel_value item=value from=$arr}
                                                                         				<option value="{$key_one}" {$value}>{$sel_value}</option>
@@ -237,7 +247,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 
                                         						{if $secondvalue.assigned_user_id neq ''}
                                                 					<span id="assign_team" style="{$style_group}">
-                                                        					<select name="assigned_group_id" >';
+                                                        					<select name="assigned_group_id" class="small">';
                                                                 				{foreach key=key_one item=arr from=$secondvalue.assigned_user_id}
                                                                         			{foreach key=sel_value item=value from=$arr}
                                                                                 			<option value="{$key_one}" {$value}>{$sel_value}</option>
@@ -274,8 +284,8 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
                                                                                         {/if}
                                                                                         {/foreach}
                                                                                 </select>
-										</td> 
-										
+										</td>
+
 									</tr>
 									{/if}
 								</table>
@@ -373,7 +383,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 							        	<td width="20%"></td><td width="30%"></td>
 							        {/if}
 						            </tr>
-	                             </table>   
+	                             </table>
                              {/if}
 						     <br>
 						     <table border=0 cellspacing=0 cellpadding=0 width=100% align=center>
@@ -402,7 +412,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 									<DIV id="addEventInviteUI" style="display:block;width:100%">
 									<table border=0 cellspacing=0 cellpadding=2 width=100%>
 										<tr>
-											<td valign=top> 
+											<td valign=top>
 												<table border=0 cellspacing=0 cellpadding=2 width=100%>
 													<tr><td colspan=3>
 														<ul style="padding-left:20px">
@@ -446,7 +456,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 										</tr>
 									</table>
 									</DIV>
-									<!-- Reminder UI -->	
+									<!-- Reminder UI -->
 									<DIV id="addEventAlarmUI" style="display:none;width:100%">
 									{if $LABEL.reminder_time neq ''}
 										<table>
@@ -454,19 +464,19 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 											{assign var=check value=$secondval[0]}
 											{assign var=yes_val value=$secondval[1]}
 											{assign var=no_val value=$secondval[2]}
-											
+
 											<tr><td>{$LABEL.reminder_time}</td><td>
 
 										{if $check eq 'CHECKED'}
 											{assign var=reminstyle value='style="display:block;width:100%"'}
 											<input type="radio" name="set_reminder" value="Yes" {$check} onClick="showBlock('reminderOptions')">&nbsp;{$yes_val}&nbsp;
 											<input type="radio" name="set_reminder" value="No" onClick="fnhide('reminderOptions')">&nbsp;{$no_val}&nbsp;
-											
+
 										{else}
 											{assign var=reminstyle value='style="display:none;width:100%"'}
 											<input type="radio" name="set_reminder" value="Yes" onClick="showBlock('reminderOptions')">&nbsp;{$yes_val}&nbsp;
 											<input type="radio" name="set_reminder" value="No" checked onClick="fnhide('reminderOptions')">&nbsp;{$no_val}&nbsp;
-											
+
 										{/if}
 											</td></tr>
 										</table>
@@ -503,7 +513,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 												</tr>
 												<!--This is now required as of now, as we aree not allowing to change the email id
 	                                        and it is showing logged in User's email id, instead of Assigned to user's email id
-															
+
 												<tr>
 													<td nowrap align=right>
 														{$MOD.LBL_SDRMD}
@@ -527,7 +537,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 											<td nowrap width=80% valign=top>
 												<table border=0 cellspacing=0 cellpadding=0>
 												<tr>
-							
+
 													<td width=20>
 													{if $ACTIVITYDATA.recurringcheck eq 'Yes'}
 														{assign var=rptstyle value='style="display:block"'}
@@ -601,7 +611,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 												</tr>
 												</table>
 												</div>
-	
+
 												<div id="repeatMonthUI" {$rptmonthstyle}>
 												<table border=0 cellspacing=0 cellpadding=2>
 												<tr>
@@ -641,7 +651,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 												</tr>
 												</table>
 												</div>
-								
+
 											</div>
 										</td>
 										</tr>
@@ -653,7 +663,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 						</div>
 						<div id="addEventRelatedtoUI" style="display:none;width:100%">
 						<table width="100%" cellpadding="5" cellspacing="0" border="0">
-							{if $LABEL.parent_id neq ''}	
+							{if $LABEL.parent_id neq ''}
 							<tr>
 								<!--td width="10%"><b>{$MOD.LBL_RELATEDTO}</b></td-->
 								<td width="10%"><b><font color="red">{$TYPEOFDATA.relatedto}</font>{$MOD.LBL_RELATEDTO}</b></td>
@@ -675,20 +685,24 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 								</td>
 							</tr>
 							{/if}
+			     			{if $IS_CONTACTS_EDIT_PERMITTED eq 'true'}
 							<tr>
 								<td><b>{$APP.Contacts}</b></td>
 								<td colspan="2">
 									<input name="contactidlist" id="contactidlist" value="{$CONTACTSID}" type="hidden">
 									<input name="deletecntlist" id="deletecntlist" type="hidden">
 									<select name="contactlist" size=5  style="height: 100px;width: 300px"  id="parentid" class="small" multiple>
-									{$CONTACTSNAME}	
-									</select>  	 
-	
+									{foreach item=contactname key=cntid from=$CONTACTSNAME}
+                                    	<option value="{$cntid}">{$contactname}</option>
+                                    {/foreach}
+									</select>
+
 									<input type="button" onclick="selectContact('true','general',document.EditView);" class="crmButton small edit" name="selectcnt" value="{$APP.LBL_SELECT_CONTACT_BUTTON_LABEL}">
 									<input type='button' value='{$APP.LNK_DELETE}' class="crmButton small edit" onclick='removeActContacts();'>
-							
+
 								</td>
 							</tr>
+							{/if}
 						</table>
 					</div>
 			</td>
@@ -701,13 +715,13 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
                         	<td class="cellLabel" width="20%" align="right"><b><font color="red">{$TYPEOFDATA.subject}</font>{$MOD.LBL_TODO}</b></td>
                         	<td class="cellInfo" width="80%" align="left"><input name="subject" value="{$ACTIVITYDATA.subject}" class="textbox" style="width: 70%;" type="text"></td>
            		</tr>
-			
+
 			<tr>
 				{if $LABEL.description != ''}
 				<td class="cellLabel" align="right"><b><font color="red">{$TYPEOFDATA.description}</font>{$LABEL.description}</b></td>
 				<td class="cellInfo" align="left"><textarea style="width: 90%; height: 60px;" name="description">{$ACTIVITYDATA.description}</textarea>
 				{/if}
-				
+
 			</tr>
 			<tr>
 		    		<td colspan="2" align="center" width="100%" style="padding:0px">
@@ -780,7 +794,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
                                 			        <input type="radio" name="assigntype" {$select_group} value="T" onclick="toggleAssignType(this.value)">&nbsp;{$APP.LBL_GROUP}
                                         			{/if}
                                         			<span id="assign_user" style="{$style_user}">
-                                                		<select name="assigned_user_id" class=small>
+                                                		<select name="assigned_user_id" class="small">
                                                         	{foreach key=key_one item=arr from=$ACTIVITYDATA.assigned_user_id}
 				                                {foreach key=sel_value item=value from=$arr}
                                 		                	<option value="{$key_one}" {$value}>{$sel_value}</option>
@@ -790,7 +804,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 								</span>
 								{if $secondvalue.assigned_user_id neq ''}
                                                 		<span id="assign_team" style="{$style_group}">
-                                                        		<select name="assigned_group_id" class=small>';
+                                                        		<select name="assigned_group_id" class="small">';
                                                                 		{foreach key=key_one item=arr from=$secondvalue.assigned_user_id}
                                                                        		{foreach key=sel_value item=value from=$arr}
                                                                                		<option value="{$key_one}" {$value}>{$sel_value}</option>
@@ -798,7 +812,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
                                                                 		{/foreach}
                                                         		</select>
 				                                </span>
-                                				{/if}	
+                                				{/if}
 							</td>
 							{else}
 								<input name="assigned_user_id" value="{$CURRENTUSERID}" type="hidden">
@@ -821,7 +835,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 							<input name="date_start" id="date_start" class="textbox" style="width: 90px;" onChange="dochange('date_start','due_date');" value="{$date_val}" type="text"></td><td width=100%><img src="{$IMAGE_PATH}btnL3Calendar.gif" alt="{$MOD.LBL_SET_DATE}" title="{$MOD.LBL_SET_DATE}" id="jscal_trigger_date_start" align="middle" border="0">
 							{foreach key=date_fmt item=date_str from=$secondvalue.date_start}
 								{assign var=date_vl value="$date_fmt"}
-							{/foreach}				
+							{/foreach}
 							<script type="text/javascript">
 								Calendar.setup ({ldelim}
 	        	                                	inputField : "date_start", ifFormat : "{$date_vl}", showsTime : false, button : "jscal_trigger_date_start", singleClick : true, step : 1
@@ -870,7 +884,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 				        	<td width="20%"></td><td width="30%"></td>
 				        {/if}
 			            </tr>
-                     </table>   
+                     </table>
                  {/if}
 				<br><br>
 		{if $LABEL.sendnotification neq '' || ($LABEL.parent_id neq '') || ($LABEL.contact_id neq '') }
@@ -942,9 +956,9 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
                                      </td>
 			     </tr>
 			     {/if}
-			     {if $LABEL.contact_id neq ''}	
+			     {if $LABEL.contact_id neq ''}
 			     <tr>
-                                     <td><b><font color="red">{$TYPEOFDATA.contact_id}</font>{$LABEL.contact_id}</b></td> 
+                                     <td><b><font color="red">{$TYPEOFDATA.contact_id}</font>{$LABEL.contact_id}</b></td>
 				     <td colspan="2">
 						<input name="contact_name" id = "contact_name" readonly type="text" class="calTxt" value="{$ACTIVITYDATA.contact_id}"><input name="contact_id"  type="hidden" value="{$secondvalue.contact_id}">&nbsp;
 						<input name="deletecntlist"  id="deletecntlist" type="hidden">
@@ -997,7 +1011,7 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
         var fielddatatype = new Array('V~M','D~M','T~O','D~M~OTH~GE~date_start~Start Date','V~O','V~O','C~O','I~O','I~O','I~O','O~O');
 {/if}
 </script>
-<script>	
+<script>
 	var ProductImages=new Array();
 	var count=0;
 
@@ -1019,3 +1033,9 @@ var gVTModule = '{$smarty.request.module|@vtlib_purify}';
 	{rdelim}
 
 </script>
+
+{if $PICKIST_DEPENDENCY_DATASOURCE neq ''}
+<script type="text/javascript">
+	Event.observe(window, 'load', function() {ldelim} (new FieldDependencies({$PICKIST_DEPENDENCY_DATASOURCE})).init() {rdelim});
+</script>
+{/if}

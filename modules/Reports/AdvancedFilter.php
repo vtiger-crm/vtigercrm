@@ -33,7 +33,7 @@ if(isset($_REQUEST["record"]) && $_REQUEST['record']!='')
 	$COLUMNS_BLOCK .= getSecondaryColumns_AdvFilterHTML($oReport->secmodule);
 	$report_std_filter->assign("COLUMNS_BLOCK", $COLUMNS_BLOCK);
 	
-	$FILTER_OPTION = getAdvCriteriaHTML();
+	$FILTER_OPTION = Reports::getAdvCriteriaHTML();
 	$report_std_filter->assign("FOPTION",$FILTER_OPTION);
 
 	$rel_fields = getRelatedFieldColumns();
@@ -190,31 +190,6 @@ function getRelatedFieldColumns($selected=""){
 	global $ogReport;
 	$rel_fields = $ogReport->adv_rel_fields;
 	return $rel_fields;
-}
-
-/** Function to get the  advanced filter criteria for an option
- *  This function accepts The option in the advenced filter as an argument
- *  This generate filter criteria for the advanced filter 
- *  It returns a HTML string of combo values
- */
-
-
-function getAdvCriteriaHTML($selected="")
-{
-	 global $adv_filter_options;
-		
-	 foreach($adv_filter_options as $key=>$value)
-	 {
-		if($selected == $key)
-		{
-			$shtml .= "<option selected value=\"".$key."\">".$value."</option>";
-		}else
-		{
-			$shtml .= "<option value=\"".$key."\">".$value."</option>";
-		}
-	 }
-	
-    return $shtml;
 }
 
 ?>

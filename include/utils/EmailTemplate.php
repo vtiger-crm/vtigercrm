@@ -1,13 +1,12 @@
 <?php
 /*+*******************************************************************************
- *  The contents of this file are subject to the vtiger CRM Public License Version 1.0
+ * The contents of this file are subject to the vtiger CRM Public License Version 1.0
  * ("License"); You may not use this file except in compliance with the License
  * The Original Code is:  vtiger CRM Open Source
  * The Initial Developer of the Original Code is vtiger.
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
- *
- *********************************************************************************/
+ ********************************************************************************* */
 
 require_once 'include/events/SqlResultIterator.inc';
 
@@ -17,6 +16,7 @@ require_once 'include/events/SqlResultIterator.inc';
  * @author mak
  */
 class EmailTemplate {
+
 	protected $module;
 	protected $rawDescription;
 	protected $processedDescription;
@@ -149,6 +149,8 @@ class EmailTemplate {
 						}elseif(strcasecmp($webserviceField->getFieldDataType(),'picklist') === 0){
 							$values[$fieldColumnMapping[$fieldName]] = getTranslatedString(
 								$values[$fieldColumnMapping[$fieldName]], $this->module);
+						}elseif(strcasecmp($webserviceField->getFieldDataType(),'datetime') === 0){
+							$values[$fieldColumnMapping[$fieldName]] = $values[$fieldColumnMapping[$fieldName]] .' '. DateTimeField::getDBTimeZone();
 						}
 					}
 				}

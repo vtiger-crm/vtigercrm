@@ -26,8 +26,12 @@ function getCustomFieldTypeName($uitype)
 	global $log;
         $log->info("uitype is ".$uitype);
 	$fldname = '';
-	
-	if($uitype == 1)
+
+	/*
+	 * salutation type is an exception where the uitype 55 is considered to be as text.
+	 */
+
+	if($uitype == 1 || $uitype == 55 || $uitype == 255)
 	{
 		$fldname = $mod_strings['Text'];
 	}
@@ -39,7 +43,7 @@ function getCustomFieldTypeName($uitype)
 	{
 		$fldname = $mod_strings['Percent'];
 	}
-	elseif($uitype == 5)
+	elseif($uitype == 5 || $uitype == 23)
 	{
 		$fldname = $mod_strings['Date'];
 	}
@@ -51,7 +55,7 @@ function getCustomFieldTypeName($uitype)
 	{
 		$fldname = $mod_strings['Phone'];
 	}
-	elseif($uitype == 15)
+	elseif($uitype == 15 )
 	{
 		$fldname = $mod_strings['PickList'];
 	}
@@ -67,7 +71,7 @@ function getCustomFieldTypeName($uitype)
 	{
 		$fldname = $mod_strings['Currency'];
 	}
-	elseif($uitype == 21)
+	elseif($uitype == 21 || $uitype == 19)
 	{
 		$fldname = $mod_strings['LBL_TEXT_AREA'];
 	}
@@ -247,8 +251,12 @@ function getCalendarCustomFields($tabid,$mode='edit',$col_fields='') {
  				" INNER JOIN vtiger_profile2field ON vtiger_profile2field.fieldid=vtiger_field.fieldid" .
  				" INNER JOIN vtiger_def_org_field ON vtiger_def_org_field.fieldid=vtiger_field.fieldid" .
  				" WHERE vtiger_field.block=? AND vtiger_field.tabid=? AND vtiger_profile2field.visible=0" .
- 				" AND vtiger_def_org_field.visible=0 AND vtiger_profile2field.profileid IN (". generateQuestionMarks($profileList) .")" .
- 				" ORDER BY vtiger_field.fieldid";
+ 				" AND vtiger_def_org_field.visible=0 AND vtiger_profile2field.profileid IN (". generateQuestionMarks($profileList) .")";
+ 		
+ 		if ($mode == 'edit') {
+ 			$custquery .= "  AND vtiger_profile2field.readonly = 0";
+ 		}
+ 		$custquery .= " ORDER BY vtiger_field.fieldid";
  		array_push($custparams, $profileList);		
 	}
 	$custresult = $adb->pquery($custquery, $custparams);

@@ -20,7 +20,11 @@ function changeModule(){
 	
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&directmode=ajax&file=PickList&moduleName='+encodeURIComponent(module)+'&roleid='+role,
 			onComplete: function(response) {
@@ -28,7 +32,7 @@ function changeModule(){
 				$("picklist_datas").innerHTML=response.responseText;
 			}
 		}
-	);
+		);
 	fnhide('actiondiv');
 }
 
@@ -45,7 +49,11 @@ function assignPicklistValues(module,fieldname,fieldlabel){
 	$("status").style.display="inline";
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&file=AssignValues&moduleName='+encodeURIComponent(module)+'&fieldname='+encodeURIComponent(fieldname)+'&fieldlabel='+encodeURIComponent(fieldlabel)+'&roleid='+role,
 			onComplete: function(response) {
@@ -55,7 +63,7 @@ function assignPicklistValues(module,fieldname,fieldlabel){
 				placeAtCenter($('actiondiv'));
 			}
 		}
-	);
+		);
 }
 
 /**
@@ -124,7 +132,11 @@ function showDeleteDiv(){
 	$("status").style.display="inline";
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&mode=delete&file=ShowActionDivs&moduleName='+encodeURIComponent(module)+'&fieldname='+encodeURIComponent(fieldName)+'&fieldlabel='+encodeURIComponent(fieldLabel),
 			onComplete: function(response) {
@@ -134,7 +146,7 @@ function showDeleteDiv(){
 				placeAtCenter($('actiondiv'));
 			}
 		}
-	);
+		);
 }
 
 /**
@@ -151,7 +163,11 @@ function showAddDiv(){
 	$("status").style.display="inline";
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&mode=add&file=ShowActionDivs&moduleName='+encodeURIComponent(module)+'&fieldname='+encodeURIComponent(fieldName)+'&fieldlabel='+encodeURIComponent(fieldLabel),
 			onComplete: function(response) {
@@ -161,7 +177,7 @@ function showAddDiv(){
 				placeAtCenter($('actiondiv'));
 			}
 		}
-	);
+		);
 }
 
 /**
@@ -178,7 +194,11 @@ function showEditDiv(){
 	$("status").style.display="inline";
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&mode=edit&file=ShowActionDivs&moduleName='+encodeURIComponent(module)+'&fieldname='+encodeURIComponent(fieldName)+'&fieldlabel='+encodeURIComponent(fieldLabel),
 			onComplete: function(response) {
@@ -188,7 +208,7 @@ function showEditDiv(){
 				placeAtCenter($('actiondiv'));
 			}
 		}
-	);
+		);
 }
 
 /**
@@ -201,7 +221,7 @@ function validateAdd(fieldname, module){
 	var pick_options = document.getElementsByClassName('picklist_existing_options');
 	for(var i=0;i<pick_options.length;i++){
 		if(pick_options[i].value != ''){
-			pickArr[i]=pick_options[i].innerHTML;
+			pickArr[i]=(pick_options[i].innerHTML).replace(/&amp;/i,'&');
 		}
 	}
 
@@ -210,6 +230,12 @@ function validateAdd(fieldname, module){
 	if(new_vals == '' || new_vals.length == 0) {
 		alert(alert_arr.LBL_ADD_PICKLIST_VALUE);
 		return false;
+	}
+	for(i=0;i<new_vals.length;i++){
+		if (trim(new_vals[i]).search(/(\<|\>|\\|\/)/gi)!=-1) {
+			alert(alert_arr.SPECIAL_CHARACTERS+'"<" ">" "\\" "/"'+alert_arr.NOT_ALLOWED);
+			return false
+		}
 	}
 	
 	var node = document.getElementsByClassName('picklist_noneditable_options');
@@ -282,7 +308,11 @@ function pickAdd(module, fieldname){
 	$("status").style.display="inline";
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&mode=add&file=PickListAction&fld_module='+encodeURIComponent(module)+'&fieldname='+encodeURIComponent(fieldname)+'&newValues='+encodeURIComponent(newValues)+'&selectedRoles='+encodeURIComponent(roleValues),
 			onComplete: function(response) {
@@ -296,7 +326,7 @@ function pickAdd(module, fieldname){
 				$("status").style.display="none";
 			}
 		}
-	);
+		);
 }
 
 /**
@@ -315,6 +345,10 @@ function validateEdit(fieldname, module){
 			alert(alert_arr.LBL_CANNOT_HAVE_EMPTY_VALUE);
 			return false;
 		}
+		if (trim(newVal[i]).search(/(\<|\>|\\|\/)/gi)!=-1) {
+			alert(alert_arr.SPECIAL_CHARACTERS+'"<" ">" "\\" "/"'+alert_arr.NOT_ALLOWED);
+			return false
+		}
 		oldVal[i] = node[i].value;
 	}
 	pickReplace(module, fieldname, JSON.stringify(newVal), JSON.stringify(oldVal));
@@ -331,7 +365,11 @@ function pickReplace(module, fieldname, newVal, oldVal){
 	$("status").style.display="inline";
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&mode=edit&file=PickListAction&fld_module='+encodeURIComponent(module)+'&fieldname='+encodeURIComponent(fieldname)+'&newValues='+encodeURIComponent(newVal)+'&oldValues='+encodeURIComponent(oldVal),
 			onComplete: function(response) {
@@ -374,7 +412,7 @@ function validateDelete(fieldname, module){
 		}else{
 			for(var j=0, k=0; j<node.length; j++){
 				if(node.options[j].selected == true){
-					arr[k++] = encodeURIComponent(node.options[j].value);
+					arr[k++] = encodeURIComponent((node.options[j].value).replace(/(")/ig,"\\$1"));
 				}
 			}
 		}
@@ -412,7 +450,11 @@ function pickDelete(module, fieldname, arr, replaceVal){
 	$("status").style.display="inline";
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&mode=delete&file=PickListAction&fld_module='+encodeURIComponent(module)+'&fieldname='+encodeURIComponent(fieldname)+'&values='+JSON.stringify(arr)+'&replaceVal='+encodeURIComponent(replaceVal),
 			onComplete: function(response) {
@@ -572,7 +614,11 @@ function saveAssignedValues(moduleName, fieldName, roleid){
 	$("status").style.display="inline";
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&file=SaveAssignedValues&moduleName='+encodeURIComponent(moduleName)+'&fieldname='+encodeURIComponent(fieldName)+'&roleid='+roleid+'&values='+encodeURIComponent(values)+'&otherRoles='+encodeURIComponent(otherRoles),
 			onComplete: function(response) {
@@ -603,7 +649,11 @@ function showPicklistEntries(){
 	$("status").style.display="inline";
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&file=PickList&moduleName='+encodeURIComponent(moduleName)+'&roleid='+roleid+'&directmode=ajax',
 			onComplete: function(response) {
@@ -624,7 +674,11 @@ function showRoleSelectDiv(roleid){
 	$("status").style.display="inline";
 	new Ajax.Request(
 		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		{
+			queue: {
+				position: 'end',
+				scope: 'command'
+			},
 			method: 'post',
 			postBody: 'action=PickListAjax&module=PickList&file=ShowRoleSelect&roleid='+roleid,
 			onComplete: function(response) {

@@ -34,6 +34,7 @@ class Vtiger_ModuleBasic {
 	var $presence = 0;
 	var $ownedby = 0; // 0 - Sharing Access Enabled, 1 - Sharing Access Disabled
 	var $tabsequence = false;
+	var $parent = false;
 
 	var $isentitytype = true; // Real module or an extension?
 
@@ -72,7 +73,8 @@ class Vtiger_ModuleBasic {
 		$this->presence = $valuemap['presence'];
 		$this->ownedby = $valuemap['ownedby'];
 		$this->tabsequence = $valuemap['tabsequence'];
-		
+		$this->parent = $valuemap['parent'];
+
 		$this->isentitytype = $valuemap['isentitytype'];
 
 		if($this->isentitytype || $this->name == 'Users') {
@@ -87,7 +89,7 @@ class Vtiger_ModuleBasic {
 	 */
 	function initialize2() {
 		global $adb;
-		$result = $adb->pquery("SELECT tablename,entityidfield FROM vtiger_entityname WHERE tabid=?", 
+		$result = $adb->pquery("SELECT tablename,entityidfield FROM vtiger_entityname WHERE tabid=?",
 			Array($this->id));
 		if($adb->num_rows($result)) {
 			$this->basetable = $adb->query_result($result, 0, 'tablename');
@@ -124,6 +126,7 @@ class Vtiger_ModuleBasic {
 	function __handleVtigerCoreSchemaChanges() {
 		// Add version column to the table first
 		Vtiger_Utils::AddColumn('vtiger_tab', 'version', ' VARCHAR(10)');
+        Vtiger_Utils::AddColumn('vtiger_tab', 'parent', ' VARCHAR(30)');
 	}
 
 	/**
@@ -144,8 +147,8 @@ class Vtiger_ModuleBasic {
 		$this->__handleVtigerCoreSchemaChanges();
 
 		$adb->pquery("INSERT INTO vtiger_tab (tabid,name,presence,tabsequence,tablabel,modifiedby,
-			modifiedtime,customized,ownedby,version) VALUES (?,?,?,?,?,?,?,?,?,?)", 
-			Array($this->id, $this->name, $this->presence, $this->tabsequence, $this->label, NULL, NULL, $customized, $this->ownedby, $this->version));
+			modifiedtime,customized,ownedby,version,parent) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+			Array($this->id, $this->name, $this->presence, -1, $this->label, NULL, NULL, $customized, $this->ownedby, $this->version,$this->parent));
 
 		$useisentitytype = $this->isentitytype? 1 : 0;
 		$adb->pquery('UPDATE vtiger_tab set isentitytype=? WHERE tabid=?',Array($useisentitytype, $this->id));
@@ -153,7 +156,7 @@ class Vtiger_ModuleBasic {
 		if(!Vtiger_Utils::CheckTable('vtiger_tab_info')) {
 			Vtiger_Utils::CreateTable(
 				'vtiger_tab_info',
-				'(tabid INT PRIMARY KEY, prefname VARCHAR(256), prefvalue VARCHAR(256), FOREIGN KEY fk_1_vtiger_tab_info(tabid) REFERENCES vtiger_tab(tabid) ON DELETE CASCADE ON UPDATE CASCADE)',
+				'(tabid INT, prefname VARCHAR(256), prefvalue VARCHAR(256), FOREIGN KEY fk_1_vtiger_tab_info(tabid) REFERENCES vtiger_tab(tabid) ON DELETE CASCADE ON UPDATE CASCADE)',
 				true);
 		}
 		if($this->minversion) {
@@ -170,11 +173,11 @@ class Vtiger_ModuleBasic {
 				$adb->pquery("UPDATE vtiger_tab_info SET prefvalue=? WHERE tabid=? AND prefname='vtiger_max_version'", array($this->maxversion,$this->id));
 			} else {
 				$adb->pquery('INSERT INTO vtiger_tab_info(tabid, prefname, prefvalue) VALUES (?,?,?)', array($this->id, 'vtiger_max_version', $this->maxversion));
-			}			
+			}
 		}
-		
+
 		Vtiger_Profile::initForModule($this);
-		
+
 		self::syncfile();
 
 		if($this->isentitytype) {
@@ -197,11 +200,11 @@ class Vtiger_ModuleBasic {
 	 * @access private
 	 */
 	function __delete() {
-		Vtiger_Module::fireEvent($this->name, 
+		Vtiger_Module::fireEvent($this->name,
 			Vtiger_Module::EVENT_MODULE_PREUNINSTALL);
 
 		global $adb;
-		if($this->isentitytype) {		
+		if($this->isentitytype) {
 			$this->unsetEntityIdentifier();
 			$this->deleteRelatedLists();
 		}
@@ -218,7 +221,7 @@ class Vtiger_ModuleBasic {
 		$this->__handleVtigerCoreSchemaChanges();
 		global $adb;
 		$adb->pquery("UPDATE vtiger_tab SET version=? WHERE tabid=?", Array($newversion, $this->id));
-		$this->version = $newversion;		
+		$this->version = $newversion;
 		self::log("Updating version to $newversion ... DONE");
 	}
 
@@ -240,6 +243,9 @@ class Vtiger_ModuleBasic {
 			Vtiger_Access::deleteTools($this);
 			Vtiger_Filter::deleteForModule($this);
 			Vtiger_Block::deleteForModule($this);
+			if(method_exists($this, 'deinitWebservice')) {
+				$this->deinitWebservice();
+			}
 		}
 		$this->__delete();
 		Vtiger_Profile::deleteForModule($this);
@@ -312,6 +318,15 @@ class Vtiger_ModuleBasic {
 		global $adb;
 		$adb->pquery("DELETE FROM vtiger_relatedlists WHERE tabid=?", Array($this->id));
 		self::log("Deleting related lists ... DONE");
+	}
+
+	/**
+	 * Delete links information
+	 */
+	function deleteLinks() {
+		global $adb;
+		$adb->pquery("DELETE FROM vtiger_links WHERE tabid=?", Array($this->id));
+		self::log("Deleting links ... DONE");
 	}
 
 	/**

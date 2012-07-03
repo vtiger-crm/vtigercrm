@@ -20,11 +20,13 @@
 	<tr>
 	<td style="padding-left: 5px;" align="left" width="65%">
 	{$MOD.LBL_GROUPING_SUMMARIZE}	
-	<select name="Group1" class="txtBox">
+	<select id="Group1" name="Group1" class="txtBox" onchange="getDateFieldGrouping('Group1')">
 	<option value="none">{$MOD.LBL_NONE}</option>
 	{$BLOCK1}
 	</select>
-	
+	</td>
+    <td style="padding-left: 5px;" align="left" width="25%">
+        {$GROUPBYTIME1}
 	</td>
 	<td style="padding-left: 5px;" align="left" width="35%">
 	{$MOD.LBL_GROUPING_SORT}<br>
@@ -37,11 +39,14 @@
 	<tr>
 	<td style="padding-left: 35px;" align="left">
 	{$MOD.LBL_GROUPING_THEN_BY}<br>
-	<select name="Group2" class="txtBox">
+	<select id="Group2" name="Group2" class="txtBox" onchange="getDateFieldGrouping('Group2')">
 	<option value="none">{$MOD.LBL_NONE}</option>
 	        {$BLOCK2}
 	</select>
 	</td>
+    <td style="padding-left: 40px;" align="left">
+        {$GROUPBYTIME2}
+    </td>
 	<td style="padding-left: 20px;" align="left">
 	{$MOD.LBL_GROUPING_SORT}<br>
 	<select name="Sort2" class="importBox">
@@ -53,11 +58,14 @@
 	<tr>
 	<td style="padding-left: 65px;" align="left">
 	{$MOD.LBL_GROUPING_FINALLY_BY}<br>
-	<select name="Group3" class="txtBox">
+	<select id="Group3" name="Group3" class="txtBox" onchange="getDateFieldGrouping('Group3')">
 	<option value="none">{$MOD.LBL_NONE}</option>
 	            {$BLOCK3}
 	</select>
 	</td>
+    <td style="padding-left: 40px;" align="left">
+        {$GROUPBYTIME3}
+    </td>
 	<td style="padding-left: 40px;" align="left">
 	{$MOD.LBL_GROUPING_SORT}<br>
 	<select name="Sort3" class="importBox">

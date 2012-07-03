@@ -8,6 +8,8 @@ CKEDITOR.editorConfig = function( config )
 	// Define changes to default configuration here. For example:
 	// config.language = 'fr';
 	// config.uiColor = '#AADC6E';
+	config.filebrowserBrowseUrl = 'kcfinder/browse.php?type=images';
+	config.filebrowserUploadUrl = 'kcfinder/upload.php?type=images';
 	CKEDITOR.config.toolbar_Vtiger =
 	[
 		['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],

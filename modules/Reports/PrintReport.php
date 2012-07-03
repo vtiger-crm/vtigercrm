@@ -21,8 +21,8 @@ $filtercolumn = $_REQUEST["stdDateFilterField"];
 $filter = $_REQUEST["stdDateFilter"];
 $oReportRun = new ReportRun($reportid);
 
-$startdate = getDBInsertDateValue($_REQUEST["startdate"]);//Convert the user date format to DB date format 
-$enddate = getDBInsertDateValue($_REQUEST["enddate"]);//Convert the user date format to DB date format
+$startdate = DateTimeField::convertToDBFormat($_REQUEST["startdate"]);//Convert the user date format to DB date format
+$enddate = DateTimeField::convertToDBFormat($_REQUEST["enddate"]);//Convert the user date format to DB date format
 $filterlist = $oReportRun->RunTimeFilter($filtercolumn,$filter,$startdate,$enddate);
 
 $arr_values = $oReportRun->GenerateReport("PRINT",$filterlist);

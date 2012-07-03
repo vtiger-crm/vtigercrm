@@ -246,10 +246,7 @@ function UpdateProfile()
 			        {foreach key=tabid item=elements from=$TAB_PRIV}	
 			        <tr>
 					{assign var=modulename value=$TAB_PRIV[$tabid][0]}
-					{assign var="MODULELABEL" value=$modulename}
-					{if $APP[$modulename] neq ''}
-						{assign var="MODULELABEL" value=$APP[$modulename]}
-					{/if}
+					{assign var="MODULELABEL" value=$modulename|@getTranslatedString:$modulename}
 			          <td class="small cellLabel" width="3%"><div align="right">
 					{$TAB_PRIV[$tabid][1]}
 			          </div></td>
@@ -331,10 +328,16 @@ function UpdateProfile()
                 </tr>
 		<table border="0" cellpadding="2" cellspacing="0">
 			<tr>
-				<td align="left"><font color="red" size=5>*</font>{$CMOD.LBL_MANDATORY_MSG}</td>
+				<td align="left"><font color="red" size=5>*</font>&nbsp;{$CMOD.LBL_MANDATORY_MSG}</td>
 			</tr>
 			<tr>
-				<td align="left"><font color="blue" size=5>*</font>{$CMOD.LBL_DISABLE_FIELD_MSG}</td>
+				<td align="left"><font color="blue" size=5>*</font>&nbsp;{$CMOD.LBL_DISABLE_FIELD_MSG}</td>
+			</tr>
+			<tr>
+				<td align="left"><img src="{'locked.png'|@vtiger_imageurl:$THEME}" />&nbsp;{$CMOD.LBL_READ_ONLY_ACCESS_MSG}</td>
+			</tr>
+			<tr>
+				<td align="left"><img src="{'unlocked.png'|@vtiger_imageurl:$THEME}" />&nbsp;{$CMOD.LBL_READ_WRITE_ACCESS_MSG}</td>
 			</tr>
 		</table>
 		<tr>

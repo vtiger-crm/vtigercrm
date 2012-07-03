@@ -26,14 +26,15 @@ $num_rows = $adb->num_rows($result);
 
 for($i=0;$i < $num_rows; $i++)
 {	
-  $wordtemplatearray=array();
-  $wordtemplatearray['templateid'] = $adb->query_result($result,$i,'templateid');
-  $wordtemplatearray['description'] = $adb->query_result($result,$i,'description');
-  $wordtemplatearray['module'] = $adb->query_result($result,$i,'module');
-  $wordtemplatearray['filename'] = $adb->query_result($result,$i,'filename');
-  $wordtemplatearray['filetype'] = $adb->query_result($result,$i,'filetype');
-  $wordtemplatearray['filesize'] = $adb->query_result($result,$i,'filesize');	 
-  $return_data []= $wordtemplatearray;	
+	$wordtemplatearray=array();
+	$wordtemplatearray['templateid'] = $adb->query_result($result,$i,'templateid');
+	$wordtemplatearray['description'] = $adb->query_result($result,$i,'description');
+	$module = $adb->query_result($result,$i,'module');
+	$wordtemplatearray['module'] = getTranslatedString($module, $module);
+	$wordtemplatearray['filename'] = $adb->query_result($result,$i,'filename');
+	$wordtemplatearray['filetype'] = $adb->query_result($result,$i,'filetype');
+	$wordtemplatearray['filesize'] = $adb->query_result($result,$i,'filesize');	 
+	$return_data []= $wordtemplatearray;	
 }
 require_once('include/utils/UserInfoUtil.php');
 global $app_strings;

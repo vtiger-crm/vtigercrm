@@ -15,7 +15,8 @@ global $app_strings,$mod_strings,$current_user,$theme,$adb;
 $image_path = 'themes/'.$theme.'/images/';
 $idlist = vtlib_purify($_REQUEST['idlist']);
 $pmodule=vtlib_purify($_REQUEST['return_module']);
-$ids=explode(';',$idlist);
+$excludedRecords=vtlib_purify($_REQUEST['excludedRecords']);
+
 $single_record = false;
 if(!strpos($idlist,':'))
 {
@@ -98,12 +99,18 @@ $smarty->assign("APP", $app_strings);
 $smarty->assign("FROM_MODULE", $pmodule);
 $smarty->assign("THEME", $theme);
 $smarty->assign("IMAGE_PATH",$image_path);
-if($single_record && count($columnlists) > 0 && $val_cnt > 0)
+$smarty->assign("EXE_REC", $excludedRecords);
+$smarty->assign("SEARCH_URL", vtlib_purify($_REQUEST['searchurl']));
+$smarty->assign("VIEWID", vtlib_purify($_REQUEST['viewname']));
+$smarty->assign('RECORDID',vtlib_purify($_REQUEST['recordid']));
+
+if(($single_record && count($columnlists) > 0)){
 	$smarty->display("SelectEmail.tpl");
-else if(!$single_record && count($columnlists) > 0)
+} else if(!$single_record && count($columnlists) > 0){
 	$smarty->display("SelectEmail.tpl");
-else if($single_record && $val_cnt == 0)
-        echo "No Mail Ids";	
-else
-	echo "Mail Ids not permitted";	
+}elseif ($val_cnt < 0){
+	echo "Mail Ids not permitted";
+} else {
+	echo "No Mail Ids";
+}
 ?>

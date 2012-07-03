@@ -32,7 +32,7 @@ class Vtiger_Field extends Vtiger_FieldBasic {
 	 * @internal Creates picklist base if it does not exists
 	 */
 	function setPicklistValues($values) {
-		global $adb;
+		global $adb,$default_charset;
 
 		// Non-Role based picklist values
 		if($this->uitype == '16') {
@@ -42,14 +42,13 @@ class Vtiger_Field extends Vtiger_FieldBasic {
 
 		$picklist_table = 'vtiger_'.$this->name;
 		$picklist_idcol = $this->name.'id';
-
 		if(!Vtiger_Utils::CheckTable($picklist_table)) {
 			Vtiger_Utils::CreateTable(
 				$picklist_table,
 				"($picklist_idcol INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 				$this->name VARCHAR(200) NOT NULL,
 				presence INT (1) NOT NULL DEFAULT 1,
-				picklist_valueid INT NOT NULL DEFAULT 0)", 
+				picklist_valueid INT NOT NULL DEFAULT 0)",
 				true);
 			$new_picklistid = $this->__getPicklistUniqueId();
 			$adb->pquery("INSERT INTO vtiger_picklist (picklistid,name) VALUES(?,?)",Array($new_picklistid, $this->name));
@@ -59,9 +58,25 @@ class Vtiger_Field extends Vtiger_FieldBasic {
 				$adb->pquery("SELECT picklistid FROM vtiger_picklist WHERE name=?", Array($this->name)), 0, 'picklistid');
 		}
 
+		$specialNameSpacedPicklists  = array(
+			'opportunity_type'=>'opptypeid',
+			'duration_minutes'=>'minutesid',
+			'recurringtype'=>'recurringeventid'
+		);
+
+		// Fix Table ID column names
+		$fieldName = (string)$this->name;
+		if(in_array($fieldName.'_id', $adb->getColumnNames($picklist_table))) {
+			$picklist_idcol = $fieldName.'_id';
+		} elseif(array_key_exists($fieldName, $specialNameSpacedPicklists)) {
+			$picklist_idcol = $specialNameSpacedPicklists[$fieldName];
+		}
+		// END
+
 		// Add value to picklist now
 		$sortid = 0; // TODO To be set per role
 		foreach($values as $value) {
+			$value = htmlentities($value,ENT_QUOTES,$default_charset);
 			$new_picklistvalueid = getUniquePicklistID();
 			$presence = 1; // 0 - readonly, Refer function in include/ComboUtil.php
 			$new_id = $adb->getUniqueID($picklist_table);
@@ -70,7 +85,7 @@ class Vtiger_Field extends Vtiger_FieldBasic {
 			++$sortid;
 
 			// Associate picklist values to all the role
-			$adb->query("INSERT INTO vtiger_role2picklist(roleid, picklistvalueid, picklistid, sortid) SELECT roleid, 
+			$adb->query("INSERT INTO vtiger_role2picklist(roleid, picklistvalueid, picklistid, sortid) SELECT roleid,
 				$new_picklistvalueid, $new_picklistid, $sortid FROM vtiger_role");
 		}
 	}
@@ -94,7 +109,7 @@ class Vtiger_Field extends Vtiger_FieldBasic {
 				"($picklist_idcol INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 				$this->name VARCHAR(200) NOT NULL,
 				sortorderid INT(11),
-				presence INT (11) NOT NULL DEFAULT 1)", 
+				presence INT (11) NOT NULL DEFAULT 1)",
 				true);
 			self::log("Creating table $picklist_table ... DONE");
 		}
@@ -106,7 +121,7 @@ class Vtiger_Field extends Vtiger_FieldBasic {
 			$new_id = $adb->getUniqueId($picklist_table);
 			$adb->pquery("INSERT INTO $picklist_table($picklist_idcol, $this->name, sortorderid, presence) VALUES(?,?,?,?)",
 				Array($new_id, $value, $sortid, $presence));
-			
+
 			$sortid = $sortid+1;
 		}
 	}
@@ -120,11 +135,13 @@ class Vtiger_Field extends Vtiger_FieldBasic {
 	function setRelatedModules($moduleNames) {
 
 		// We need to create core table to capture the relation between the field and modules.
-		Vtiger_Utils::CreateTable(
-			'vtiger_fieldmodulerel',
-			'(fieldid INT NOT NULL, module VARCHAR(100) NOT NULL, relmodule VARCHAR(100) NOT NULL, status VARCHAR(10), sequence INT)',
-			true
-		);
+		if(!Vtiger_Utils::CheckTable('vtiger_fieldmodulerel')) {
+			Vtiger_Utils::CreateTable(
+				'vtiger_fieldmodulerel',
+				'(fieldid INT NOT NULL, module VARCHAR(100) NOT NULL, relmodule VARCHAR(100) NOT NULL, status VARCHAR(10), sequence INT)',
+				true
+			);
+		}
 		// END
 
 		global $adb;
@@ -135,9 +152,9 @@ class Vtiger_Field extends Vtiger_FieldBasic {
 			// If relation already exist continue
 			if($adb->num_rows($checkres)) continue;
 
-			$adb->pquery('INSERT INTO vtiger_fieldmodulerel(fieldid, module, relmodule) VALUES(?,?,?)', 
+			$adb->pquery('INSERT INTO vtiger_fieldmodulerel(fieldid, module, relmodule) VALUES(?,?,?)',
 				Array($this->id, $this->getModuleName(), $relmodule));
-			
+
 			self::log("Setting $this->name relation with $relmodule ... DONE");
 		}
 		return true;
@@ -150,9 +167,9 @@ class Vtiger_Field extends Vtiger_FieldBasic {
 	function unsetRelatedModules($moduleNames) {
 		global $adb;
 		foreach($moduleNames as $relmodule) {
-			$adb->pquery('DELETE FROM vtiger_fieldmodulerel WHERE fieldid=? AND module=? AND relmodule = ?', 
+			$adb->pquery('DELETE FROM vtiger_fieldmodulerel WHERE fieldid=? AND module=? AND relmodule = ?',
 				Array($this->id, $this->getModuleName(), $relmodule));
-			
+
 			Vtiger_Utils::Log("Unsetting $this->name relation with $relmodule ... DONE");
 		}
 		return true;
@@ -221,7 +238,7 @@ class Vtiger_Field extends Vtiger_FieldBasic {
 
 		$query = "SELECT * FROM vtiger_field WHERE tabid=?";
 		$queryParams = Array($moduleInstance->id);
-		
+
 		$result = $adb->pquery($query, $queryParams);
 		for($index = 0; $index < $adb->num_rows($result); ++$index) {
 			$instance = new self();

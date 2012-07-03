@@ -1,3 +1,14 @@
+{*<!--
+/*+**********************************************************************************
+ * The contents of this file are subject to the vtiger CRM Public License Version 1.0
+ * ("License"); You may not use this file except in compliance with the License
+ * The Original Code is:  vtiger CRM Open Source
+ * The Initial Developer of the Original Code is vtiger.
+ * Portions created by vtiger are Copyright (C) vtiger.
+ * All Rights Reserved.
+ ************************************************************************************/
+-->*}
+
 <script src="modules/com_vtiger_workflow/resources/vtigerwebservices.js" type="text/javascript" charset="utf-8"></script>
 
 <script type="text/javascript" charset="utf-8">
@@ -35,7 +46,12 @@ var taskPriority = '{$task->priority}';
 	<tr><td colspan="2"><hr size="1" noshade="noshade" /></td></tr>
 	<tr>
 		<td align="right"><b>Time</b></td>
-		<td><input type="hidden" name="time" value="{$task->time}" id="workflow_time" style="width:60px" class="time_field"></td>
+		{if $task->time neq ''} 
+			{assign var=now value=$task->time}
+		{else}
+			{assign var=now value=$USER_TIME}
+		{/if}
+		<td><input type="hidden" name="time" value="{$now}" id="workflow_time" style="width:60px" class="time_field"></td>
 	</tr>
 	<tr>
 		<td align="right"><b>Due Date</b></td>

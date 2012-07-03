@@ -68,14 +68,19 @@
 		 * Retrieve a task from the database
 		 *
 		 * @param $taskId The id of the task to retrieve.
-		 * @return The retrieved task.
+		 * @return VTTask The retrieved task.
 		 */
 		public function retrieveTask($taskId){
 			$adb = $this->adb;
 			$result = $adb->pquery("select task from com_vtiger_workflowtasks where task_id=?", array($taskId));
 			$data = $adb->raw_query_result_rowdata($result, 0);
 			$task = $data["task"];
-			return $this->unserializeTask($task);
+			$task = $this->unserializeTask($task);
+			$timeFieldList = $task->getTimeFieldList();
+			foreach ($timeFieldList as $field) {
+				$task->$field = $task->formatTimeForTimePicker($task->$field);
+			}
+			return $task;
 		}
 		
 		
@@ -109,13 +114,27 @@
 		}
 		
 		
-		function getTaskTypes(){
-			$taskTypes = array("VTEmailTask", "VTEntityMethodTask", "VTCreateTodoTask","VTCreateEventTask");
+		function getTaskTypes($moduleName=''){
+			$taskTypes = array("VTEmailTask", "VTEntityMethodTask", "VTCreateTodoTask","VTCreateEventTask","VTUpdateFieldsTask","VTCreateEntityTask");
 			// Make SMSTask available if module is active
 			// TODO Generic way of handling this could be helpful
 			if(getTabid('SMSNotifier') && vtlib_isModuleActive('SMSNotifier')) {
 				$taskTypes [] = 'VTSMSTask'; 	
-			}				
+			}
+			$taskTypes = $this->filterTaskTypes($moduleName, $taskTypes);
+			return $taskTypes;
+		}
+
+		private function filterTaskTypes($moduleName, $taskTypes) {
+			$eliminateTaskTypes = array(
+				"Calendar" => array("VTCreateTodoTask","VTCreateEventTask"),
+				"Events" => array("VTCreateTodoTask","VTCreateEventTask"),
+				"Faq" => array("VTCreateTodoTask","VTCreateEventTask"),
+			);
+
+			if(!empty($moduleName) && array_key_exists($moduleName, $eliminateTaskTypes)) {
+				$taskTypes = array_diff($taskTypes, $eliminateTaskTypes[$moduleName]);
+			}
 			return $taskTypes;
 		}
 		
@@ -147,7 +166,30 @@
 	abstract class VTTask{
 		public abstract function doTask($data);
 		public abstract function getFieldNames();
+
+		public function getTimeFieldList() {
+			return array();
+		}
+
+		public function formatTimeForTimePicker($time) {
+			list($h, $m, $s) = explode(':', $time);
+			$mn = str_pad($m - $m % 15, 2, 0, STR_PAD_LEFT);
+			$AM_PM = array('am', 'pm');
+			return str_pad(($h%12), 2, 0, STR_PAD_LEFT).':'.$mn.$AM_PM[($h/12)%2];
+		}
+
+		public function getMetaVariables() {
+			return array(
+				'Current Date' => '(general : (__VtigerMeta__) date)',
+				'Current Time' => '(general : (__VtigerMeta__) time)',
+				'System Timezone' => '(general : (__VtigerMeta__) dbtimezone)',
+				'CRM Detail View URL' => '(general : (__VtigerMeta__) crmdetailviewurl)',
+				'Portal Detail View URL' => '(general : (__VtigerMeta__) portaldetailviewurl)',
+				'Site Url' => '(general : (__VtigerMeta__) siteurl)',
+				'Portal Url' => '(general : (__VtigerMeta__) portalurl)'
+			);
+		}
+
 	}
 	
-	//require 'modules/Workflow/tasks/VTEmailTask.inc';
 ?>

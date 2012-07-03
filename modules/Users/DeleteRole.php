@@ -8,11 +8,15 @@
  * All Rights Reserved.
  ********************************************************************************/
 
+require_once 'modules/Users/Role.php';
+require_once ('config.php');
 global $adb;
 $del_id =  $_REQUEST['delete_role_id'];
 $tran_id = $_REQUEST['user_role'];
 
-deleteRole($del_id,$tran_id);
+$role = Vtiger_Role::getInstanceById($del_id);
+$targetRole = Vtiger_Role::getInstanceById($tran_id);
+$role->delete($targetRole);
 
 header("Location: index.php?action=listroles&module=Settings");
 ?>

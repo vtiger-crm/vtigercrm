@@ -19,5 +19,6 @@
 {/if}
 <div id="searchResultContainerId">
 <input name="globalSearchText" id="globalSearchText" type="hidden" value="{$SEARCH_STRING}" />
+<input name="tagSearchText" id="tagSearchText" type="hidden" value="{$TAG_SEARCH}" />
 {include file='UnifiedSearchAjax.tpl'}
 </div>

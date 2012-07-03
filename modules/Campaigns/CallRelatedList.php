@@ -12,7 +12,7 @@ require_once('Smarty_setup.php');
 require_once('include/utils/utils.php');
 //Redirecting Header for single page layout 
 require_once('user_privileges/default_module_view.php');
-global $singlepane_view;
+global $singlepane_view, $list_max_entries_per_page;
 $currentmodule = vtlib_purify($_REQUEST['module']);
 $RECORD = vtlib_purify($_REQUEST['record']);
 $category = getParentTab();
@@ -101,6 +101,8 @@ if($singlepane_view == 'true' && $_REQUEST['action'] == 'CallRelatedList') {
 	$smarty->assign("APP",$app_strings);
 	$smarty->assign("THEME", $theme);
 	$smarty->assign("IMAGE_PATH", $image_path);
+	$smarty->assign("RECORDID", $RECORD);
+	$smarty->assign('MAX_RECORDS', $list_max_entries_per_page);
 	
 	$check_button = Button_Check($module);
 	$smarty->assign("CHECK", $check_button);

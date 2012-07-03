@@ -8,7 +8,7 @@
  * All Rights Reserved.
  ************************************************************************************/
 require_once('modules/Emails/class.phpmailer.php');
-
+include_once('include/utils/CommonUtils.php');
 include_once('config.inc.php');
 include_once('include/database/PearDatabase.php');
 include_once('vtlib/Vtiger/Utils.php');
@@ -54,7 +54,10 @@ class Vtiger_Mailer extends PHPMailer {
 			$this->SMTPAuth = $adb->query_result($result, 0, 'smtp_auth');
 			if(empty($this->SMTPAuth)) $this->SMTPAuth = false;
 
+			$this->ConfigSenderInfo($adb->query_result($result, 0, 'from_email_field'));
+
 			$this->_serverConfigured = true;
+			$this->Sender= getReturnPath($this->Host);
 		}
 	}
 
@@ -63,8 +66,6 @@ class Vtiger_Mailer extends PHPMailer {
 	 * @access private
 	 */
 	function reinitialize() {
-		$this->From = '';
-		$this->FromName = '';
 		$this->to = Array();
 		$this->cc = Array();
 		$this->bcc = Array();
@@ -93,6 +94,15 @@ class Vtiger_Mailer extends PHPMailer {
 		}
 		return false;		
 	}
+	/**
+	*Adding signature to mail
+	*/
+	function addSignature($userId) {
+		global $adb;
+		$sign = nl2br($adb->query_result($adb->pquery("select signature from vtiger_users where id=?", array($userId)),0,"signature"));
+		$this->Signature = $sign;
+	}
+
 
 	/**
 	 * Configure sender information
@@ -148,6 +158,11 @@ class Vtiger_Mailer extends PHPMailer {
 					'(id INTEGER, name VARCHAR(100), email VARCHAR(100), type VARCHAR(7))',
 					true);
 			}
+			if(!Vtiger_Utils::CheckTable('vtiger_mailer_queueattachments')) {
+				Vtiger_Utils::CreateTable('vtiger_mailer_queueattachments',
+					'(id INTEGER, path TEXT, name VARCHAR(100), encoding VARCHAR(50), type VARCHAR(100))',
+					true);
+			}
 			$this->_queueinitialized = true;
 		}
 		return true;
@@ -183,13 +198,18 @@ class Vtiger_Mailer extends PHPMailer {
 				$adb->pquery('INSERT INTO vtiger_mailer_queueinfo(id, name, email, type) VALUES(?,?,?,?)',
 					Array($queueid, $rtoinfo[1], $rtoinfo[0], 'RPLYTO'));
 			}
+			foreach($this->attachment as $attachmentinfo) {
+				if(empty($attachmentinfo[0])) continue;
+				$adb->pquery('INSERT INTO vtiger_mailer_queueattachments(id, path, name, encoding, type) VALUES(?,?,?,?,?)',
+					Array($queueid, $attachmentinfo[0], $attachmentinfo[2], $attachmentinfo[3], $attachmentinfo[4]));
+			}
 		}
 	}
 
 	/**
 	 * Dispatch (send) email that was queued.
 	 */
-	static function dispatchQueue() {
+	static function dispatchQueue(Vtiger_Mailer_Listener $listener=null) {
 		global $adb;
 		if(!Vtiger_Utils::CheckTable('vtiger_mailer_queue')) return;
 
@@ -218,16 +238,42 @@ class Vtiger_Mailer extends PHPMailer {
 					else if($email_record[type] == 'BCC')$mailer->AddBCC($email_record[email], $email_record[name]);
 					else if($email_record[type] == 'RPLYTO')$mailer->AddReplyTo($email_record[email], $email_record[name]);
 				}
+				
+				$attachments = $adb->pquery('SELECT * FROM vtiger_mailer_queueattachments WHERE id=?', Array($queueid));
+				for($aidx = 0; $aidx < $adb->num_rows($attachments); ++$aidx) {
+					$attachment_record = $adb->fetch_array($attachments, $aidx);
+					if($attachment_record['path'] != '') {
+						$mailer->AddAttachment($attachment_record['path'], $attachment_record['name'],
+												$attachment_record['encoding'], $attachment_record['type']);
+					}
+				}
 				$sent = $mailer->Send(true);
 				if($sent) {
 					Vtiger_Event::trigger('vtiger.mailer.mailsent', $relcrmid);
+					if($listener) {
+						$listener->mailsent($queueid);
+					}
 					$adb->pquery('DELETE FROM vtiger_mailer_queue WHERE id=?', Array($queueid));
 					$adb->pquery('DELETE FROM vtiger_mailer_queueinfo WHERE id=?', Array($queueid));
+					$adb->pquery('DELETE FROM vtiger_mailer_queueattachments WHERE id=?', Array($queueid));
 				} else {
-					$adb->pquery('UPDATE vtiger_mailer_queueinfo SET failed=?, failreason=? WHERE id=?', Array(1, $mailer->ErrorInfo, $queueid));
+					if($listener) {
+						$listener->mailerror($queueid);
+					}
+					$adb->pquery('UPDATE vtiger_mailer_queue SET failed=?, failreason=? WHERE id=?', Array(1, $mailer->ErrorInfo, $queueid));
 				}
 			}
 		}
 	}
 }
+
+/**
+ * Provides API to act on the different events triggered by send email action.
+ * @package vtlib
+ */
+abstract class Vtiger_Mailer_Listener {
+	function mailsent($queueid) { }
+	function mailerror($queueid) { }
+}
+
 ?>

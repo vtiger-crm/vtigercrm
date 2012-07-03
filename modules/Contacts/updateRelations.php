@@ -9,7 +9,7 @@
  ********************************************************************************/
 require_once('include/database/PearDatabase.php');
 require_once('user_privileges/default_module_view.php');
-global $adb, $singlepane_view, $currentModule;
+global $singlepane_view, $currentModule;
 $idlist = vtlib_purify($_REQUEST['idlist']);
 $dest_mod = vtlib_purify($_REQUEST['destination_module']);
 $record = vtlib_purify($_REQUEST['record']);
@@ -30,24 +30,12 @@ if(!empty($_REQUEST['idlist'])) {
 	$storearray = array($_REQUEST['entityid']);
 }elseif(!empty($_REQUEST['pot_id'])) {
 	$forCRMRecord = $record;
-	$sql = "insert into vtiger_contpotentialrel values(?,?)";
-	$adb->pquery($sql, array($forCRMRecord, $_REQUEST["pot_id"]));
+	$storearray = array(vtlib_purify($_REQUEST["pot_id"]));
+	$dest_mod = 'Potentials';
 }
 $focus = CRMEntity::getInstance($currentModule);
-foreach($storearray as $id)
-{
-	if($id != '')
-	{
-		if($dest_mod == 'Products')
-			$adb->pquery("insert into vtiger_seproductsrel values (?,?,?)", array($forCRMRecord, $id, 'Contacts'));	
-		elseif($dest_mod == 'Campaigns')
-			$adb->pquery("insert into vtiger_campaigncontrel values(?,?,1)", array($id, $forCRMRecord));
-		elseif($dest_mod == 'Documents')
-			$adb->pquery("insert into vtiger_senotesrel values(?,?)", array($forCRMRecord,$id));
-		else {
-			$focus->save_related_module($currentModule, $forCRMRecord, $dest_mod, $id);
-		}
-	}
+if(!empty($storearray)) {
+	relateEntities($focus, $currentModule, $forCRMRecord, $dest_mod, $storearray);
 }
 
 header("Location: index.php?action=$action&module=$currentModule&record=".$forCRMRecord."&parenttab=".$parenttab);

@@ -9,7 +9,7 @@
  ********************************************************************************/
 
 if(isset($_REQUEST['file']) && ($_REQUEST['file'] !='')) {
-	checkFileAccess('modules/Settings/'.$_REQUEST['file'].'.php');
+	checkFileAccessForInclusion('modules/Settings/'.$_REQUEST['file'].'.php');
 	require_once('modules/Settings/'.$_REQUEST['file'].'.php');
 }
 if(isset($_REQUEST['orgajax']) && ($_REQUEST['orgajax'] !='')) {

@@ -18,6 +18,16 @@
 <script type="text/javascript" src="jscalendar/calendar.js"></script>
 <script type="text/javascript" src="jscalendar/lang/calendar-{$CALENDAR_LANG}.js"></script>
 <script type="text/javascript" src="jscalendar/calendar-setup.js"></script>
+<script type="text/javascript" src="include/js/FieldDependencies.js"></script>
+<script type="text/javascript" src="modules/com_vtiger_workflow/resources/jquery-1.2.6.js"></script>
+<script type="text/javascript">
+	jQuery.noConflict();
+</script>
+{if $PICKIST_DEPENDENCY_DATASOURCE neq ''}
+<script type="text/javascript">
+	jQuery(document).ready(function() {ldelim} (new FieldDependencies({$PICKIST_DEPENDENCY_DATASOURCE})).init() {rdelim});
+</script>
+{/if}
 
 <!-- overriding the pre-defined #company to avoid clash with vtiger_field in the view -->
 {literal}
@@ -105,9 +115,10 @@ function sensex_info()
 					<td class="dvtTabCache" style="width:10px" nowrap>&nbsp;</td>
 
 					{if $ADVBLOCKS neq ''}	
-						<td width=75 style="width:15%" align="center" nowrap class="dvtSelectedCell" id="bi" onclick="fnLoadValues('bi','mi','basicTab','moreTab','normal','{$MODULE}')"><b>{$APP.LBL_BASIC} {$APP.LBL_INFORMATION}</b></td>
-                    				<td class="dvtUnSelectedCell" style="width: 100px;" align="center" nowrap id="mi" onclick="fnLoadValues('mi','bi','moreTab','basicTab','normal','{$MODULE}')"><b>{$APP.LBL_MORE} {$APP.LBL_INFORMATION} </b></td>
-                   				<td class="dvtTabCache" style="width:65%" nowrap>&nbsp;</td>
+						<td style="width:15%" align="center" nowrap class="dvtSelectedCell" id="bi" onclick="fnLoadValues('bi','mi','basicTab','moreTab','normal','{$MODULE}')"><b>{$APP.LBL_BASIC} {$APP.LBL_INFORMATION}</b></td>
+                    	<td class="dvtTabCache" style="width:10px" nowrap>&nbsp;</td>
+						<td class="dvtUnSelectedCell" style="width: 100px;" align="center" nowrap id="mi" onclick="fnLoadValues('mi','bi','moreTab','basicTab','normal','{$MODULE}')"><b>{$APP.LBL_MORE} {$APP.LBL_INFORMATION} </b></td>
+						<td class="dvtTabCache" style="width:65%" nowrap>&nbsp;</td>
 					{else}
 						<td class="dvtSelectedCell" align=center nowrap>{$APP.LBL_BASIC} {$APP.LBL_INFORMATION}</td>
 	                                        <td class="dvtTabCache" style="width:65%">&nbsp;</td>

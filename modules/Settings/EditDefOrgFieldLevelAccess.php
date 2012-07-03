@@ -54,6 +54,7 @@ function getStdOutput($fieldListResult, $noofrows, $lang_strings,$profileid)
 		$displaytype = $adb->query_result($fieldListResult,$i,"displaytype");
 		$fieldlabel = $adb->query_result($fieldListResult,$i,"fieldlabel");
 		$typeofdata = $adb->query_result($fieldListResult,$i,"typeofdata");
+		$presence = $adb->query_result($fieldListResult,$i,"presence");
 		$fieldtype = explode("~",$typeofdata);
                 $mandatory = '';
 		$readonly = '';
@@ -67,7 +68,8 @@ function getStdOutput($fieldListResult, $noofrows, $lang_strings,$profileid)
 			$standCustFld []= $mandatory.' '.$lang_strings[$fieldlabel];
 		else
 			$standCustFld []= $mandatory.' '.$fieldlabel;
-		if($adb->query_result($fieldListResult,$i,"visible") == 0 && $displaytype!=3)
+		if($adb->query_result($fieldListResult,$i,"visible") == 0 && $displaytype!=3 && 
+				$presence != '0')
 		{
 			if($fieldlabel == 'Activity Type')
 			{
@@ -77,7 +79,7 @@ function getStdOutput($fieldListResult, $noofrows, $lang_strings,$profileid)
 			else
 				$visible = "checked";
 		}
-		elseif($displaytype == 3)
+		elseif($displaytype == 3 || $presence == '0')
 		{
 			$visible = "checked";
 			$readonly = 'disabled';

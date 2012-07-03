@@ -186,7 +186,7 @@ function VTEmailTask($){
 				if(!contains(accessibleModulesInfo, moduleName)) return [];
 				
 				return map(function(field){					
-					return ['('+name+' : '+'('+moduleName+') '+field['name']+')',label+' : '+'('+moduleName+') '+field['label']];
+					return ['('+name+' : '+'('+moduleName+') '+field['name']+')',label+' : '+'('+modules[moduleName]['label']+') '+field['label']];
 					},
 					filteredFields(modules[moduleName]['fields']));
 			}
@@ -216,6 +216,16 @@ function VTEmailTask($){
 					var textarea = CKEDITOR.instances.save_content;
 					var value = '$'+jQuery(this).attr('value');
 					textarea.insertHtml(value);
+					});
+
+					fillSelectBox('task-subjectfields', modules, moduleName,
+										 function(e){return (e['type']['name']!='file' && e['type']['name']!='text' );});
+					$('#task-subjectfields-busyicon').hide();
+					$('#task-subjectfields').show();
+					$('#task-subjectfields').change(function(){
+						var input = $($('#save_subject').get());
+						var value = '$'+$(this).attr('value');
+						input.attr("value", input.attr("value")+' '+value);
 					});
 
 					fillSelectBox('task-emailfields', modules, moduleName,

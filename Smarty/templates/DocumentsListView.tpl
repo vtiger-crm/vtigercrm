@@ -49,31 +49,17 @@ function trimfValues(value)
     return string_array[4];
 }
 
+
+
 function updatefOptions(sel, opSelName) {
     var selObj = document.getElementById(opSelName);
     var fieldtype = null ;
 
     var currOption = selObj.options[selObj.selectedIndex];
     var currField = sel.options[sel.selectedIndex];
-    
+
     var fld = currField.value.split(":");
     var tod = fld[4];
-  /*  if(fld[4] == 'D' || (fld[4] == 'T' && fld[1] != 'time_start' && fld[1] != 'time_end') || fld[4] == 'DT')
-    {
-	$("and"+sel.id).innerHTML =  "";
-	if(sel.id != "fcol5")
-		$("and"+sel.id).innerHTML =  "<em old='(yyyy-mm-dd)'>("+$("user_dateformat").value+")</em>&nbsp;"+alert_arr.LBL_AND;
-	else
-		$("and"+sel.id).innerHTML =  "<em old='(yyyy-mm-dd)'>("+$("user_dateformat").value+")</em>&nbsp;";
-    }
-    else {
-	$("and"+sel.id).innerHTML =  "";
-	if(sel.id != "fcol5")
-		$("and"+sel.id).innerHTML =  "&nbsp;"+alert_arr.LBL_AND;
-	else
-		$("and"+sel.id).innerHTML =  "&nbsp;";
-    } 	
-*/
     if(currField.value != null && currField.value.length != 0)
     {
 	fieldtype = trimfValues(currField.value);
@@ -88,10 +74,6 @@ function updatefOptions(sel, opSelName) {
 		{
 			selObj.remove(0);
 		}
-	/*	selObj.options[0] = new Option ('None', '');
-		if (currField.value == '') {
-			selObj.options[0].selected = true;
-		}*/
 		for (var i = 0; i < ops.length; i++)
 		{
 			var label = fLabels[ops[i]];
@@ -141,24 +123,11 @@ function callSearch(searchtype)
         {rdelim}
         else if(searchtype == 'Advanced')
         {ldelim}
-                var no_rows = document.basicSearch.search_cnt.value;
-                for(jj = 0 ; jj < no_rows; jj++)
-                {ldelim}
-                        var sfld_name = getObj("Fields"+jj);
-                        var scndn_name= getObj("Condition"+jj);
-                        var srchvalue_name = getObj("Srch_value"+jj);
-                        var p_tab = document.getElementsByName("parenttab");
-                        urlstring = urlstring+'Fields'+jj+'='+sfld_name[sfld_name.selectedIndex].value+'&';
-                        urlstring = urlstring+'Condition'+jj+'='+scndn_name[scndn_name.selectedIndex].value+'&';
-			urlstring = urlstring+'Srch_value'+jj+'='+encodeURIComponent(srchvalue_name.value)+'&';
-                        urlstring = urlstring + 'parenttab='+p_tab[0].value+ '&';
-                {rdelim}
-                for (i=0;i<getObj("matchtype").length;i++){ldelim}
-                        if (getObj("matchtype")[i].checked==true)
-                                urlstring += 'matchtype='+getObj("matchtype")[i].value+'&';
-                {rdelim}
-                urlstring += 'search_cnt='+no_rows+'&';
-                urlstring += 'searchtype=advance&'
+        		checkAdvancedFilter();
+				var advft_criteria = $('advft_criteria').value;
+				var advft_criteria_groups = $('advft_criteria_groups').value;
+				urlstring += '&advft_criteria='+advft_criteria+'&advft_criteria_groups='+advft_criteria_groups+'&';
+				urlstring += 'searchtype=advance&'
         {rdelim}
 	$("status").style.display="inline";
 	new Ajax.Request(
@@ -234,10 +203,10 @@ function alphabetic(module,url,dataid)
 	 <!-- SIMPLE SEARCH -->
 <div id="searchAcc" style="display: block;position:relative;">
 <form name="basicSearch" method="post" action="index.php" onSubmit="return callSearch('Basic');">
-<table width="80%" cellpadding="5" cellspacing="0"  class="searchUIBasic small" align="center" border=0>
+<table width="100%" cellpadding="5" cellspacing="0"  class="searchUIBasic small" align="center" border=0>
 	<tr>
 		<td class="searchUIName small" nowrap align="left">
-		<span class="moduleName">{$APP.LBL_SEARCH}</span><br><span class="small"><a href="#" onClick="fnhide('searchAcc');show('advSearch');updatefOptions(document.getElementById('Fields0'), 'Condition0');document.basicSearch.searchtype.value='advance';">{$APP.LBL_GO_TO} {$APP.LNK_ADVANCED_SEARCH}</a></span>
+		<span class="moduleName">{$APP.LBL_SEARCH}</span><br><span class="small"><a href="#" onClick="fnhide('searchAcc');show('advSearch');document.basicSearch.searchtype.value='advance';">{$APP.LBL_GO_TO} {$APP.LNK_ADVANCED_SEARCH}</a></span>
 		<!-- <img src="{$IMAGE_PATH}basicSearchLens.gif" align="absmiddle" alt="{$APP.LNK_BASIC_SEARCH}" title="{$APP.LNK_BASIC_SEARCH}" border=0>&nbsp;&nbsp;-->
 		</td>
 		<td class="small" nowrap align=right><b>{$APP.LBL_SEARCH_FOR}</b></td>
@@ -250,7 +219,8 @@ function alphabetic(module,url,dataid)
 			</select>
 			</div>
                         <input type="hidden" name="searchtype" value="BasicSearch">
-                        <input type="hidden" name="module" value="{$MODULE}">
+                        <input type="hidden" name="module" value="{$MODULE}" id="curmodule">
+						<input name="maxrecords" type="hidden" value="{$MAX_RECORDS}" id='maxrecords'>
                         <input type="hidden" name="parenttab" value="{$CATEGORY}">
 						<input type="hidden" name="action" value="index">
                         <input type="hidden" name="query" value="true">
@@ -272,55 +242,33 @@ function alphabetic(module,url,dataid)
 		</td>
 	</tr>
 </table>
-</form>
+</form><br>
 </div>
 <!-- ADVANCED SEARCH -->
 <div id="advSearch" style="display:none;">
-<form name="advSearch" method="post" action="index.php" onSubmit="totalnoofrows();return callSearch('Advanced');">
-		<table  cellspacing=0 cellpadding=5 width=80% class="searchUIAdv1 small" align="center" border=0>
-			<tr>
-					<td class="searchUIName small" nowrap align="left"><span class="moduleName">{$APP.LBL_SEARCH}</span><br><span class="small"><a href="#" onClick="show('searchAcc');fnhide('advSearch')">{$APP.LBL_GO_TO} {$APP.LNK_BASIC_SEARCH}</a></span></td>
-					<td nowrap class="small"><b><input name="matchtype" type="radio" value="all">&nbsp;{$APP.LBL_ADV_SEARCH_MSG_ALL}</b></td>
-					<td nowrap width=60% class="small" ><b><input name="matchtype" type="radio" value="any" checked>&nbsp;{$APP.LBL_ADV_SEARCH_MSG_ANY}</b></td>
-					<td class="small" valign="top" onMouseOver="this.style.cursor='pointer';" onclick="moveMe('searchAcc');searchshowhide('searchAcc','advSearch')">[x]</td>
-			</tr>
-		</table>
-		<table cellpadding="2" cellspacing="0" width="80%" align="center" class="searchUIAdv2 small" border=0>
-			<tr>
-				<td align="center" class="small" width=90%>
-				<div id="fixed" style="position:relative;width:95%;height:80px;padding:0px; overflow:auto;border:1px solid #CCCCCC;background-color:#ffffff" class="small">
-					<table border=0 width=95%>
-					<tr>
-					<td align=left>
-						<table width="100%"  border="0" cellpadding="2" cellspacing="0" id="adSrc" align="left">
-						<tr  >
-							<td width="31%"><select name="Fields0" id="Fields0" class="detailedViewTextBox" onchange="updatefOptions(this, 'Condition0')">{$FIELDNAMES}</select>
-							</td>
-							<td width="32%"><select name="Condition0" id="Condition0" class="detailedViewTextBox">{$CRITERIA}</select>
-							</td>
-							<td width="32%"><input type="text" name="Srch_value0" id="Srch_value0" class="detailedViewTextBox"></td>
-						</tr>
-						</table>
-					</td>
-					</tr>
-				</table>
-				</div>	
-				</td>
-			</tr>
-		</table>
-			
-		<table border=0 cellspacing=0 cellpadding=5 width=80% class="searchUIAdv3 small" align="center">
+<form name="advSearch" method="post" action="index.php" onSubmit="return callSearch('Advanced');">
+	<table  cellspacing=0 cellpadding=5 width=100% class="searchUIAdv1 small" align="center" border=0>
 		<tr>
-			<td align=left width=40%>
-						<input type="button" name="more" value=" {$APP.LBL_MORE} " onClick="fnAddSrch()" class="crmbuttom small edit" >
-						<input name="button" type="button" value=" {$APP.LBL_FEWER_BUTTON} " onclick="delRow()" class="crmbuttom small edit" >
-			</td>
-			<td align=left class="small"><input type="button" class="crmbutton small create" value=" {$APP.LBL_SEARCH_NOW_BUTTON} " onClick="totalnoofrows();callSearch('Advanced');">
+			<td class="searchUIName small" nowrap align="left"><span class="moduleName">{$APP.LBL_SEARCH}</span><br><span class="small"><a href="#" onClick="show('searchAcc');fnhide('advSearch')">{$APP.LBL_GO_TO} {$APP.LNK_BASIC_SEARCH}</a></span></td>
+			<td class="small" align="right" valign="top" onMouseOver="this.style.cursor='pointer';" onclick="moveMe('searchAcc');searchshowhide('searchAcc','advSearch')">[x]</td>
+		</tr>
+	</table>
+	<table cellpadding="2" cellspacing="0" width="100%" align="center" class="searchUIAdv2 small" border=0>
+		<tr>
+			<td align="center" class="small" width=100%>
+				{include file='AdvanceFilter.tpl' SOURCE='customview' COLUMNS_BLOCK=$FIELDNAMES}
 			</td>
 		</tr>
 	</table>
-</form>
-</div>		
+
+	<table border=0 cellspacing=0 cellpadding=5 width=100% class="searchUIAdv3 small" align="center">
+		<tr>
+			<td align="center" class="small"><input type="button" class="crmbutton small create" value=" {$APP.LBL_SEARCH_NOW_BUTTON} " onClick="callSearch('Advanced');">
+			</td>
+		</tr>
+	</table>
+</form><br>
+</div>
 {*<!-- Searching UI -->*}
  
  <div id="mergeDup" style="z-index:1;display:none;position:relative;">
@@ -333,7 +281,6 @@ function alphabetic(module,url,dataid)
 	</div>
 
      </td>
-        <td valign=top><img src="{'showPanelTopRight.gif'|@vtiger_imageurl:$THEME}"></td>
    </tr>
 </table>
 
@@ -381,11 +328,3 @@ function alphabetic(module,url,dataid)
 </div>
 
 <!-- Add new folder UI for Documents module ends -->
-
-
-
-
-
-
-
-

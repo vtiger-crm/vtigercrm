@@ -26,7 +26,6 @@ require_once('modules/Users/Users.php');
 require_once('include/utils/UserInfoUtil.php');
 require_once('modules/Users/Forms.php');
 require_once('include/database/PearDatabase.php');
-require_once('modules/Calendar/OpenListView.php');
 require_once('modules/Leads/ListViewTop.php');
 
 global $app_strings;
@@ -43,7 +42,7 @@ if(isset($_REQUEST['record']) && isset($_REQUEST['record'])) {
 	$mode='edit';
 	if (!is_admin($current_user) && $_REQUEST['record'] != $current_user->id) die ("Unauthorized access to user administration.");
     $focus->retrieve_entity_info($_REQUEST['record'],'Users');
-	$smarty->assign("USERNAME",$focus->last_name.' '.$focus->first_name);
+	$smarty->assign("USERNAME", getFullNameFromArray('Users', $focus->column_fields));
 }else
 {
 	$mode='create';
@@ -57,6 +56,9 @@ if(isset($_REQUEST['isDuplicate']) && $_REQUEST['isDuplicate'] == 'true') {
 	//When duplicating the user the password fields should be empty
 	$focus->column_fields['user_password']='';
 	$focus->column_fields['confirm_password']='';
+}
+if(empty($focus->column_fields['time_zone'])) {
+	$focus->column_fields['time_zone'] = DateTimeField::getDBTimeZone();
 }
 
 global $theme;
@@ -95,7 +97,7 @@ $smarty->assign("IMAGE_PATH", $image_path);$smarty->assign("PRINT_URL", "phprint
 $focus->mode = $mode;
 $disp_view = getView($focus->mode);
 $smarty->assign("IMAGENAME",$focus->imagename);
-$smarty->assign("BLOCKS",getBlocks($currentModule,$disp_view,$mode,$focus->column_fields));	
+$smarty->assign("BLOCKS",getBlocks($currentModule,$disp_view,$mode,$focus->column_fields));
 $smarty->assign("MODULE", 'Settings');
 $smarty->assign("MODE",$focus->mode);
 $smarty->assign("HOUR_FORMAT",$focus->hour_format);
@@ -104,8 +106,8 @@ if ($_REQUEST['Edit'] == ' Edit ')
 {
 	$smarty->assign("READONLY", "readonly");
 	$smarty->assign("USERNAME_READONLY", "readonly");
-	
-}	
+
+}
 if(isset($_REQUEST['record']) && $_REQUEST['isDuplicate'] != 'true')
 {
 	$smarty->assign("USERNAME_READONLY", "readonly");
@@ -113,7 +115,7 @@ if(isset($_REQUEST['record']) && $_REQUEST['isDuplicate'] != 'true')
 
 $smarty->assign("HOMEORDER",$focus->getHomeStuffOrder($focus->id));
 //Added to provide User based Tagcloud
-if($mode == 'create') $smarty->assign("TAGCLOUDVIEW","true"); // While creating user select tag cloud by default 
+if($mode == 'create') $smarty->assign("TAGCLOUDVIEW","true"); // While creating user select tag cloud by default
 else $smarty->assign("TAGCLOUDVIEW",getTagCloudView($focus->id));
 
 $smarty->assign("DUPLICATE",vtlib_purify($_REQUEST['isDuplicate']));
@@ -122,6 +124,9 @@ $smarty->assign('PARENTTAB', getParentTab());
 $_SESSION['Users_FORM_TOKEN'] = rand(5, 2000) * rand(2, 7);
 $smarty->assign('FORM_TOKEN', $_SESSION['Users_FORM_TOKEN']);
 
+// Gather the help information associated with fields
+$smarty->assign('FIELDHELPINFO', vtlib_getFieldHelpInfo($currentModule));
+// END
 $smarty->display('UserEditView.tpl');
 
 ?>

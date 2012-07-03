@@ -1,369 +1,266 @@
 <?php
-/*+*******************************************************************************
+/* +*******************************************************************************
  * The contents of this file are subject to the vtiger CRM Public License Version 1.0
  * ("License"); You may not use this file except in compliance with the License
  * The Original Code is:  vtiger CRM Open Source
  * The Initial Developer of the Original Code is vtiger.
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
- *
- *********************************************************************************/
+ ******************************************************************************** */
 
 require_once 'include/Webservices/Retrieve.php';
 require_once 'include/Webservices/Create.php';
+require_once 'include/Webservices/Delete.php';
+require_once 'include/Webservices/DescribeObject.php';
 
-function vtws_convertlead($leadId,$assignedTo,$accountName,$avoidPotential,$potential,$user) {
-	global $adb,$log;
-	if(empty($assignedTo)){
-		$assignedTo = vtws_getWebserviceEntityId('Users',$user->id);
+function vtws_convertlead($entityvalues, $user) {
+
+	global $adb, $log;
+	if (empty($entityvalues['assignedTo'])) {
+		$entityvalues['assignedTo'] = vtws_getWebserviceEntityId('Users', $user->id);
 	}
-	if(((boolean)$avoidPotential) !== true){
-		try{
-			if(empty($potential)){
-				throw new WebServiceException(WebServiceErrorCode::$INVALID_POTENTIAL_FOR_CONVERT_LEAD,
-					"Invalid lead information given for potential");
-			}
-		}catch(Zend_Json_Exception $e){
-			throw new WebServiceException(WebServiceErrorCode::$INVALID_POTENTIAL_FOR_CONVERT_LEAD,
-					"Potentail information given is not in valid JSON format");
-		}
-	}
-	$currencyInfo=getCurrencySymbolandCRate($user->currency_id);
-	$rate = $currencyInfo['rate'];
-	if($potential['amount'] != ''){
-		$potential['amount'] = convertToDollar($potential['amount'],$rate);
+	if (empty($entityvalues['transferRelatedRecordsTo'])) {
+		$entityvalues['transferRelatedRecordsTo'] = 'Contacts';
 	}
 
-	$leadObject = VtigerWebserviceObject::fromName($adb,'Leads');
+
+	$leadObject = VtigerWebserviceObject::fromName($adb, 'Leads');
 	$handlerPath = $leadObject->getHandlerPath();
 	$handlerClass = $leadObject->getHandlerClass();
 
 	require_once $handlerPath;
 
-	$leadHandler = new $handlerClass($leadObject,$user,$adb,$log);
-	$leadHandler->getMeta()->retrieveMeta();
+	$leadHandler = new $handlerClass($leadObject, $user, $adb, $log);
 
-	$leadInfo = vtws_retrieve($leadId,$user);
+
+	$leadInfo = vtws_retrieve($entityvalues['leadId'], $user);
 	$sql = "select converted from vtiger_leaddetails where converted = 1 and leadid=?";
-	$leadIdComponents = vtws_getIdComponents($leadId);
+	$leadIdComponents = vtws_getIdComponents($entityvalues['leadId']);
 	$result = $adb->pquery($sql, array($leadIdComponents[1]));
-	if($result === false){
+	if ($result === false) {
 		throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
-			"Database error while performing required operation");
+				vtws_getWebserviceTranslatedString('LBL_' .
+						WebServiceErrorCode::$DATABASEQUERYERROR));
 	}
 	$rowCount = $adb->num_rows($result);
-	if($rowCount > 0){
+	if ($rowCount > 0) {
 		throw new WebServiceException(WebServiceErrorCode::$LEAD_ALREADY_CONVERTED,
-			"Lead is already converted");
+				"Lead is already converted");
 	}
 
-	$customFieldMapping = vtws_getConvertLeadFieldMapping();
+	$entityIds = array();
 
-	//check if accountName given in request is empty then default to lead company field.
-	if(empty($accountName)){
-		$accountName = $leadInfo['company'];
-	}
-	
-	$sql = "select vtiger_account.accountid from vtiger_account
-		left join vtiger_crmentity on vtiger_account.accountid = vtiger_crmentity.crmid
-		where vtiger_crmentity.deleted=0 and vtiger_account.accountname = ?";
-	$result = $adb->pquery($sql, array($accountName));
-	if($result === false){
-		throw new WebServiceException(WebServiceErrorCode::$DATABASEQUERYERROR,
-			"Database error while performing required operation");
-	}
-	$rowCount = $adb->num_rows($result);
-	if($rowCount != 0 && vtlib_isModuleActive('Accounts') === true){
-		$crmId = $adb->query_result($result,0,"accountid");
+	$availableModules = array('Accounts', 'Contacts', 'Potentials');
 
-		$status = vtws_getRelatedNotesAttachments($leadIdComponents[1],$crmId);
-		if($status === false){
-			throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move related Documents to the Account");
-		}
-		//Retrieve the lead related products and relate them with this new account
-		$status = vtws_saveLeadRelatedProducts($leadIdComponents[1], $crmId, "Accounts");
-		if($status === false){
-			throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move related Products to the Account");
-		}
-		$status = vtws_saveLeadRelations($leadIdComponents[1], $crmId, "Accounts");
-		if($status === false){
-			throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move Records to the Account");
-		}
-	}else{
-		//don't create account if no company name is given in input and lead doest not have
-		// company field populated, DONE TO RESPECT B2C model.
-		if(!empty($accountName)){
-			$accountObject = VtigerWebserviceObject::fromName($adb,'Accounts');
-			$handlerPath = $accountObject->getHandlerPath();
-			$handlerClass = $accountObject->getHandlerClass();
+	if (!(($entityvalues['entities']['Accounts']['create']) || ($entityvalues['entities']['Contacts']['create']))) {
+		return null;
+	}
+
+	foreach ($availableModules as $entityName) {
+		if ($entityvalues['entities'][$entityName]['create']) {
+			$entityvalue = $entityvalues['entities'][$entityName];
+			$entityObject = VtigerWebserviceObject::fromName($adb, $entityvalue['name']);
+			$handlerPath = $entityObject->getHandlerPath();
+			$handlerClass = $entityObject->getHandlerClass();
 
 			require_once $handlerPath;
 
-			$accountHandler = new $handlerClass($accountObject,$user,$adb,$log);
-			if($accountHandler->getMeta()->hasWriteAccess()){
-				$account  = array();
-				if(!empty($leadInfo["annualrevenue"])){
-					$account['annual_revenue'] = $leadInfo["annualrevenue"];
-				}
+			$entityHandler = new $handlerClass($entityObject, $user, $adb, $log);
 
-				if(!empty($leadInfo["noofemployees"])) {
-					$account['employees'] = $leadInfo["noofemployees"];
+			$entityObjectValues = array();
+			$entityObjectValues['assigned_user_id'] = $entityvalues['assignedTo'];
+			$entityObjectValues = vtws_populateConvertLeadEntities($entityvalue, $entityObjectValues, $entityHandler, $leadHandler, $leadInfo);
+
+			//update potential related to property
+			if ($entityvalue['name'] == 'Potentials') {
+				if (!empty($entityIds['Accounts'])) {
+					$entityObjectValues['related_to'] = $entityIds['Accounts'];
+				} else {
+					$entityObjectValues['related_to'] = $entityIds['Contacts'];
 				}
-				$account['accountname'] = $accountName;
-				$account['industry'] = $leadInfo["industry"];
-				$account['phone'] = $leadInfo["phone"];
-				$account['fax'] = $leadInfo["fax"];
-				$account['rating'] = $leadInfo["rating"];
-				$account['email1'] = $leadInfo["email"];
-				$account['website'] = $leadInfo["website"];
-				$account['bill_city'] = $leadInfo["city"];
-				$account['bill_code'] = $leadInfo["code"];
-				$account['bill_country'] = $leadInfo["country"];
-				$account['bill_state'] = $leadInfo["state"];
-				$account['bill_street'] = $leadInfo["lane"];
-				$account['bill_pobox'] = $leadInfo["pobox"];
-				$account['ship_city'] = $leadInfo["city"];
-				$account['ship_code'] = $leadInfo["code"];
-				$account['ship_country'] = $leadInfo["country"];
-				$account['ship_state'] = $leadInfo["state"];
-				$account['ship_street'] = $leadInfo["lane"];
-				$account['ship_pobox'] = $leadInfo["pobox"];
-				$account['assigned_user_id'] = $assignedTo;
-				$account['description'] = $leadInfo['description'];
-				$leadFields = $leadHandler->getMeta()->getModuleFields();
-				$accountFields = $accountHandler->getMeta()->getModuleFields();
-				foreach ($customFieldMapping as $leadFieldId=>$mappingDetails){
-					$accountFieldId = $mappingDetails['Accounts'];
-					if(empty($accountFieldId)){
-						continue;
+			}
+
+			//update the contacts relation
+			if ($entityvalue['name'] == 'Contacts') {
+				if (!empty($entityIds['Accounts'])) {
+					$entityObjectValues['account_id'] = $entityIds['Accounts'];
+				}
+			}
+
+			try {
+				$create = true;
+				if ($entityvalue['name'] == 'Accounts') {
+					$sql = "SELECT vtiger_account.accountid FROM vtiger_account,vtiger_crmentity WHERE vtiger_crmentity.crmid=vtiger_account.accountid AND vtiger_account.accountname=? AND vtiger_crmentity.deleted=0";
+					$result = $adb->pquery($sql, array($entityvalue['accountname']));
+					if ($adb->num_rows($result) > 0) {
+						$entityIds[$entityName] = vtws_getWebserviceEntityId('Accounts', $adb->query_result($result, 0, 'accountid'));
+						$create = false;
 					}
-					$accountField = vtws_getFieldfromFieldId($accountFieldId,$accountFields);
-					if($accountField == null){
-						//user doesn't have access so continue.TODO update even if user doesn't have access
-						continue;
-					}
-					$leadField = vtws_getFieldfromFieldId($leadFieldId,$leadFields);
-					if($leadField == null){
-						//user doesn't have access so continue.TODO update even if user doesn't have access
-						continue;
-					}
-					$leadFieldName = $leadField->getFieldName();
-					$accountFieldName = $accountField->getFieldName();
-					$account[$accountFieldName] = $leadInfo[$leadFieldName];
 				}
-				$account = vtws_create('Accounts',$account,$user);
-				$accountIdComponents = vtws_getIdComponents($account['id']);
-				$status = vtws_getRelatedNotesAttachments($leadIdComponents[1],$accountIdComponents[1]);
-				if($status === false){
-					throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move related Documents to the Account");
+				if ($create) {
+					$entityRecord = vtws_create($entityvalue['name'], $entityObjectValues, $user);
+					$entityIds[$entityName] = $entityRecord['id'];
 				}
-				//Retrieve the lead related products and relate them with this new account
-				$status = vtws_saveLeadRelatedProducts($leadIdComponents[1], $accountIdComponents[1], "Accounts");
-				if($status === false){
-					throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move related Products to the Account");
-				}
-				$status = vtws_saveLeadRelations($leadIdComponents[1], $accountIdComponents[1], "Accounts");
-				if($status === false){
-					throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move Records to the Account");
-				}
+			} catch (Exception $e) {
+				return null;
 			}
 		}
 	}
-	$contactObject = VtigerWebserviceObject::fromName($adb,'Contacts');
-	$handlerPath = $contactObject->getHandlerPath();
-	$handlerClass = $contactObject->getHandlerClass();
 
-	require_once $handlerPath;
 
-	$contactHandler = new $handlerClass($contactObject,$user,$adb,$log);
-	if(!empty($crmId)){
-		$accountId = $crmId;
-		$webserviceAccountId = vtws_getWebserviceEntityId('Accounts',$crmId);
-	}elseif(!empty($accountName)){
-		if(count($accountIdComponents)===2){
-			$accountId = $accountIdComponents[1];
-			$webserviceAccountId = vtws_getId($accountIdComponents[0],$accountIdComponents[1]);
+	try {
+		$accountIdComponents = vtws_getIdComponents($entityIds['Accounts']);
+		$accountId = $accountIdComponents[1];
+
+		$contactIdComponents = vtws_getIdComponents($entityIds['Contacts']);
+		$contactId = $contactIdComponents[1];
+
+		if (!empty($accountId) && !empty($contactId) && !empty($entityIds['Potentials'])) {
+			$potentialIdComponents = vtws_getIdComponents($entityIds['Potentials']);
+			$potentialId = $potentialIdComponents[1];
+			$sql = "insert into vtiger_contpotentialrel values(?,?)";
+			$result = $adb->pquery($sql, array($contactId, $potentialIdComponents[1]));
+			if ($result === false) {
+				throw new WebServiceException(WebServiceErrorCode::$FAILED_TO_CREATE_RELATION,
+						"Failed to related Contact with the Potential");
+			}
 		}
-	}else{
-		$accountId = '';
-		$webserviceAccountId = '';
+
+		$transfered = vtws_convertLeadTransferHandler($leadIdComponents, $entityIds, $entityvalues);
+
+		$relatedIdComponents = vtws_getIdComponents($entityIds[$entityvalues['transferRelatedRecordsTo']]);
+		vtws_getRelatedActivities($leadIdComponents[1], $accountId, $contactId, $relatedIdComponents[1]);
+		vtws_updateConvertLeadStatus($entityIds, $entityvalues['leadId'], $user);
+	} catch (Exception $e) {
+		foreach ($entityIds as $entity => $id) {
+			vtws_delete($id, $user);
+		}
+		return null;
 	}
-	if($contactHandler->getMeta()->hasWriteAccess()){
-		$contact = array();
-		$contact['assigned_user_id'] = $assignedTo;
-		$contact['description'] = $leadInfo['description'];
-		$contact['account_id'] = $webserviceAccountId;
-		$contact['salutationtype'] = $leadInfo["salutationtype"];
-		$contact['firstname'] = $leadInfo["firstname"];
-		$contact['lastname'] = $leadInfo["lastname"];
-		$contact['email'] = $leadInfo["email"];
-		$contact['phone'] = $leadInfo["phone"];
-		$contact['mobile'] = $leadInfo["mobile"];
-		$contact['title'] = $leadInfo["designation"];
-		$contact['fax'] = $leadInfo["fax"];
-		$contact['yahooid'] = $leadInfo['yahooid'];
-		$contact['leadsource'] = $leadInfo['leadsource'];
-		$contact['mailingcity'] = $leadInfo["city"];
-		$contact['mailingzip'] = $leadInfo["code"];
-		$contact['mailingcountry'] = $leadInfo["country"];
-		$contact['mailingstate'] = $leadInfo["state"];
-		$contact['mailingstreet'] = $leadInfo["lane"];
-		$contact['mailingpobox'] = $leadInfo["pobox"];
+
+	return $entityIds;
+}
+
+/*
+ * populate the entity fields with the lead info.
+ * if mandatory field is not provided populate with '????'
+ * returns the entity array.
+ */
+
+function vtws_populateConvertLeadEntities($entityvalue, $entity, $entityHandler, $leadHandler, $leadinfo) {
+	global $adb, $log;
+	$column;
+	$entityName = $entityvalue['name'];
+	$sql = "SELECT * FROM vtiger_convertleadmapping";
+	$result = $adb->pquery($sql, array());
+	if ($adb->num_rows($result)) {
+		switch ($entityName) {
+			case 'Accounts':$column = 'accountfid';
+				break;
+			case 'Contacts':$column = 'contactfid';
+				break;
+			case 'Potentials':$column = 'potentialfid';
+				break;
+			default:$column = 'leadfid';
+				break;
+		}
+
 		$leadFields = $leadHandler->getMeta()->getModuleFields();
-		$contactFields = $contactHandler->getMeta()->getModuleFields();
-		foreach ($customFieldMapping as $leadFieldId=>$mappingDetails){
-			$contactFieldId = $mappingDetails['Contacts'];
-			if(empty($contactFieldId)){
-				continue;
-			}
-			$contactField = vtws_getFieldfromFieldId($contactFieldId,$contactFields);
-			if($contactField == null){
+		$entityFields = $entityHandler->getMeta()->getModuleFields();
+		$row = $adb->fetch_array($result);
+		$count = 1;
+		do {
+			$entityField = vtws_getFieldfromFieldId($row[$column], $entityFields);
+			if ($entityField == null) {
 				//user doesn't have access so continue.TODO update even if user doesn't have access
 				continue;
 			}
-			$leadField = vtws_getFieldfromFieldId($leadFieldId,$leadFields);
-			if($leadField == null){
+			$leadField = vtws_getFieldfromFieldId($row['leadfid'], $leadFields);
+			if ($leadField == null) {
 				//user doesn't have access so continue.TODO update even if user doesn't have access
 				continue;
 			}
 			$leadFieldName = $leadField->getFieldName();
-			$contactFieldName = $contactField->getFieldName();
-			$contact[$contactFieldName] = $leadInfo[$leadFieldName];
-		}
-		
-		$contact = vtws_create('Contacts',$contact,$user);
-		$contactIdComponents = vtws_getIdComponents($contact['id']);
-		$contactId = $contactIdComponents[1];
+			$entityFieldName = $entityField->getFieldName();
+			$entity[$entityFieldName] = $leadinfo[$leadFieldName];
+			$count++;
+		} while ($row = $adb->fetch_array($result));
 
-		//To convert relates Activites and Email.
-		$status = vtws_getRelatedActivities($leadIdComponents[1],$accountId,$contactIdComponents[1]);
-		if($status === false){
-			throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move Related Activities to the Contact");
+		foreach ($entityvalue as $fieldname => $fieldvalue) {
+			if (!empty($fieldvalue)) {
+				$entity[$fieldname] = $fieldvalue;
+			}
 		}
-		$status = vtws_getRelatedNotesAttachments($leadIdComponents[1],$contactIdComponents[1]);
-		if($status === false){
-			throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move related Documents to the Contact");
-		}
-		//Retrieve the lead related products and relate them with this new contact
-		$status = vtws_saveLeadRelatedProducts($leadIdComponents[1], $contactIdComponents[1], "Contacts");
-		if($status === false){
-			throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move related Products to the Contact");
-		}
-		$status = vtws_saveLeadRelations($leadIdComponents[1], $contactIdComponents[1], "Contacts");
-		if($status === false){
-			throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move Records to the Contact");
-		}
-		//Retrieve the lead related Campaigns and relate them with this new contact --Minnie
-		$status = vtws_saveLeadRelatedCampaigns($leadIdComponents[1], $contactIdComponents[1]);
-		if($status === false){
-			throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-				"Failed to move Related Campaigns to the Contact");
+
+		$entity = vtws_validateConvertLeadEntityMandatoryValues($entity, $entityHandler, $leadinfo, $entityName);
+	}
+	return $entity;
+}
+
+function vtws_validateConvertLeadEntityMandatoryValues($entity, $entityHandler, $leadinfo, $module) {
+
+	$mandatoryFields = $entityHandler->getMeta()->getMandatoryFields();
+	foreach ($mandatoryFields as $field) {
+		if (empty($entity[$field])) {
+			$fieldInfo = vtws_getConvertLeadFieldInfo($module, $field);
+			if (($fieldInfo['type']['name'] == 'picklist' || $fieldInfo['type']['name'] == 'multipicklist'
+				|| $fieldInfo['type']['name'] == 'date' || $fieldInfo['type']['name'] == 'datetime')
+				&& ($fieldInfo['editable'] == true)) {
+				$entity[$field] = $fieldInfo['default'];
+			} else {
+				$entity[$field] = '????';
+			}
 		}
 	}
-	if((boolean)$avoidPotential != true ){
-		$potentialObject = VtigerWebserviceObject::fromName($adb,'Potentials');
-		$handlerPath = $potentialObject->getHandlerPath();
-		$handlerClass = $potentialObject->getHandlerClass();
+	return $entity;
+}
 
-		require_once $handlerPath;
-
-		$potentialHandler = new $handlerClass($potentialObject,$user,$adb,$log);
-		if($potentialHandler->getMeta()->hasWriteAccess()){
-			if(!empty($webserviceAccountId)){
-				$relatedTo = $webserviceAccountId;
-			}else{
-				if(!empty($contactId)){
-					$relatedTo = vtws_getWebserviceEntityId('Contacts',$contactId);
-				}
-			}
-			$potential['assigned_user_id'] = $assignedTo;
-			$potential['description'] = $leadInfo['description'];
-			$potential['related_to'] = $relatedTo;
-			$potential['leadsource'] = $leadInfo['leadsource'];
-			$leadFields = $leadHandler->getMeta()->getModuleFields();
-			$potentialFields = $potentialHandler->getMeta()->getModuleFields();
-			foreach ($customFieldMapping as $leadFieldId=>$mappingDetails){
-				$potentialFieldId = $mappingDetails['Potentials'];
-				if(empty($potentialFieldId)){
-					continue;
-				}
-				$potentialField = vtws_getFieldfromFieldId($potentialFieldId,$potentialFields);
-				if($potentialField == null){
-					//user doesn't have access so continue.TODO update even if user doesn't have access
-					continue;
-				}
-				$leadField = vtws_getFieldfromFieldId($leadFieldId,$leadFields);
-				if($leadField == null){
-					//user doesn't have access so continue.TODO update even if user doesn't have access
-					continue;
-				}
-				$leadFieldName = $leadField->getFieldName();
-				$potentialFieldName = $potentialField->getFieldName();
-				$potential[$potentialFieldName] = $leadInfo[$leadFieldName];
-			}
-			$potential = vtws_create('Potentials',$potential,$user);
-			$potentialIdComponents = vtws_getIdComponents($potential['id']);
-			if(!empty($accountId) && !empty($contactId)) {
-				$sql ="insert into vtiger_contpotentialrel values(?,?)";
-				$result = $adb->pquery($sql, array($contactId, $potentialIdComponents[1]));
-				if($result === false){
-					throw new WebServiceException(WebServiceErrorCode::$FAILED_TO_CREATE_RELATION,
-						"Failed to related Contact with the Potential");
-				}
-			}
-			//Retrieve the lead related products and relate them with this new potential
-			$status = vtws_saveLeadRelatedProducts($leadIdComponents[1], $potentialIdComponents[1], "Potentials");
-			if($status === false){
-				throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-					"Failed to move related Products to the Potential");
-			}
-			$status = vtws_saveLeadRelations($leadIdComponents[1], $potentialIdComponents[1], "Potentials");
-			if($status === false){
-				throw new WebServiceException(WebServiceErrorCode::$LEAD_RELATED_UPDATE_FAILED,
-					"Failed to move Records to the Potential");
-			}
-			$potentialId = $potentialIdComponents[1];
+function vtws_getConvertLeadFieldInfo($module, $fieldname) {
+	global $adb, $log, $current_user;
+	$describe = vtws_describe($module, $current_user);
+	foreach ($describe['fields'] as $index => $fieldInfo) {
+		if ($fieldInfo['name'] == $fieldname) {
+			return $fieldInfo;
 		}
 	}
-	//Updating the converted status
-	if($accountId != '' || $contactId != ''){
+	return false;
+}
+
+//function to handle the transferring of related records for lead
+function vtws_convertLeadTransferHandler($leadIdComponents, $entityIds, $entityvalues) {
+
+	try {
+		$entityidComponents = vtws_getIdComponents($entityIds[$entityvalues['transferRelatedRecordsTo']]);
+		vtws_transferLeadRelatedRecords($leadIdComponents[1], $entityidComponents[1], $entityvalues['transferRelatedRecordsTo']);
+	} catch (Exception $e) {
+		return false;
+	}
+
+	return true;
+}
+
+function vtws_updateConvertLeadStatus($entityIds, $leadId, $user) {
+	global $adb, $log;
+	$leadIdComponents = vtws_getIdComponents($leadId);
+	if ($entityIds['Accounts'] != '' || $entityIds['Contacts'] != '') {
 		$sql = "UPDATE vtiger_leaddetails SET converted = 1 where leadid=?";
 		$result = $adb->pquery($sql, array($leadIdComponents[1]));
-		if($result === false){
+		if ($result === false) {
 			throw new WebServiceException(WebServiceErrorCode::$FAILED_TO_MARK_CONVERTED,
-				"Failed mark lead converted");
+					"Failed mark lead converted");
 		}
 		//updating the campaign-lead relation --Minnie
-		$sql = "delete from vtiger_campaignleadrel where leadid=?";
+		$sql = "DELETE FROM vtiger_campaignleadrel WHERE leadid=?";
 		$adb->pquery($sql, array($leadIdComponents[1]));
+
+		$sql = "DELETE FROM vtiger_tracker WHERE item_id=?";
+		$adb->pquery($sql, array($leadIdComponents[1]));
+
+		//update the modifiedtime and modified by information for the record
+		$leadModifiedTime = $adb->formatDate(date('Y-m-d H:i:s'), true);
+		$crmentityUpdateSql = "UPDATE vtiger_crmentity SET modifiedtime=?, modifiedby=? WHERE crmid=?";
+		$adb->pquery($crmentityUpdateSql, array($leadModifiedTime, $user->id, $leadIdComponents[1]));
 	}
-	$result = array('leadId'=>$leadId);
-	if(!empty($webserviceAccountId)){
-		$result['accountId'] = $webserviceAccountId;
-	}else{
-		$result['accountId'] = '';
-	}
-	if(!empty($contactId)){
-		$result['contactId'] = vtws_getWebserviceEntityId('Contacts',$contactId);;
-	}else{
-		$result['contactId'] = '';
-	}
-	if(!empty($potentialId)){
-		$result['potentialId'] = $potential['id'];
-	}else{
-		$result['potentialId'] = '';
-	}
-	return $result;
 }
 
 ?>

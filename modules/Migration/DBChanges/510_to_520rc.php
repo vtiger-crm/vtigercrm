@@ -31,7 +31,7 @@ function migration520_populateFieldForSecurity($tabid,$fieldid)
 		$adb->pquery("INSERT INTO vtiger_def_org_field (tabid, fieldid, visible, readonly) VALUES(?,?,?,?)",
 			array($tabid, $fieldid, 0, 1));
 	}
-			
+
 	$profileresult = $adb->pquery("SELECT * FROM vtiger_profile", array());
 	$countprofiles = $adb->num_rows($profileresult);
 	for ($i=0;$i<$countprofiles;$i++)
@@ -43,13 +43,13 @@ function migration520_populateFieldForSecurity($tabid,$fieldid)
     	} else {
     		$adb->pquery("INSERT INTO vtiger_profile2field (profileid, tabid, fieldid, visible, readonly) VALUES(?,?,?,?,?)",
 				array($profileid, $tabid, $fieldid, 0, 1));
-    	}		
-	}	
+    	}
+	}
 }
 ExecuteQuery("CREATE TABLE IF NOT EXISTS vtiger_tab_info (tabid INT, prefname VARCHAR(256), prefvalue VARCHAR(256), FOREIGN KEY fk_1_vtiger_tab_info(tabid) REFERENCES vtiger_tab(tabid) ON DELETE CASCADE ON UPDATE CASCADE)  ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
-$documents_tab_id=getTabid('Documents'); 
-ExecuteQuery("update vtiger_field set quickcreate=3 where tabid = $documents_tab_id and columnname = 'filelocationtype'"); 
+$documents_tab_id=getTabid('Documents');
+ExecuteQuery("update vtiger_field set quickcreate=3 where tabid = $documents_tab_id and columnname = 'filelocationtype'");
 /* For Campaigns enhancement */
 $accounts_tab_id = getTabid('Accounts');
 $campaigns_tab_id = getTabid('Campaigns');
@@ -196,7 +196,7 @@ function populateDefaultWorkflows($adb) {
 
 	//added column defaultworkflow
 	//For default workflows it sets column defaultworkflow=true
-	
+
 	$column_name="defaultworkflow";
 	$adb->pquery("alter table com_vtiger_workflows add column $column_name int(1)",array());
 
@@ -319,7 +319,11 @@ function VT520_migrateCustomview($sql,$forModule, $user, $handler) {
 		$module = $row->entitytype;
 		$current_module = $module;
 		if($forModule == 'Accounts') {
-			$fieldname = 'account_id';
+			if($module == 'Potentials') {
+				$fieldname = 'related_to';
+			} else {
+				$fieldname = 'account_id';
+			}
 		}elseif($forModule == 'Contacts') {
 			$fieldname = 'contact_id';
 		}elseif($forModule == 'Products') {
@@ -360,16 +364,7 @@ function VT520_queryGeneratorMigration() {
 	$db = PearDatabase::getInstance();
 	$sql = "delete from vtiger_cvadvfilter where columnname IS NULL or columnname='';";
 	$db->pquery($sql, array());
-	$sql = "select id from vtiger_users where is_admin='On' and status='Active' limit 1";
-	$result = $db->pquery($sql, array());
-	$adminId = 1;
-	$it = new SqlResultIterator($db, $result);
-	foreach ($it as $row) {
-		$adminId = $row->id;
-	}
-	$user = new Users();
-	$current_user = $user->retrieveCurrentUserInfoFromFile($adminId);
-	$user = $current_user;
+    $user = Users::getActiveAdminUser();
 	$sql = "select vtiger_customview.cvid,columnindex,entitytype from vtiger_customview inner join ".
 		"vtiger_cvcolumnlist on vtiger_customview.cvid=vtiger_cvcolumnlist.cvid where entitytype !=".
 		"'Accounts' and columnname like 'vtiger_account:accountname:accountname%';";
@@ -473,9 +468,9 @@ $adb->query("ALTER TABLE vtiger_relcriteria ADD COLUMN groupid INT DEFAULT 1");
 $adb->query("ALTER TABLE vtiger_relcriteria ADD COLUMN column_condition VARCHAR(256) DEFAULT 'and'");
 
 // Create table to store Reports Advanced Filters Condition Grouping information
-$adb->query("CREATE TABLE IF NOT EXISTS vtiger_relcriteria_grouping 
+$adb->query("CREATE TABLE IF NOT EXISTS vtiger_relcriteria_grouping
 		(groupid INT NOT NULL, queryid INT, group_condition VARCHAR(256), condition_expression TEXT, PRIMARY KEY(groupid, queryid))");
-		
+
 // Migration queries to migrate existing data to the required state (Storing Condition Expression in the newly created table for existing Reports)
 // Remove all unwanted condition columns added (where column name is empty)
 $adb->pquery("DELETE FROM vtiger_relcriteria WHERE (columnname IS NULL OR trim(columnname) = '')",
@@ -499,26 +494,31 @@ if($adb->num_rows($maxReportIdResult) > 0) {
 					$columnIndexArray[] = $columnIndex;
 				}
 				$conditionExpression = implode(' and ', $columnIndexArray);
-				$adb->pquery('INSERT INTO vtiger_relcriteria_grouping VALUES(?,?,?,?)', 
+				$adb->pquery('INSERT INTO vtiger_relcriteria_grouping VALUES(?,?,?,?)',
 							array(1, $reportId, '', $conditionExpression));
 
 				$adb->pquery("UPDATE vtiger_relcriteria SET column_condition='' WHERE columnindex=? AND queryid=?", array($maxColumnIndex,$reportId));
-			}		
+			}
 		}
 	}
 }
 
-ExecuteQuery("CREATE TABLE IF NOT EXISTS `vtiger_customerportal_tabs` ( `tabid` int(19) NOT NULL, `visible` int(1) 
-	default '1', `sequence` int(1) default NULL, PRIMARY KEY  (`tabid`)) ENGINE=InnoDB 
+ExecuteQuery("CREATE TABLE IF NOT EXISTS `vtiger_customerportal_tabs` ( `tabid` int(19) NOT NULL, `visible` int(1)
+	default '1', `sequence` int(1) default NULL, PRIMARY KEY  (`tabid`)) ENGINE=InnoDB
 	DEFAULT CHARSET=utf8");
 
-ExecuteQuery("CREATE TABLE IF NOT EXISTS `vtiger_customerportal_prefs` ( `tabid` int(11) NOT NULL, `prefkey` 
-	varchar(100) default NULL, `prefvalue` int(20) default NULL, INDEX tabid_idx(tabid) 
-	) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+if(Vtiger_Utils::CheckTable('vtiger_customerportal_prefs')) {
+	ExecuteQuery("ALTER TABLE `vtiger_customerportal_prefs` DROP INDEX tabid_idx");
+	ExecuteQuery("ALTER TABLE `vtiger_customerportal_prefs` ADD PRIMARY KEY  (`tabid`)");
 
+} else {
+	ExecuteQuery("CREATE TABLE IF NOT EXISTS `vtiger_customerportal_prefs` ( `tabid` int(11) NOT NULL, `prefkey`
+		varchar(100) default NULL, `prefvalue` int(20) default NULL, PRIMARY KEY  (`tabid`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+}
 
-//Adding Block to email fields 
-$blockquery = "select blockid from vtiger_blocks where blocklabel = ?"; 
+//Adding Block to email fields
+$blockquery = "select blockid from vtiger_blocks where blocklabel = ?";
 $blockres = $adb->pquery($blockquery,array('LBL_EMAIL_INFORMATION'));
 $blockid = $adb->query_result($blockres,0,'blockid');
 $fieldsqueryuitype8 = 'update vtiger_field set block=? where tabid=? and uitype=8';

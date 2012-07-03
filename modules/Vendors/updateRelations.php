@@ -11,7 +11,7 @@
 require_once('include/database/PearDatabase.php');
 require_once('user_privileges/default_module_view.php');
 
-global $adb, $singlepane_view, $currentModule;
+global $singlepane_view, $currentModule;
 
 $idlist = vtlib_purify($_REQUEST['idlist']);
 $dest_mod = vtlib_purify($_REQUEST['destination_module']);
@@ -32,18 +32,8 @@ if(!empty($_REQUEST['idlist'])) {
 	$storearray = array($_REQUEST['entityid']);
 }
 $focus = CRMEntity::getInstance($currentModule);
-foreach($storearray as $id)
-{
-	if($id != '')
-	{
-		if($dest_mod == 'Contacts')
-			$adb->pquery("insert into vtiger_vendorcontactrel values (?,?)", array($forCRMRecord, $id));
-		elseif($dest_mod == 'Products')
-			$adb->pquery("update vtiger_products set vendor_id=? where productid=?", array($forCRMRecord, $id));
-		else {
-			$focus->save_related_module($currentModule, $forCRMRecord, $dest_mod, $id);
-		}
-	}
+if(!empty($storearray)) {
+	relateEntities($focus, $currentModule, $forCRMRecord, $dest_mod, $storearray);
 }
 
 header("Location: index.php?action=$action&module=$currentModule&record=".$forCRMRecord."&parenttab=".$parenttab);

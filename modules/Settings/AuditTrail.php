@@ -112,7 +112,8 @@ class AuditTrail{
 			$entries[] = getTranslatedString($adb->query_result($result, $i-1, 'module'));
 			$entries[] = $adb->query_result($result, $i-1, 'action');
 			$entries[] = $adb->query_result($result, $i-1, 'recordid');
-			$entries[] = getDisplayDate($adb->query_result($result, $i-1, 'actiondate'));
+			$date = new DateTimeField($adb->query_result($result, $i-1, 'actiondate'));
+			$entries[] = $date->getDBInsertDateValue();
 			
 			$entries_list[] = $entries;
 		}

@@ -194,3 +194,67 @@ function Searchfn()
         );
 }
 
+function getListViewCount(module,element,parentElement,url){
+	if(module != 'Documents'){
+		var elementList = document.getElementsByName(module+'_listViewCountRefreshIcon');
+		for(var i=0;i<elementList.length;++i){
+			elementList[i].style.display = 'none';
+		}
+	}else{
+		element.style.display = 'none';
+	}
+	var elementList = document.getElementsByName(module+'_listViewCountContainerBusy');
+	for(var i=0;i<elementList.length;++i){
+		elementList[i].style.display = '';
+	}
+	var element = document.getElementsByName('search_url')[0];
+	var searchURL = '';
+	if(typeof element !='undefined'){
+		searchURL = element.value;
+	}else if(typeof document.getElementsByName('search_text')[0] != 'undefined'){
+		element = document.getElementsByName('search_text')[0];
+		var searchField = document.getElementsByName('search_field')[0];
+		if(element.value.length > 0) {
+			searchURL = '&query=true&searchtype=BasicSearch&search_field='+
+				encodeURIComponent(searchField.value)+'&search_text='+encodeURIComponent(element.value);
+		}
+	}else if(document.getElementById('globalSearchText') != null &&
+			typeof document.getElementById('globalSearchText') != 'undefined'){
+            var searchText = document.getElementById('globalSearchText').value;
+            searchURL = '&query=true&globalSearch=true&globalSearchText='+encodeURIComponent(searchText);
+            if(document.getElementById('tagSearchText') != null && typeof document.getElementById('tagSearchText') != 'undefined'){
+                var tagSearch = document.getElementById('tagSearchText').value;
+                searchURL = '&query=true&globalSearch=true&globalSearchText='+encodeURIComponent(searchText)+'&tagSearchText='+encodeURIComponent(tagSearch);
+            }
+	}
+	if(module != 'Documents'){
+		searchURL += (url);
+	}
+	// Url parameters to carry forward the Alphabetical search in Popups,
+	// which is stored in the global variable gPopupAlphaSearchUrl
+	if(typeof gPopupAlphaSearchUrl != 'undefined' && gPopupAlphaSearchUrl != '')
+		searchURL += gPopupAlphaSearchUrl;
+
+	new Ajax.Request(
+			'index.php',
+			{queue: {position: 'end', scope: 'command'},
+				method: 'post',
+				postBody:"module="+module+"&action="+module+"Ajax&file=ListViewPagging&ajax=true"+searchURL,
+				onComplete: function(response) {
+					var elementList = document.getElementsByName(module+'_listViewCountContainerBusy');
+					for(var i=0;i<elementList.length;++i){
+						elementList[i].style.display = 'none';
+					}
+					elementList = document.getElementsByName(module+'_listViewCountRefreshIcon');
+					if(module != 'Documents' && typeof parentElement != 'undefined' && elementList.length !=0){
+						for(i=0;i<=elementList.length;){
+							//No need to increment the count, as the element will be eliminated in the next step.
+							elementList[i].parentNode.innerHTML = response.responseText;
+						}
+					}else{
+						parentElement.innerHTML = response.responseText;
+					}
+				}
+			}
+	);
+}

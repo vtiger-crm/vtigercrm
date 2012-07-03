@@ -28,6 +28,109 @@ global $default_language;
 $log =& LoggerManager::getLogger('graph');
 $log->debug($_REQUEST);
 
+if (($module == 'Users' || $module == 'Home' || $module == 'uploads') && $_REQUEST['parenttab'] 
+		!= 'Settings') {
+	$skipSecurityCheck = true;
+}
+
+require_once('include/utils/UserInfoUtil.php');
+if (preg_match('/Ajax/', $action)) {
+	if ($_REQUEST['ajxaction'] == 'LOADRELATEDLIST') {
+		$now_action = 'DetailView';
+	} else {
+		$now_action = vtlib_purify($_REQUEST['file']);
+	}
+} else {
+	$now_action = $action;
+}
+
+if (isset($_REQUEST['record']) && $_REQUEST['record'] != '') {
+	$display = isPermitted($module, $now_action, $_REQUEST['record']);
+} else {
+	$display = isPermitted($module, $now_action);
+}
+
+$currentModule = $module;
+$module = $_REQUEST['module'];
+
+$current_user = new Users();
+
+if($use_current_login) {
+	//getting the current user info from flat file
+	$result = $current_user->retrieveCurrentUserInfoFromFile($_SESSION['authenticated_user_id']);
+}
+
+$use_current_login = false;
+if (isset($_SESSION["authenticated_user_id"]) && (isset($_SESSION["app_unique_key"]) && 
+		$_SESSION["app_unique_key"] == $application_unique_key)) {
+	$use_current_login = true;
+}
+
+// if the language is not set yet, then set it to the default language.
+if (isset($_SESSION['authenticated_user_language']) && $_SESSION['authenticated_user_language'] 
+		!= '') {
+	$current_language = $_SESSION['authenticated_user_language'];
+} else {
+	if (!empty($current_user->language)) {
+		$current_language = $current_user->language;
+	} else {
+		$current_language = $default_language;
+	}
+}
+
+if (isset($_SESSION['vtiger_authenticated_user_theme']) && 
+		$_SESSION['vtiger_authenticated_user_theme'] != '') {
+	$theme = $_SESSION['vtiger_authenticated_user_theme'];
+} else {
+	if (!empty($current_user->theme)) {
+		$theme = $current_user->theme;
+	} else {
+		$theme = $default_theme;
+	}
+}
+
+$app_strings = return_application_language($current_language);
+$app_list_strings = return_app_list_strings_language($current_language);
+$mod_strings = return_module_language($current_language, $currentModule);
+
+if ($display == "no" || $use_current_login !== true) {
+	echo "<link rel='stylesheet' type='text/css' href='themes/$theme/style.css'>";
+	echo "<table border='0' cellpadding='5' cellspacing='0' width='100%' height='450px'><tr><td align='center'>";
+	echo "<div style='border: 3px solid rgb(153, 153, 153); background-color: rgb(255, 255, 255); width: 55%; position: relative; z-index: 10000000;'>
+
+		<table border='0' cellpadding='5' cellspacing='0' width='98%'>
+		<tbody><tr>
+		<td rowspan='2' width='11%'><img src='" . vtiger_imageurl('denied.gif', $theme) . "' ></td>
+		<td style='border-bottom: 1px solid rgb(204, 204, 204);' nowrap='nowrap' width='70%'><span class='genHeaderSmall'>$app_strings[LBL_PERMISSION]</span></td>
+		</tr>
+		<tr>
+		<td class='small' align='right' nowrap='nowrap'>			   	
+		<a href='javascript:window.history.back();'>$app_strings[LBL_GO_BACK]</a><br>								   						     </td>
+		</tr>
+		</tbody></table> 
+		</div>";
+	echo "</td></tr></table>";
+}
+// vtlib customization: Check if module has been de-activated
+else if (!vtlib_isModuleActive($currentModule)) {
+	echo "<link rel='stylesheet' type='text/css' href='themes/$theme/style.css'>";
+	echo "<table border='0' cellpadding='5' cellspacing='0' width='100%' height='450px'><tr><td align='center'>";
+	echo "<div style='border: 3px solid rgb(153, 153, 153); background-color: rgb(255, 255, 255); width: 55%; position: relative; z-index: 10000000;'>
+
+		<table border='0' cellpadding='5' cellspacing='0' width='98%'>
+		<tbody><tr>
+		<td rowspan='2' width='11%'><img src='" . vtiger_imageurl('denied.gif', $theme) . "' ></td>
+		<td style='border-bottom: 1px solid rgb(204, 204, 204);' nowrap='nowrap' width='70%'><span class='genHeaderSmall'>$currentModule $app_strings[VTLIB_MOD_NOT_ACTIVE]</span></td>
+		</tr>
+		<tr>
+		<td class='small' align='right' nowrap='nowrap'>			   	
+		<a href='javascript:window.history.back();'>$app_strings[LBL_GO_BACK]</a><br>								   						     </td>
+		</tr>
+		</tbody></table> 
+		</div>";
+	echo "</td></tr></table>";
+}
+
 if(isset($_REQUEST['action']) && isset($_REQUEST['module']))
 {
 	$action = $_REQUEST['action']; 
@@ -65,7 +168,7 @@ $log->info("current langugage is $current_language");
 $log->info("current module is $current_module ");	
 $log->info("including $current_module_file");	
 
-checkFileAccess($current_module_file);
+checkFileAccessForInclusion($current_module_file);
 require_once($current_module_file);
 $draw_this = new jpgraph();
 

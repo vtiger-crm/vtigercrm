@@ -16,6 +16,8 @@ $theme_path="themes/".$theme."/";
 $image_path=$theme_path."images/";
 $smarty = new vtigerCRM_Smarty;
 $profDetails=getAllProfileInfo();
+$smarty->assign("MOD", return_module_language($current_language,'Settings'));
+$smarty->assign("APP", $app_strings);
 if(isset($_REQUEST['roleid']) && $_REQUEST['roleid'] != '')
 {	
 	$roleid= vtlib_purify($_REQUEST['roleid']);
@@ -33,9 +35,7 @@ elseif(isset($_REQUEST['parent']) && $_REQUEST['parent'] != '')
 	$mode = 'create';
 	$parent=vtlib_purify($_REQUEST['parent']);
 }
-$smarty->assign("MOD", return_module_language($current_language,'Settings'));
 $smarty->assign("IMAGE_PATH",$image_path);
-$smarty->assign("APP", $app_strings);
 $smarty->assign("CMOD", $mod_strings);
 $smarty->assign("THEME", $theme);
 

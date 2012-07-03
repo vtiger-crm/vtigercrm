@@ -20,7 +20,7 @@
 		$meta = $handler->getMeta();
 		$entityName = $meta->getObjectEntityName($id);
 		
-		$types = vtws_listtypes($user);
+		$types = vtws_listtypes(null, $user);
 		if(!in_array($entityName,$types['types'])){
 			throw new WebServiceException(WebServiceErrorCode::$ACCESSDENIED,"Permission to perform the operation is denied");
 		}
@@ -38,8 +38,8 @@
 			throw new WebServiceException(WebServiceErrorCode::$RECORDNOTFOUND,"Record you are trying to access is not found");
 		}
 		
-		if($meta->hasWriteAccess()!==true){
-			throw new WebServiceException(WebServiceErrorCode::$ACCESSDENIED,"Permission to write is denied");
+		if($meta->hasDeleteAccess()!==true){
+			throw new WebServiceException(WebServiceErrorCode::$ACCESSDENIED,"Permission to delete is denied");
 		}
 		$entity = $handler->delete($id);
 		VTWS_PreserveGlobal::flush();

@@ -11,7 +11,7 @@ require_once 'include/utils/utils.php';
 require_once 'modules/PickList/PickListUtils.php';
 require_once "include/Zend/Json.php";
 
-global $adb, $current_user;
+global $adb, $current_user,$default_charset;
 
 $moduleName = vtlib_purify($_REQUEST['moduleName']);
 $tableName = vtlib_purify($_REQUEST['fieldname']);
@@ -47,7 +47,7 @@ echo "SUCCESS";
 
 
 function assignValues($picklistid, $roleid, $values, $tableName){
-	global $adb;
+	global $adb,$default_charset;
 	$count = count($values);
 	//delete older values
 	$sql = 'DELETE FROM vtiger_role2picklist WHERE roleid=? AND picklistid=?';
@@ -55,7 +55,8 @@ function assignValues($picklistid, $roleid, $values, $tableName){
 	
 	//insert the new values
 	for($i=0;$i<$count;$i++){
-		$pickVal = $values[$i];
+		$pickVal = htmlentities($values[$i],ENT_QUOTES,$default_charset);
+		
 		$tableName = $adb->sql_escape_string($tableName);
 		$sql = "SELECT * FROM vtiger_$tableName WHERE $tableName=?";
 		$result = $adb->pquery($sql, array($pickVal));

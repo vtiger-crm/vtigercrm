@@ -9,18 +9,17 @@
  *
  ********************************************************************************/
 include_once 'modules/Quotes/QuotePDFController.php';
-
 $controller = new Vtiger_QuotePDFController($currentModule);
 $controller->loadRecord(vtlib_purify($_REQUEST['record']));
-
+$quote_no = getModuleSequenceNumber($currentModule,vtlib_purify($_REQUEST['record']));
 if(isset($_REQUEST['savemode']) && $_REQUEST['savemode'] == 'file') {
 	$quote_id = vtlib_purify($_REQUEST['record']);
-	$filepath='test/product/'.$quote_id.'_Quotes.pdf';
+	$filepath='test/product/'.$quote_id.'_Quotes_'.$quote_no.'.pdf';
 	//added file name to make it work in IE, also forces the download giving the user the option to save
 	$controller->Output($filepath,'F');
 } else {
 	//added file name to make it work in IE, also forces the download giving the user the option to save
-	$controller->Output('Quotes.pdf', 'D');
+	$controller->Output('Quotes_'.$quote_no.'.pdf', 'D');
 	exit();
 }
 

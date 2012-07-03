@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * The contents of this file are subject to the SugarCRM Public License Version 1.1.2
- * ("License"); You may not use this file except in compliance with the 
+ * ("License"); You may not use this file except in compliance with the
  * License. You may obtain a copy of the License at http://www.sugarcrm.com/SPL
  * Software distributed under the License is distributed on an  "AS IS"  basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
@@ -42,18 +42,20 @@ $rate = $rate_symbol['rate'];
 
 if(isset($_REQUEST['record']) && $_REQUEST['record'] != ''){
     $focus->id = $_REQUEST['record'];
-    $focus->mode = 'edit'; 
+    $focus->mode = 'edit';
     $log->debug("Mode is Edit. Quoteid is ".$focus->id);
-    $focus->retrieve_entity_info($_REQUEST['record'],"Quotes");		
-    $focus->name=$focus->column_fields['subject']; 
+    $focus->retrieve_entity_info($_REQUEST['record'],"Quotes");
+    $focus->name=$focus->column_fields['subject'];
 }
 
 if(isset($_REQUEST['isDuplicate']) && $_REQUEST['isDuplicate'] == 'true') {
 	$smarty->assign("DUPLICATE_FROM", $focus->id);
-	$QUOTE_associated_prod = getAssociatedProducts("Quotes",$focus);
+	$QUOTE_associated_prod = getAssociatedProducts($currentModule,$focus);
+    $inventory_cur_info = getInventoryCurrencyInfo($currentModule, $focus->id);
+	$currencyid = $inventory_cur_info['currency_id'];
 	$log->debug("Mode is Duplicate. Quoteid to be duplicated is ".$focus->id);
 	$focus->id = "";
-    	$focus->mode = ''; 	
+    $focus->mode = '';
 }
 if(empty($_REQUEST['record']) && $focus->mode != 'edit'){
 	setObjectValuesFromRequest($focus);
@@ -90,8 +92,8 @@ if(isset($_REQUEST['product_id']) && $_REQUEST['product_id'] !=''){
 
 if(!empty($_REQUEST['parent_id']) && !empty($_REQUEST['return_module'])){
     if ($_REQUEST['return_module'] == 'Services') {
-	    $focus->column_fields['product_id'] = $_REQUEST['parent_id'];
-	    $log->debug("Service Id from the request is ".$_REQUEST['parent_id']);
+	    $focus->column_fields['product_id'] = vtlib_purify($_REQUEST['parent_id']);
+	    $log->debug("Service Id from the request is ".vtlib_purify($_REQUEST['parent_id']));
 	    $associated_prod = getAssociatedProducts("Services",$focus,$focus->column_fields['product_id']);
 		for ($i=1; $i<=count($associated_prod);$i++) {
 			$associated_prod_id = $associated_prod[$i]['hdnProductId'.$i];
@@ -129,19 +131,8 @@ $image_path=$theme_path."images/";
 
 $disp_view = getView($focus->mode);
 $mode = $focus->mode;
-if($disp_view == 'edit_view')
 	$smarty->assign("BLOCKS",getBlocks($currentModule,$disp_view,$mode,$focus->column_fields));
-else	
-{
-	$bas_block = getBlocks($currentModule,$disp_view,$mode,$focus->column_fields,'BAS');
-	$adv_block = getBlocks($currentModule,$disp_view,$mode,$focus->column_fields,'ADV');
-	$blocks['basicTab'] = $bas_block;
-	if(is_array($adv_block ))
-		$blocks['moreTab'] = $adv_block;
-	
-	$smarty->assign("BLOCKS",$blocks);
-	$smarty->assign("BLOCKS_COUNT",count($blocks));
-}
+
 $smarty->assign("OP_MODE",$disp_view);
 $smarty->assign("MODULE",$currentModule);
 $smarty->assign("SINGLE_MOD",'Quote');
@@ -167,7 +158,7 @@ if(isset($cust_fld))
 if($focus->mode == 'edit')
 {
 	$smarty->assign("UPDATEINFO",updateInfo($focus->id));
-	$associated_prod = getAssociatedProducts("Quotes",$focus);//getProductDetailsBlockInfo('edit','Quotes',$focus); 
+	$associated_prod = getAssociatedProducts("Quotes",$focus);//getProductDetailsBlockInfo('edit','Quotes',$focus);
 	$smarty->assign("ASSOCIATEDPRODUCTS", $associated_prod);
 	$smarty->assign("MODE", $focus->mode);
 
@@ -218,19 +209,19 @@ if($focus->mode != 'edit')
 {
 	$tax_details = getAllTaxes('available');
 	$sh_tax_details = getAllTaxes('available','sh');
-}	
+}
 else
 {
 	$tax_details = getAllTaxes('available','',$focus->mode,$focus->id);
         $sh_tax_details = getAllTaxes('available','sh','edit',$focus->id);
-}	
+}
 $smarty->assign("GROUP_TAXES",$tax_details);
 $smarty->assign("SH_TAXES",$sh_tax_details);
 
 $tabid = getTabid("Quotes");
 $validationData = getDBValidationData($focus->tab_name,$tabid);
 $data = split_validationdataArray($validationData);
- 
+
 $smarty->assign("VALIDATION_DATA_FIELDNAME",$data['fieldname']);
 $smarty->assign("VALIDATION_DATA_FIELDDATATYPE",$data['datatype']);
 $smarty->assign("VALIDATION_DATA_FIELDLABEL",$data['fieldlabel']);
@@ -261,12 +252,20 @@ if($focus->mode != 'edit' && $mod_seq_field != null) {
 // END
 
 $smarty->assign("CURRENCIES_LIST", getAllCurrencies());
-if($focus->mode == 'edit' || $_REQUEST['isDuplicate'] == 'true') {
+if($focus->mode == 'edit') {
 	$inventory_cur_info = getInventoryCurrencyInfo('Quotes', $focus->id);
 	$smarty->assign("INV_CURRENCY_ID", $inventory_cur_info['currency_id']);
 } else {
 	$smarty->assign("INV_CURRENCY_ID", $currencyid);
 }
+$smarty->assign('CREATEMODE', vtlib_purify($_REQUEST['createmode']));
+
+$picklistDependencyDatasource = Vtiger_DependencyPicklist::getPicklistDependencyDatasource($currentModule);
+$smarty->assign("PICKIST_DEPENDENCY_DATASOURCE", Zend_Json::encode($picklistDependencyDatasource));
+
+// Gather the help information associated with fields
+$smarty->assign('FIELDHELPINFO', vtlib_getFieldHelpInfo($currentModule));
+// END
 
 if($focus->mode == 'edit')
 	$smarty->display("Inventory/InventoryEditView.tpl");

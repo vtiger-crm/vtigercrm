@@ -81,23 +81,15 @@ if($_REQUEST['deleteImage'] == 'true') {
 	exit;
 }
 
-if($_REQUEST['changepassword'] == 'true')
-{
+if($_REQUEST['changepassword'] == 'true') {
 	$focus->retrieve_entity_info($_REQUEST['record'],'Users');
 	$focus->id = $_REQUEST['record'];
-if (isset($_POST['new_password'])) {
-		$new_pass = $_POST['new_password'];
-		$new_passwd = $_POST['new_password'];
-		$new_pass = md5($new_pass);
-		$old_pass = $_POST['old_password'];
-		$uname = $_POST['user_name'];
-		if (!$focus->change_password($_POST['old_password'], $_POST['new_password'])) {
-		
+	if (isset($_REQUEST['new_password'])) {
+		if (!$focus->change_password($_REQUEST['old_password'], $_REQUEST['new_password'])) {
 			header("Location: index.php?action=Error&module=Users&error_string=".urlencode($focus->error_string));
-		exit;
-}
-}
-	
+			exit;
+		}
+	}
 }	
 
     
@@ -128,18 +120,11 @@ if(! $_REQUEST['changepassword'] == 'true')
 	if(isset($_SESSION['internal_mailer']) && $_SESSION['internal_mailer'] != $focus->column_fields['internal_mailer'])
 		$_SESSION['internal_mailer'] = $focus->column_fields['internal_mailer'];
 	setObjectValuesFromRequest($focus);
-	
-	// Added for Reminder Popup support
-	$query_prev_interval = $adb->pquery("SELECT reminder_interval from vtiger_users where id=?",array($focus->id));
-	$prev_reminder_interval = $adb->query_result($query_prev_interval,0,'reminder_interval');
-	
-	$focus->saveentity("Users");
-	//$focus->imagename = $image_upload_array['imagename'];
-	$focus->saveHomeStuffOrder($focus->id);
-	SaveTagCloudView($focus->id);
 
-	// Added for Reminder Popup support
-	$focus->resetReminderInterval($prev_reminder_interval);
+	if(empty($focus->column_fields['roleid']) && !empty($_POST['user_role'])) {
+		$focus->column_fields['roleid'] = $_POST['user_role'];
+	}
+	$focus->save("Users");
 
 	$return_id = $focus->id;
 
@@ -157,33 +142,11 @@ if (isset($_POST['user_name']) && isset($_POST['new_password'])) {
 
 if(isset($focus->id) && $focus->id != '')
 {
-
-  if(isset($_POST['user_role']))
-  {
-    updateUser2RoleMapping($_POST['user_role'],$focus->id);
-  }
   if(isset($_POST['group_name']) && $_POST['group_name'] != '')
   {
     updateUsers2GroupMapping($_POST['group_name'],$focus->id);
   }
 }
-else
-{
-  if(isset($_POST['user_role']))
-  {
-    insertUser2RoleMapping($_POST['user_role'],$focus->id);
-  }
-  if(isset($_POST['group_name']))
-  {
-    insertUsers2GroupMapping($_POST['group_name'],$focus->id);
-  }
-}
-
-//Creating the Privileges Flat File
-require_once('modules/Users/CreateUserPrivilegeFile.php');
-createUserPrivilegesfile($focus->id);
-createUserSharingPrivilegesfile($focus->id);
-
 }
 if(isset($_POST['return_module']) && $_POST['return_module'] != "") $return_module = vtlib_purify($_REQUEST['return_module']);
 else $return_module = "Users";

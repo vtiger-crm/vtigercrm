@@ -14,7 +14,7 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header: /advent/projects/wesat/vtiger_crm/sugarcrm/modules/Emails/language/en_us.lang.php,v 1.17 2005/03/28 06:31:38 rank Exp $
- * Description:  Defines the English language pack for the Account module.
+ * Description:  Defines the English language pack for the Emails module.
  ********************************************************************************/
  
 $mod_strings = Array(
@@ -55,7 +55,7 @@ $mod_strings = Array(
 'LBL_JUNK_MAILS'=>'Junk Mails',
 'LBL_TO_LEADS'=>'To Leads',
 'LBL_TO_CONTACTS'=>'To Contacts',
-'LBL_TO_ACCOUNTS'=>'To Accounts',
+'LBL_TO_ACCOUNTS'=>'To Organizations',
 'LBL_MY_MAILS'=>'My Mails',
 'LBL_QUAL_CONTACT'=>'Qualified Mails (As Contacts)',
 'LBL_MAILS'=>'Mails',
@@ -95,8 +95,8 @@ $mod_strings = Array(
 'LBL_PRODUCT_TITLE'=>'Products',
 'LBL_NEW_CONTACT'=>'New Contact',
 'LBL_CONTACT_TITLE'=>'Contacts',
-'LBL_NEW_ACCOUNT'=>'New Account',
-'LBL_ACCOUNT_TITLE'=>'Accounts',
+'LBL_NEW_ACCOUNT'=>'New Organization',
+'LBL_ACCOUNT_TITLE'=>'Organizations',
 
 // Added vtiger_fields after vtiger4 - Beta
 'LBL_USER_TITLE'=>'Users',

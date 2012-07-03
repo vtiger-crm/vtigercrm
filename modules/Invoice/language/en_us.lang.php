@@ -14,7 +14,7 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header$
- * Description:  Defines the English language pack 
+ * Description:  Defines the English language pack for Invoice module.
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.
  * All Rights Reserved.
  * Contributor(s): ______________________________________..
@@ -32,7 +32,7 @@ $mod_strings = Array(
 'LBL_NEW_FORM_SO_TITLE'=>'New Sales Order',
 'LBL_MEMBER_ORG_FORM_TITLE'=>'Member Organizations',
 
-'LBL_LIST_ACCOUNT_NAME'=>'Account Name',
+'LBL_LIST_ACCOUNT_NAME'=>'Organization Name',
 'LBL_LIST_CITY'=>'City',
 'LBL_LIST_WEBSITE'=>'Website',
 'LBL_LIST_STATE'=>'State',
@@ -47,8 +47,8 @@ $mod_strings = Array(
 
 //END DON'T CONVERT
 
-'LBL_ACCOUNT'=>'Account:',
-'LBL_ACCOUNT_NAME'=>'Account Name:',
+'LBL_ACCOUNT'=>'Organization:',
+'LBL_ACCOUNT_NAME'=>'Organization Name:',
 'LBL_PHONE'=>'Phone:',
 'LBL_WEBSITE'=>'Website:',
 'LBL_FAX'=>'Fax:',
@@ -67,7 +67,7 @@ $mod_strings = Array(
 'LBL_TYPE'=>'Type:',
 'LBL_ANNUAL_REVENUE'=>'Annual Revenue:',
 'LBL_ADDRESS_INFORMATION'=>'Address Information',
-'LBL_Quote_INFORMATION'=>'Account Information',
+'LBL_Quote_INFORMATION'=>'Organization Information',
 'LBL_CUSTOM_INFORMATION'=>'Custom Information',
 'LBL_BILLING_ADDRESS'=>'Billing Address:',
 'LBL_SHIPPING_ADDRESS'=>'Shipping Address:',
@@ -82,18 +82,18 @@ $mod_strings = Array(
 'NTC_COPY_BILLING_ADDRESS'=>'Copy billing address to shipping address',
 'NTC_COPY_SHIPPING_ADDRESS'=>'Copy shipping address to billing address',
 'NTC_REMOVE_MEMBER_ORG_CONFIRMATION'=>'Are you sure you want to remove this record as a member organization?',
-'LBL_DUPLICATE'=>'Potential Duplicate Accounts',
-'MSG_DUPLICATE' => 'Creating this vtiger_account may vtiger_potentialy create a duplicate vtiger_account. You may either select an vtiger_account from the list below or you may click on Create New Account to continue creating a new vtiger_account with the previously entered data.',
+'LBL_DUPLICATE'=>'Opportunity Duplicate Organizations',
+'MSG_DUPLICATE' => 'Creating this vtiger_account may vtiger_potentialy create a duplicate vtiger_account. You may either select an vtiger_account from the list below or you may click on Create New Organization to continue creating a new vtiger_account with the previously entered data.',
 
 'LBL_INVITEE'=>'Contacts',
 'ERR_DELETE_RECORD'=>"A record number must be specified to delete the vtiger_account.",
 
-'LBL_SELECT_ACCOUNT'=>'Select Account',
+'LBL_SELECT_ACCOUNT'=>'Select Organization',
 'LBL_GENERAL_INFORMATION'=>'General Information',
 
 //for v4 release added
-'LBL_NEW_POTENTIAL'=>'New Potential',
-'LBL_POTENTIAL_TITLE'=>'Potentials',
+'LBL_NEW_POTENTIAL'=>'New Opportunity',
+'LBL_POTENTIAL_TITLE'=>'Opportunities',
 
 'LBL_NEW_TASK'=>'New Task',
 'LBL_TASK_TITLE'=>'Tasks',
@@ -114,7 +114,7 @@ $mod_strings = Array(
 'LBL_PARTNER'=>'Partner',
 
 // Added for 4GA
-'LBL_TOOL_FORM_TITLE'=>'Account Tools',
+'LBL_TOOL_FORM_TITLE'=>'Organization Tools',
 //Added for 4GA
 'Subject'=>'Subject',
 'Quote Name'=>'Quote Name',
@@ -151,11 +151,11 @@ $mod_strings = Array(
 'Created Time'=>'Created Time',
 'Modified Time'=>'Modified Time',
 'Description'=>'Description',
-'Potential Name'=>'Potential Name',
+'Potential Name'=>'Opportunity Name',
 'Customer No'=>'Customer No',
 'Sales Order'=>'Sales Order',
 'Pending'=>'Pending',
-'Account Name'=>'Account Name',
+'Account Name'=>'Organization Name',
 'Terms & Conditions'=>'Terms & Conditions',
 //Quote Info
 'LBL_INVOICE_INFORMATION'=>'Invoice Information',
@@ -190,13 +190,15 @@ $mod_strings = Array(
 'Tax Type'=>'Tax Type',
 'Discount Percent'=>'Discount Percent',
 'Discount Amount'=>'Discount Amount',
-'Terms & Conditions'=>'Terms & Conditions',
 'No'=>'No',
 'Date'=>'Date',
 
 // Added affter 5.0.4 GA
 //Added for Documents module
 'Documents'=>'Documents',
+
+'SINGLE_Invoice'=>'Invoice',
+'Invoice ID'=>'Invoice ID',
 );
 
 ?>

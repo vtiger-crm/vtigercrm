@@ -23,22 +23,17 @@
 		</select>
 	</td>
 	<td nowrap align="right">
-		<input type="button" value="{$APP.LBL_ADD_BUTTON}" name="add" class="crmButton small create" onclick="showAddDiv();">
- 		<input type="button" value="{$APP.LBL_EDIT_BUTTON}" name="del" class="crmButton small edit" onclick="showEditDiv();">
- 		<input type="button" value="{$APP.LBL_DELETE_BUTTON}" name="del" class="crmButton small delete" onclick="showDeleteDiv();">
+		<input type="button" value="{'LBL_ADD_BUTTON'|@getTranslatedString}" name="add" class="crmButton small create" onclick="showAddDiv();">
+ 		<input type="button" value="{'LBL_EDIT_BUTTON'|@getTranslatedString}" name="del" class="crmButton small edit" onclick="showEditDiv();">
+ 		<input type="button" value="{'LBL_DELETE_BUTTON'|@getTranslatedString}" name="del" class="crmButton small delete" onclick="showDeleteDiv();">
  	</td>
 </tr>
 </table>
-{*<!-- vtlib customization: Use translated string only if available -->*}
-{assign var="MODULELABEL" value=$MODULE}
-{if $APP.$MODULE}
-	{assign var="MODULELABEL" value=$MODULE}
-{/if}
 <table class="tableHeading" border="0" cellpadding="7" cellspacing="0" width="100%">
 <tr>
 	<td width="40%">
 		<strong>
-			{$MOD.LBL_PICKLIST_AVAIL} {$MODULELABEL} {$MOD.LBL_FOR} &nbsp;
+			{$MOD.LBL_PICKLIST_AVAIL} {$MODULE|@getTranslatedString:$MODULE} {$MOD.LBL_FOR} &nbsp;
 		</strong>
 		<select name="pickrole" id="pickid" class="detailedViewTextBox" onChange="showPicklistEntries('{$MODULE}' );" style="width : auto;">
 			{foreach key=roleid item=role from=$ROLE_LISTS}
@@ -67,14 +62,14 @@
 		{foreach item=picklistfields from=$picklists}
 			{if $picklistfields neq ''}
 				<td class="listTableTopButtons small" style="padding-left:20px" valign="top" align="left">
-					{if $TEMP_MOD[$picklistfields.fieldlabel] neq ''}	
+					{if $TEMP_MOD[$picklistfields.fieldlabel] neq ''}
 						<b>{$TEMP_MOD[$picklistfields.fieldlabel]}</b>
 					{else}
 						<b>{$picklistfields.fieldlabel}</b>
 					{/if}
 				</td>
 				<td class="listTableTopButtons" valign="top">
-					<input type="button" value="{$MOD_PICKLIST.LBL_ASSIGN_BUTTON}" class="crmButton small edit" onclick="assignPicklistValues('{$MODULE}','{$picklistfields.fieldname}','{$picklistfields.fieldlabel}');" > 
+					<input type="button" value="{$MOD_PICKLIST.LBL_ASSIGN_BUTTON}" class="crmButton small edit" onclick="assignPicklistValues('{$MODULE}','{$picklistfields.fieldname}','{$picklistfields.fieldlabel}');" >
 				</td>
 			{else}
 				<td class="listTableTopButtons small" colspan="2">&nbsp;</td>
@@ -103,7 +98,7 @@
 		{/foreach}
 	</tr>
 	{/foreach}
-	</table> 
+	</table>
 </td>
 </tr>
 </table>

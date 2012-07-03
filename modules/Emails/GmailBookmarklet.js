@@ -385,7 +385,7 @@ function init(){
 				
 				var accountName = document.getElementById("__searchaccount__").value;
 				if(accountName.length < 1){
-					alert("Please enter the search critiria");
+					alert("Please enter the search criteria");
 					return;
 				}
 				showBusy();

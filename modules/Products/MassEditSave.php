@@ -33,16 +33,24 @@ if(isset($idlist)) {
 		if(isPermitted($currentModule,'EditView',$recordid) == 'yes') {
 			// Save each module record with update value.
 			$focus->retrieve_entity_info($recordid, $currentModule);
-			$focus->mode = 'edit';		
-			$focus->id = $recordid;		
+			$focus->mode = 'edit';
+			$focus->id = $recordid;
 			foreach($focus->column_fields as $fieldname => $val)
-			{    	
+			{
 				if(isset($_REQUEST[$fieldname."_mass_edit_check"]))
 				{
-					if(is_array($_REQUEST[$fieldname]))
-						$value = $_REQUEST[$fieldname];
-					else
-						$value = trim($_REQUEST[$fieldname]);
+					if($fieldname == 'assigned_user_id'){
+						if($_REQUEST['assigntype'] == 'U')  {
+							$value = $_REQUEST['assigned_user_id'];
+						} elseif($_REQUEST['assigntype'] == 'T') {
+							$value = $_REQUEST['assigned_group_id'];
+						}
+					} else {
+						if(is_array($_REQUEST[$fieldname]))
+							$value = $_REQUEST[$fieldname];
+						else
+							$value = trim($_REQUEST[$fieldname]);
+					}
 					$focus->column_fields[$fieldname] = $value;
 				}
 				else{

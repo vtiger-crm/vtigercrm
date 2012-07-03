@@ -18,6 +18,12 @@ if($ajaxaction == "LOADRELATEDLIST") {
 	$relationId =  vtlib_purify($_REQUEST['relation_id']);
 	if(!empty($relationId) && ((int)$relationId) > 0) {
 		$recordid =  vtlib_purify($_REQUEST['record']);
+		if($_SESSION['rlvs'][$currentModule][$relationId]['currentRecord'] != $recordid) {
+			$resetCookie = true;
+		} else {
+			$resetCookie = false;
+		}
+		$_SESSION['rlvs'][$currentModule][$relationId]['currentRecord'] = $recordid;
 		$actions = vtlib_purify($_REQUEST['actions']);
 		$header = vtlib_purify($_REQUEST['header']);
 		$modObj->id = $recordid;
@@ -27,10 +33,17 @@ if($ajaxaction == "LOADRELATEDLIST") {
 
 		$relatedListData = $modObj->$function_name($recordid, getTabid($currentModule),
 				$relationInfo['relatedTabId'], $actions);
+		require_once('Smarty_setup.php');
+		global $theme, $mod_strings, $app_strings;
+		$theme_path="themes/".$theme."/";
+		$image_path=$theme_path."images/";
+
+		$smarty = new vtigerCRM_Smarty;
 		// vtlib customization: Related module could be disabled, check it
 		if(is_array($relatedListData)) {
 			if( ($relatedModule == "Contacts" || $relatedModule == "Leads" ||
-					$relatedModule == "Accounts") && $currentModule == 'Campaigns') {
+					$relatedModule == "Accounts") && $currentModule == 'Campaigns' && 
+					!$resetCookie) {
 				//TODO for 5.3 this should be COOKIE not REQUEST, change here else where
 				// this logic is used for listview checkbox selection propogation.
 				$checkedRecordIdString = $_REQUEST[$relatedModule.'_all'];
@@ -46,18 +59,15 @@ if($ajaxaction == "LOADRELATEDLIST") {
 						}
 					}
 				}
+				$smarty->assign("SELECTED_RECORD_LIST", $checkedRecordIdString);
+			} else {
+				$smarty->assign('RESET_COOKIE', $resetCookie);
 			}
 		}
 		// END
 		require_once('include/ListView/RelatedListViewSession.php');
 		RelatedListViewSession::addRelatedModuleToSession($relationId,$header);
 
-		require_once('Smarty_setup.php');
-		global $theme, $mod_strings, $app_strings;
-		$theme_path="themes/".$theme."/";
-		$image_path=$theme_path."images/";
-
-		$smarty = new vtigerCRM_Smarty;
 		$smarty->assign("MOD", $mod_strings);
 		$smarty->assign("APP", $app_strings);
 		$smarty->assign("THEME", $theme);

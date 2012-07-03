@@ -79,8 +79,8 @@
 				<form action="index.php" method="get" accept-charset="utf-8" id="filter_modules" onsubmit="VtigerJS_DialogBox.block();" style="display: inline;">
 					<b>{$MOD.LBL_SELECT_MODULE}: </b>
 					<select class="importBox" name="list_module" id='pick_module'>
-						<option value="All">{$APP.LBL_ALL}</a>
-							<option value="All" disabled="disabled" >-----------------------------</a>
+						<option value="All">{$APP.LBL_ALL}</option>
+							<option value="All" disabled="disabled" >-----------------------------</option>
 {foreach  item=moduleName from=$moduleNames}
 						<option value="{$moduleName}" {if $moduleName eq $listModule}selected="selected"{/if}>
 							{$moduleName|@getTranslatedString:$moduleName}
@@ -126,11 +126,13 @@
 						style="cursor: pointer;" id="expressionlist_editlink_{$workflow->id}" \
 						src="{'editfield.gif'|@vtiger_imageurl:$THEME}"/>
 				</a>
+				{if $workflow->defaultworkflow neq '1'}
 				<a href="{$module->deleteWorkflowUrl($workflow->id)}" onclick="return confirm('{$APP.SURE_TO_DELETE}');">
 					<img border="0" title="Delete" alt="Delete"\
 			 			src="{'delete.gif'|@vtiger_imageurl:$THEME}" \
 						style="cursor: pointer;" id="expressionlist_deletelink_{$workflow->id}" />
 				</a>
+				{/if}
 			</td>
 		</tr>
 {/foreach}

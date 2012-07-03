@@ -26,6 +26,11 @@
 			$obj->entityId = $entityId;
 			$result = $adb->pquery("select setype from vtiger_crmentity where crmid=?", array($entityId));
 			$setype =  $adb->query_result($result,0,"setype");
+
+            if($setype == 'Calendar') {
+                $setype = vtws_getCalendarEntityType($entityId);
+            }
+            
 			$obj->moduleName = $setype;
 			
 			require_once('data/CRMEntity.php');
@@ -33,6 +38,28 @@
 						
 			$focus->retrieve_entity_info($entityId, $setype);
 			$focus->id = $entityId;
+			$obj->isNew = false;
+			$obj->focus = $focus;
+			return $obj;
+		}
+		
+		/**
+		 * Get an entity data object.
+		 * @param $adb Pear database instance.
+		 * @param $userId The id of the entity to load.
+		 * @return The new entity data object.
+		 */
+		static function fromUserId($adb,$userId){
+			$obj = new VTEntityData();
+			$obj->entityId = $userId;
+
+			$obj->moduleName = 'Users';
+
+			require_once('data/CRMEntity.php');
+			$focus = CRMEntity::getInstance($obj->moduleName);
+
+			$focus->retrieve_entity_info($userId, $obj->moduleName);
+			$focus->id = $userId;
 			$obj->isNew = false;
 			$obj->focus = $focus;
 			return $obj;
@@ -90,6 +117,13 @@
 			if(array_key_exists($className, $importModuleMapping)){
 				$moduleName = $importModuleMapping[$className];
 			}
+
+            if($className == 'Activity') {
+                $id = $this->getId();
+                if($id != null || $id != '') {
+                    $moduleName = vtws_getCalendarEntityType($id);
+                }
+            }
 			return $moduleName;
 		}
 		

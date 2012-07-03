@@ -9,6 +9,7 @@
  ************************************************************************************/
 	function vtSortFieldsJson($request){
 		$moduleName = $request['module_name'];
+		checkFileAccessForInclusion("modules/$moduleName/$moduleName.php");
 		require_once("modules/$moduleName/$moduleName.php");
 		$focus = new $moduleName();
 		echo Zend_Json::encode($focus->sortby_fields);

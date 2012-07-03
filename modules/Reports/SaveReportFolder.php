@@ -37,7 +37,7 @@ if($mode=="Save")
 			header("Location: index.php?action=ReportsAjax&file=ListView&mode=ajax&module=Reports");
 		}else
 		{
-			include('themes/'.$theme.'/header.php');
+			include('modules/Vtiger/header.php');
 			$errormessage = "<font color='red'><B>Error Message<ul>
 			<li><font color='red'>Error while inserting the record</font>
 			</ul></B></font> <br>" ;
@@ -57,7 +57,7 @@ if($mode=="Save")
 			header("Location: index.php?action=ReportsAjax&file=ListView&mode=ajax&module=Reports");
 		}else
 		{
-			include('themes/'.$theme.'/header.php');
+			include('modules/Vtiger/header.php');
 			$errormessage = "<font color='red'><B>Error Message<ul>
 			<li><font color='red'>Error while updating the record</font>
 			</ul></B></font> <br>" ;

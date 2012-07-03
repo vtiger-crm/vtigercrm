@@ -14,15 +14,15 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header: /advent/projects/wesat/vtiger_crm/sugarcrm/modules/Yahoo/language/en_us.lang.php,v 1.3 2005/01/25 06:23:32 jack Exp $
- * Description:  Defines the English language pack for the Account module.
+ * Description:  Defines the English language pack for the Organization module.
  ********************************************************************************/
  
 $mod_strings = Array(
-'LBL_MODULE_NAME'=>'Accounts',
-'LBL_MODULE_TITLE'=>'Accounts: Home',
-'LBL_SEARCH_FORM_TITLE'=>'Account Search',
-'LBL_LIST_FORM_TITLE'=>'Account List',
-'LBL_NEW_FORM_TITLE'=>'New Account',
+'LBL_MODULE_NAME'=>'Organizations',
+'LBL_MODULE_TITLE'=>'Organizations: Home',
+'LBL_SEARCH_FORM_TITLE'=>'Organization Search',
+'LBL_LIST_FORM_TITLE'=>'Organization List',
+'LBL_NEW_FORM_TITLE'=>'New Organization',
 'ERR_DELETE_RECORD'=>"A record number must be specified to delete the account.",
 );
 

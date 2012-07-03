@@ -15,12 +15,42 @@
 function chooseType(typeName){
 	$('vtbusy_info').style.display="inline";
 	$('stufftype_id').value=typeName;
-	
+
 	var typeLabel = typeName;
 	if(alert_arr[typeName] != null && alert_arr[typeName] != "" && alert_arr[typeName] != 'undefined'){
 		typeLabel = alert_arr[typeName];
 	}
-	$('divHeader').innerHTML="<b>"+alert_arr.LBL_ADD+typeLabel+"</b>";
+    if(typeLabel == 'defaultwidget'){
+		$('divHeader').innerHTML="<b>"+alert_arr.LBL_SELECT+"</b>";
+		$('vtbusy_info').style.display="inline";
+		new Ajax.Request(
+			'index.php',
+			{queue: {position: 'end', scope: 'command'},
+			method: 'post',
+			postBody:'module=Home&action=HomeAjax&file=HomestuffAjax&home=homewidget',
+			onComplete: function(response){
+				var responseVal=response.responseText;
+				$('home').innerHTML=response.responseText;
+				show('addWidgetsDiv');
+				placeAtCenter($('addWidgetsDiv'));
+				$('homewidget').style.display="block";
+				$('moduleNameRow').style.display="none";
+				$('moduleFilterRow').style.display="none";
+				$('modulePrimeRow').style.display="none";
+				$('rssRow').style.display="none";
+				$('showrow').style.display="none";
+				$('dashTypeRow').style.display="none";
+				$('dashNameRow').style.display="none";
+				$('StuffTitleId').style.display="none";
+				$('vtbusy_info').style.display="none";
+				$('reportNameRow').style.display="none";
+				$('reportTypeRow').style.display="none";
+			}
+			}
+		);
+	}else{
+			$('divHeader').innerHTML="<b>"+alert_arr.LBL_ADD+typeLabel+"</b>";
+	}
 	if(typeName=='Module'){
 		$('moduleNameRow').style.display="block";
 		$('moduleFilterRow').style.display="block";
@@ -30,6 +60,9 @@ function chooseType(typeName){
 		$('dashNameRow').style.display="none";
 		$('dashTypeRow').style.display="none";
 		$('StuffTitleId').style.display="block";
+		$('homewidget').style.display="none";
+		$('reportNameRow').style.display="none";
+		$('reportTypeRow').style.display="none";
 		//$('homeURLField').style.display = "none";
 	}else if(typeName=='DashBoard'){
 		$('moduleNameRow').style.display="none";
@@ -40,6 +73,9 @@ function chooseType(typeName){
 		$('dashNameRow').style.display="block";
 		$('dashTypeRow').style.display="block";
 		$('StuffTitleId').style.display="block";
+		$('reportNameRow').style.display="none";
+        $('reportTypeRow').style.display="none";
+		$('homewidget').style.display="none";
 		//$('homeURLField').style.display = "none";
 		new Ajax.Request(
 			'index.php',
@@ -64,7 +100,10 @@ function chooseType(typeName){
 		$('dashNameRow').style.display="none";
 		$('dashTypeRow').style.display="none";
 		$('StuffTitleId').style.display="block";
+		$('homewidget').style.display="none";
 		$('vtbusy_info').style.display="none";
+		$('reportNameRow').style.display="none";
+		$('reportTypeRow').style.display="none";
 		//$('homeURLField').style.display = "none";
 	}else if(typeName=='Default'){
 		$('moduleNameRow').style.display="none";
@@ -75,7 +114,10 @@ function chooseType(typeName){
 		$('dashNameRow').style.display="none";
 		$('dashTypeRow').style.display="none";
 		$('StuffTitleId').style.display="none";
+		$('homewidget').style.display="none";
 		$('url_id').style.display = "none";
+		$('reportNameRow').style.display="none";
+		$('reportTypeRow').style.display="none";
 	}else if(typeName == 'Notebook'){
 		$('moduleNameRow').style.display="none";
 		$('moduleFilterRow').style.display="none";
@@ -86,7 +128,37 @@ function chooseType(typeName){
 		$('dashTypeRow').style.display="none";
 		$('StuffTitleId').style.display="block";
 		$('vtbusy_info').style.display="none";
+		$('homewidget').style.display="none";
+		$('reportNameRow').style.display="none";
+		$('reportTypeRow').style.display="none";
 		//$('homeURLField').style.display = "none";
+	}
+	else if(typeName == 'ReportCharts'){
+		$('moduleNameRow').style.display="none";
+		$('moduleFilterRow').style.display="none";
+		$('modulePrimeRow').style.display="none";
+		$('rssRow').style.display="none";
+		$('showrow').style.display="none";
+		$('StuffTitleId').style.display="block";
+		$('reportNameRow').style.display="block";
+		$('reportTypeRow').style.display="block";
+		$('vtbusy_info').style.display="none";
+        $('dashNameRow').style.display="none";
+		$('dashTypeRow').style.display="none";
+		$('homewidget').style.display="none";
+		new Ajax.Request(
+                    'index.php',
+                    {queue: {position: 'end', scope: 'command'},
+                            method: 'post',
+                            postBody: 'module=Home&action=HomeAjax&file=HomeReportChart&ajax=true',
+                            onComplete: function(response) {
+                                        $('selReportName').innerHTML=response.responseText;
+					show('addWidgetsDiv');
+					placeAtCenter($('addWidgetsDiv'));
+					$('vtbusy_info').style.display="none";
+                        }
+                    }
+                 );
 	}
 	/*else if(typeName == 'URL'){
 		$('moduleNameRow').style.display="none";
@@ -298,19 +370,22 @@ function loadStuff(stuffid,stufftype){
 						var url = "index.php?module="+$('more_'+stuffid).value+"&action=index";
 						if($('search_qry_'+stuffid)!=''){
 							url += $('search_qry_'+stuffid).value;
-						} 
+						}
 						$('a_'+stuffid).href = url;
 					}else{
 						$('a_'+stuffid).style.display = 'none';
-					}	
+					}
 				}
 				if(stufftype=="RSS"){
 					$('a_'+stuffid).href = $('more_'+stuffid).value;
 				}
 				if(stufftype=="DashBoard"){
 					$('a_'+stuffid).href = "index.php?module=Dashboard&action=index&type="+$('more_'+stuffid).value;
-				}	
-				$('refresh_'+stuffid).innerHTML='';	
+				}
+                if(stufftype=="ReportCharts"){
+                	$('a_'+stuffid).href = "index.php?module=Reports&action=SaveAndRun&record="+$('more_'+stuffid).value;
+                }
+				$('refresh_'+stuffid).innerHTML='';
 		    }
 		}
 	);
@@ -378,101 +453,132 @@ function loadAllWidgets(widgetInfoList, batchSize){
  * this function validates the form for creating a new widget
  */
 function frmValidate(){
-	if(trim($('stufftitle_id').value)==""){
-		alert(alert_arr.LBL_ENTER_WINDOW_TITLE);
-		$('stufftitle_id').focus();
-		return false;
-	}
-	if($('stufftype_id').value=="RSS"){			
-		if($('txtRss_id').value==""){
-			alert(alert_arr.LBL_ENTER_RSS_URL);
-			$('txtRss_id').focus();
-			return false;
+	if($('stufftype_id').value=="defaultwidget"){
+		var namelist = new Array();
+		$('vtbusy_info').style.display="block";
+		var elem = document.getElementsByName("names")
+        for(var i = 0; i < elem.length; i++){
+            if(elem[i].checked) {
+				namelist[i] = elem[i].value;
+            }
 		}
-	}
-	/*if($('stufftype_id').value=="URL"){			
-		if($('url_id').value==""){
-			alert("Please enter URL");
-			$('url_id').focus();
-			return false;
-		}
-	}*/
-	if($('stufftype_id').value=="Module"){
-		var selLen;
-		var fieldval=new Array();
-		var cnt=0;
-		selVal=document.Homestuff.PrimeFld;
-		for(k=0;k<selVal.options.length;k++){
-			if(selVal.options[k].selected){
-				fieldval[cnt]=selVal.options[k].value;
-				cnt= cnt+1;
-			}
-		}
-		if(cnt>2){
-			alert(alert_arr.LBL_SELECT_ONLY_FIELDS);
-			selVal.focus();
-			return false;
-		}else{
-			document.Homestuff.fldname.value=fieldval;
-		}
-	}
-	var stufftype=$('stufftype_id').value;
-	var stufftitle=$('stufftitle_id').value;
-	$('stufftitle_id').value = '';
-	var selFiltername='';
-	var fldname='';
-	var selmodule='';
-	var maxentries='';
-	var txtRss='';
-	var seldashbd='';
-	var seldashtype='';
-	var seldeftype='';
-	//var txtURL = '';
 
-	if(stufftype=="Module"){
-		selFiltername =document.Homestuff.selFiltername[document.Homestuff.selFiltername.selectedIndex].value;
-		fldname = fieldval;
-		selmodule =$('selmodule_id').value;
-		maxentries =$('maxentryid').value;
-	}else if(stufftype=="RSS"){
-		txtRss=$('txtRss_id').value;
-		maxentries =$('maxentryid').value;
-	}/*else if(stufftype=="URL"){
-		txtURL=$('url_id').value;
-	}*/else if(stufftype=="DashBoard"){
-		seldashbd=$('seldashbd_id').value;
-		seldashtype=$('seldashtype_id').value;
-	}else if(stufftype=="Default"){
-		seldeftype=document.Homestuff.seldeftype[document.Homestuff.seldeftype.selectedIndex].value;
-	}
-
-	var url="stufftype="+stufftype+"&stufftitle="+stufftitle+"&selmodule="+selmodule+"&maxentries="+maxentries+"&selFiltername="+selFiltername+"&fldname="+encodeURIComponent(fldname)+"&txtRss="+txtRss+"&seldashbd="+seldashbd+"&seldashtype="+seldashtype+"&seldeftype="+seldeftype;//+'&txtURL='+txtURL;
-	var stuffarr=new Array();
-	$('vtbusy_info').style.display="inline";	
-
-	new Ajax.Request(
-		'index.php',
-		{queue: {position: 'end', scope: 'command'},
+		var values = JSON.stringify(namelist);
+		new Ajax.Request(
+			'index.php',
+			{queue: {position: 'end', scope: 'command'},
 			method: 'post',
-			postBody:'module=Home&action=HomeAjax&file=Homestuff&'+url,
-			onComplete: function(response){
-				var responseVal=response.responseText;
-				if(!response.responseText){
-					alert(alert_arr.LBL_ADD_HOME_WIDGET);
-					$('vtbusy_info').style.display="none";
-					$('stufftitle_id').value='';
-					$('txtRss_id').value='';
-					return false;
-				}else{
-					hide('addWidgetsDiv');
-					$('vtbusy_info').style.display="none";
-					$('stufftitle_id').value='';
-					$('txtRss_id').value='';
-					eval(response.responseText);
-				}
+			postBody: 'action=HomeAjax&module=Home&file=HomeWidgetsSave&values='+encodeURIComponent(values),
+			onComplete: function(response) {
+				$('addWidgetsDiv').style.display="none";
+				$('vtbusy_info').style.display="none";
+				window.location.reload();
 			}
 		}
 	);
+	}else{
+		if(trim($('stufftitle_id').value)==""){
+			alert(alert_arr.LBL_ENTER_WINDOW_TITLE);
+			$('stufftitle_id').focus();
+			return false;
+		}
+		if($('stufftype_id').value=="RSS"){
+			if($('txtRss_id').value==""){
+				alert(alert_arr.LBL_ENTER_RSS_URL);
+				$('txtRss_id').focus();
+				return false;
+			}
+		}
+		/*if($('stufftype_id').value=="URL"){
+			if($('url_id').value==""){
+				alert("Please enter URL");
+				$('url_id').focus();
+				return false;
+			}
+		}*/
+		if($('stufftype_id').value=="Module"){
+			var selLen;
+			var fieldval=new Array();
+			var cnt=0;
+			selVal=document.Homestuff.PrimeFld;
+			for(k=0;k<selVal.options.length;k++){
+				if(selVal.options[k].selected){
+					fieldval[cnt]=selVal.options[k].value;
+					cnt= cnt+1;
+				}
+			}
+			if(cnt>2){
+				alert(alert_arr.LBL_SELECT_ONLY_FIELDS);
+				selVal.focus();
+				return false;
+			}else{
+				document.Homestuff.fldname.value=fieldval;
+			}
+		}
+		var stufftype=$('stufftype_id').value;
+		var stufftitle=$('stufftitle_id').value;
+		$('stufftitle_id').value = '';
+		var selFiltername='';
+		var fldname='';
+		var selmodule='';
+		var maxentries='';
+		var txtRss='';
+		var seldashbd='';
+		var seldashtype='';
+		var seldeftype='';
+    	var selreport='';
+    	var selreportcharttype='';
+		//var txtURL = '';
+
+		if(stufftype=="Module"){
+			selFiltername =document.Homestuff.selFiltername[document.Homestuff.selFiltername.selectedIndex].value;
+			fldname = fieldval;
+			selmodule =$('selmodule_id').value;
+			maxentries =$('maxentryid').value;
+		}else if(stufftype=="RSS"){
+			txtRss=$('txtRss_id').value;
+			maxentries =$('maxentryid').value;
+		}/*else if(stufftype=="URL"){
+			txtURL=$('url_id').value;
+		}*/else if(stufftype=="DashBoard"){
+			seldashbd=$('seldashbd_id').value;
+			seldashtype=$('seldashtype_id').value;
+		}else if(stufftype=="Default"){
+			seldeftype=document.Homestuff.seldeftype[document.Homestuff.seldeftype.selectedIndex].value;
+		}
+    else if(stufftype=="ReportCharts"){
+    	selreport = $('selreportchart_id').value;
+        selreportcharttype = $('selreportcharttype_id').value;
+    }
+
+	var url="stufftype="+stufftype+"&stufftitle="+stufftitle+"&selmodule="+selmodule+"&maxentries="+maxentries+"&selFiltername="+selFiltername+"&fldname="+encodeURIComponent(fldname)+"&txtRss="+txtRss+"&seldashbd="+seldashbd+"&seldashtype="+seldashtype+"&seldeftype="+seldeftype+"&selreport="+selreport+"&selreportcharttype="+selreportcharttype;//+'&txtURL='+txtURL;
+		var stuffarr=new Array();
+		$('vtbusy_info').style.display="inline";
+
+		new Ajax.Request(
+			'index.php',
+			{queue: {position: 'end', scope: 'command'},
+				method: 'post',
+				postBody:'module=Home&action=HomeAjax&file=Homestuff&'+url,
+				onComplete: function(response){
+					var responseVal=response.responseText;
+					if(!response.responseText){
+						alert(alert_arr.LBL_ADD_HOME_WIDGET);
+						$('vtbusy_info').style.display="none";
+						$('stufftitle_id').value='';
+						$('txtRss_id').value='';
+						return false;
+					}else{
+						hide('addWidgetsDiv');
+						$('vtbusy_info').style.display="none";
+						$('stufftitle_id').value='';
+						$('txtRss_id').value='';
+						eval(response.responseText);
+					}
+				}
+			}
+		);
+	}
 }
 
 /**
@@ -495,7 +601,7 @@ function HideDefault(sid){
 					$('seqSettings').style.display = 'none';
 					placeAtCenter($('seqSettings'));
 					Effect.Appear('seqSettings');
-					setTimeout(hideSeqSettings,3000);
+					setTimeout(hideSeqSettings,5000);
 				}else{
 					alert(alert_arr.ERR_HIDING + '.'+ alert_arr.MSG_TRY_AGAIN + '.');
 				}
@@ -529,7 +635,7 @@ function positionDivInAccord(targetDiv,stufftitle,stufftype){
 	var layout=$('homeLayout').value;
 	var widgetWidth;
 	var dashWidth;
-	
+
 	switch(layout){
 		case '2':
 			widgetWidth = 49;
@@ -549,7 +655,7 @@ function positionDivInAccord(targetDiv,stufftitle,stufftype){
 			break;
 	}
 	var mainX = parseInt(document.getElementById("MainMatrix").style.width);
-	if(stufftitle != vtdashboard_defaultDashbaordWidgetTitle && stufftype != "DashBoard"){
+	if(stufftitle != vtdashboard_defaultDashbaordWidgetTitle && stufftype != "DashBoard" && stufftype != "ReportCharts"){
 		var dx = mainX *  widgetWidth/ 100;
 	}else{
 		var dx = mainX * dashWidth / 100;
@@ -600,7 +706,7 @@ initHomePage = function(){
 				for(x=0;x<matrixarr.length;x++){
 					matrixseqarr[x]=matrixarr[x].split("=")[1];
 				}
-				BlockSorting(matrixseqarr);	
+				BlockSorting(matrixseqarr);
 			}
 		}
 	);
@@ -700,6 +806,30 @@ function saveLayout(){
 			onComplete: function(response){
 				var responseVal=response.responseText;
 				window.location.href = window.location.href;
+			}
+		}
+	);
+}
+function saveEditReportCharts(dashRowId){
+	$('refresh_'+dashRowId).innerHTML=$('vtbusy_homeinfo').innerHTML;
+	cancelEntries('editRowmodrss_'+dashRowId);
+	var reportVal='';
+	var iter=0;
+	for(iter=0;iter<3;iter++){
+		if($('reportradio_'+iter).checked){
+			reportVal=$('reportradio_'+iter).value;
+		}
+	}
+	stuffid=dashRowId;
+	new Ajax.Request(
+		'index.php',
+		{queue: {position: 'end', scope: 'command'},
+			method: 'post',
+			postBody:'module=Home&action=HomeAjax&file=HomestuffAjax&reportVal='+reportVal+'&stuffid='+stuffid,
+			onComplete: function(response){
+				var responseVal=response.responseText;
+				eval(response.responseText);
+				$('refresh_'+stuffid).innerHTML='';
 			}
 		}
 	);

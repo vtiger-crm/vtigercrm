@@ -82,12 +82,6 @@ foreach($focus->column_fields as $fieldname => $val)
 	}
 }
 
-if(isset($_REQUEST['annual_revenue']))
-{
-	$value = convertToDollar($_REQUEST['annual_revenue'],$rate);
-	$focus->column_fields['annual_revenue'] = $value;
-}
-
 if($_REQUEST['assigntype'] == 'U')  {
 	$focus->column_fields['assigned_user_id'] = $_REQUEST['assigned_user_id'];
 } elseif($_REQUEST['assigntype'] == 'T') {

@@ -73,8 +73,30 @@
 }
 
 /* similar to .small class defined themes/softed/style.css */ 
-.fieldname, .operation, .value, .form_input, .time_field, .timepicker {
+.fieldname, .operation, .value, .joincondition, .form_input, .time_field, .timepicker {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 11px;
 	color: #000000;
+	margin-right: 10px;
+	margin-bottom: 10px;
+}
+
+.expressionvalue {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	color: #000000;
+    background-color: #EEEEEE;
+    width: 200px;
+}
+
+.condition_group_block {
+    border : 1px solid #DADADA;
+    padding : 5px;
+    margin : 5px;
+}
+
+.condition_group_join_block {
+    padding : 5px;
+    margin : 5px;
+    text-align : center;
 }

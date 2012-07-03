@@ -414,9 +414,9 @@ function getUserModuleSharingObjects($module,$userid,$def_org_share,$current_use
 	$mod_share_read_permission=Array();
 	$mod_share_write_permission=Array();
 	$mod_share_read_permission['ROLE']=Array();
-        $mod_share_write_permission['ROLE']=Array();
-        $mod_share_read_permission['GROUP']=Array();
-        $mod_share_write_permission['GROUP']=Array();
+	$mod_share_write_permission['ROLE']=Array();
+	$mod_share_read_permission['GROUP']=Array();
+	$mod_share_write_permission['GROUP']=Array();
 
 	$share_id_members=Array();
 	$share_id_groupmembers=Array();
@@ -534,9 +534,12 @@ function getUserModuleSharingObjects($module,$userid,$def_org_share,$current_use
 		//Get roles from Role2Grp
 		$grpIterator=false;
 		$groupList = $current_user_groups;
+		if (empty($groupList)) $groupList = array(0);
+		
 		if (!empty($groupList)) {
 			$query="select vtiger_datashare_role2group.* from vtiger_datashare_role2group inner join vtiger_datashare_module_rel on vtiger_datashare_module_rel.shareid=vtiger_datashare_role2group.shareid where vtiger_datashare_module_rel.tabid=?";
 			$qparams = array($mod_tabid);
+
 			if (count($groupList) > 0) {
 				$query .= " and vtiger_datashare_role2group.to_groupid in (". generateQuestionMarks($groupList) .")";
 				array_push($qparams, $groupList);

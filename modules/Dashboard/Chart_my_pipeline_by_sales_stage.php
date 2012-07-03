@@ -167,7 +167,8 @@ Calendar.setup ({
 <?php } 
 else {
 	if (file_exists($tmp_dir.$cache_file_name)) {
-		$file_date = getDisplayDate(date('Y-m-d H:i', filemtime($tmp_dir.$cache_file_name)));
+		$date = new DateTimeField(date('Y-m-d H:i', filemtime($tmp_dir.$cache_file_name)));
+		$file_date = $date->getDBInsertDateValue();
 	}
 	else {
 		$file_date = '';

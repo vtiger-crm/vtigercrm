@@ -170,6 +170,23 @@ class Vtiger_PDF_Generator {
 		$this->contentViewer->display($this);		
 		$this->pdf->Output($name, $outputMode);
 	}
+
+	function getImageSize($file) {
+		// get image dimensions
+		$imsize = @getimagesize($file);
+		if ($imsize === FALSE) {
+			// encode spaces on filename
+			$file = str_replace(' ', '%20', $file);
+			$imsize = @getimagesize($file);
+			if ($imsize === FALSE) {
+				//TODO handle error better.
+				//values here are consistent with one that should be max size of logo.
+				return array(60, 30, null, null);
+			}
+		}
+		return $imsize;
+	}
+
 }
 
 ?>

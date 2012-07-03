@@ -120,7 +120,8 @@
         
 				<td width=35% class="cellLabel small" >
 					{if $EDIT_MODE eq 'true'}
-						<input name="{$tax.taxlabel}" id={$tax_label} type="text" value="{$tax.taxlabel}" class="detailedViewTextBox small">
+						{assign var = pstax value = $tax.taxlabel}
+						<input name="{$pstax|bin2hex}" id={$tax_label} type="text" value="{$tax.taxlabel}" class="detailedViewTextBox small">
 					{else}
 						{$tax.taxlabel}
 					{/if}
@@ -202,8 +203,8 @@
 			{assign var=tax_label value="taxlabel_"|cat:$tax.taxname} 
 			<td width=35% class="cellLabel small">
 			 	{if $SH_EDIT_MODE eq 'true'}
-			 	
-					<input name="{$tax.taxlabel}" id="{$tax_label}" type="text" value="{$tax.taxlabel}" class="detailedViewTextBox small">
+                    {assign var = shtax value = $tax.taxlabel}
+					<input name="{$shtax|bin2hex}" id="{$tax_label}" type="text" value="{$tax.taxlabel}" class="detailedViewTextBox small">
 			 	{else} 
 					{$tax.taxlabel}
 				{/if}

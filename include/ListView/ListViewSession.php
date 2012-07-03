@@ -172,7 +172,7 @@ class ListViewSession {
 	function getRequestCurrentPage($currentModule, $query, $viewid, $queryMode = false) {
 		global $list_max_entries_per_page, $adb;
 		$start = 1;
-		if(isset($_REQUEST['query']) && $_REQUEST['query'] == 'true'){
+		if(isset($_REQUEST['query']) && $_REQUEST['query'] == 'true'&& $_REQUEST['start']!="last"){
 			return ListViewSession::getRequestStartPage();
 		}
 		if(!empty($_REQUEST['start'])){

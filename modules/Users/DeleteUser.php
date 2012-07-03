@@ -8,17 +8,14 @@
  * All Rights Reserved.
  ********************************************************************************/
 
-require_once 'include/Webservices/Utils.php';
+require_once 'modules/Users/Users.php';
 
 global $adb;
 $del_id =  $_REQUEST['delete_user_id'];
 $tran_id = $_REQUEST['transfer_user_id'];
 
-vtws_transferOwnership($del_id, $tran_id);
-
-//delete from user vtiger_table;
-$sql15 = "delete from vtiger_users where id=?";
-$adb->pquery($sql15, array($del_id));
+$userObj = new Users();
+$userObj->transformOwnerShipAndDelete($del_id, $tran_id);	
 
 //if check to delete user from detail view
 if(isset($_REQUEST["ajax_delete"]) && $_REQUEST["ajax_delete"] == 'false')

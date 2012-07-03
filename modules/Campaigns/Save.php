@@ -26,39 +26,12 @@ require_once('include/logging.php');
 require_once('include/database/PearDatabase.php');
 
 $focus = new Campaigns();
- global $current_user;
- $currencyid=fetchCurrency($current_user->id);
- $rate_symbol = getCurrencySymbolandCRate($currencyid);
- $rate = $rate_symbol['rate'];
+
+global $current_user;
+
 //added to fix 4600
 $search=vtlib_purify($_REQUEST['search_url']);
 setObjectValuesFromRequest($focus);
-
-if(isset($_REQUEST['expectedrevenue']))
-{
-	$value = convertToDollar($_REQUEST['expectedrevenue'],$rate);
-	$focus->column_fields['expectedrevenue'] = $value;
-}
-if(isset($_REQUEST['budgetcost']))
-{
-	$value = convertToDollar($_REQUEST['budgetcost'],$rate);
-	$focus->column_fields['budgetcost'] = $value;
-}
-if(isset($_REQUEST['actualcost']))
-{
-	$value = convertToDollar($_REQUEST['actualcost'],$rate);
-	$focus->column_fields['actualcost'] = $value;
-}
-if(isset($_REQUEST['actualroi']))
-{
-	$value = convertToDollar($_REQUEST['actualroi'],$rate);
-	$focus->column_fields['actualroi'] = $value;
-}
-if(isset($_REQUEST['expectedroi']))
-{
-	$value = convertToDollar($_REQUEST['expectedroi'],$rate);
-	$focus->column_fields['expectedroi'] = $value;
-}
 
 if($_REQUEST['assigntype'] == 'U')  {
 	$focus->column_fields['assigned_user_id'] = $_REQUEST['assigned_user_id'];

@@ -8,11 +8,13 @@
  * All Rights Reserved.
  ********************************************************************************/
 	
-global $adb,$current_user, $mod_strings;
+global $adb,$current_user, $mod_strings,$currentModule;
 require('user_privileges/user_privileges_'.$current_user->id.'.php');
 
 $modval=trim($_REQUEST['modname']);
 $dash=trim($_REQUEST['dash']);
+$home=trim($_REQUEST['home']);
+
 if(!empty($modval)){
 	$tabid = getTabId($modval);
 	$ssql = "select vtiger_customview.*, vtiger_users.user_name from vtiger_customview inner join vtiger_tab on vtiger_tab.name = vtiger_customview.entitytype 
@@ -32,9 +34,11 @@ if(!empty($modval)){
 	}else{
 		$html = '<select id=selFilterid name=selFiltername onchange=setPrimaryFld(this) class="detailedViewTextBox" onfocus="this.className=\'detailedViewTextBoxOn\'" onblur="this.className=\'detailedViewTextBox\'"  style="width:60%">';
 		for($i=0;$i<$adb->num_rows($result);$i++){
-			if($adb->query_result($result,$i,'userid')==$current_user->id || $adb->query_result($result,$i,"viewname")=='All'){
+			if($adb->query_result($result,$i,"viewname")=='All'){
+				$html .= "<option value='".$adb->query_result($result,$i,'cvid')."'>".getTranslatedString('COMBO_ALL',$currentModule)."</option>";
+			} else if($adb->query_result($result,$i,'userid')==$current_user->id){
 				$html .= "<option value='".$adb->query_result($result,$i,'cvid')."'>".$adb->query_result($result,$i,"viewname")."</option>";
-			}else{
+			} else {
 				$html .= "<option value='".$adb->query_result($result,$i,'cvid')."'>".$adb->query_result($result,$i,"viewname")."[".$adb->query_result($result,$i,'user_name')."]</option>";
 			}
 		}
@@ -147,6 +151,14 @@ if(!empty($_REQUEST['dashVal'])){
 	echo "loadStuff(".$did.",'DashBoard')";
 }
 
+if(!empty($_REQUEST['reportVal'])){
+	$stuffid=$_REQUEST['stuffid'];
+	global $adb;
+	$qry="update vtiger_homereportchart set reportcharttype=? where stuffid=?";
+	$res=$adb->pquery($qry, array($_REQUEST['reportVal'], $stuffid));
+	echo "loadStuff(".$stuffid.",'ReportCharts')";
+}
+
 if(!empty($_REQUEST['homestuffid'])){
 	$sid=$_REQUEST['homestuffid'];
 	global $adb;
@@ -188,5 +200,34 @@ if(!empty($_REQUEST['layout'])){
 		echo "SUCCESS";
 	}
 }
+
+if(!empty($home)){
+	global $current_user,$mod_strings,$currentModule;
+	$UMOD = $mod_strings;
+	$focus = new Users();
+	$homeWidgets = $focus->getHomeStuffOrder($current_user->id);
+    if(!in_array("", $homeWidgets)){
+			$errorMsg="LBL_NO_WIDGETS_HIDDEN";
+	}
+	$html='<table border="0" cellpadding="5" cellspacing="0" ><tr>';
+	$COUNT = 0;
+	foreach($homeWidgets as $key=>$value){
+		if($value == ''){
+			$html .= '<td class="dvtCellInfo" align="center" >
+			<input type="checkbox" name="names" value="'.$key.'"></td>
+			<td class="dvtCellLabel" align="left">'.getTranslatedString($key,"Users").'</td>';
+			$COUNT++;
+			if (($COUNT % 2) == 0){
+				$html .= '</tr><tr>';
+			}
+		}
+	}
+	if ($errorMsg != ''){
+		$html .= '<td align="center">'.getTranslatedString($errorMsg,"Home").'</td>';
+	}
+	$html .= '</tr></table>';
+	echo $html;
+}
+
 //layout save ends here
 ?>

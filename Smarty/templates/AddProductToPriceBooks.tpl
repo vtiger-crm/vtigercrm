@@ -29,12 +29,23 @@ function addtopricebook()
 			{	
 				if(elem[i].name == yy)
 				{
-					if (elem[i].value.replace(/^\s+/g, '').replace(/\s+$/g, '').length==0) 
+					var val = elem[i].value.replace(/^\s+/g, '').replace(/\s+$/g, '');
+					if(typeof userCurrencySeparator != 'undefined') {
+						while(val.indexOf(userCurrencySeparator) != -1) {
+							val = val.replace(userCurrencySeparator,'');
+						}
+					}
+					if(typeof userDecimalSeparator != 'undefined') {
+						if(val.indexOf(userDecimalSeparator) != -1) {
+							val = val.replace(userDecimalSeparator,'.');
+						}
+					}
+					if (val.length==0)
 					{
 						alert(alert_arr.LISTPRICE_CANNOT_BE_EMPTY);
 			               		return false;	
 					}	
-					else if(isNaN(elem[i].value))
+					else if(isNaN(val))
                                         {
                                                 alert(alert_arr.INVALID_LIST_PRICE);
                                                 return false;
@@ -77,12 +88,23 @@ function addtopricebook()
                                         var xy= prod_array[j]+"_listprice";
                                         if(elem[i].name == xy)
                                         {
-						if (elem[i].value.replace(/^\s+/g, '').replace(/\s+$/g, '').length==0) 
+						var val = elem[i].value.replace(/^\s+/g, '').replace(/\s+$/g, '');
+						if(typeof userCurrencySeparator != 'undefined') {
+							while(val.indexOf(userCurrencySeparator) != -1) {
+								val = val.replace(userCurrencySeparator,'');
+							}
+						}
+						if(typeof userDecimalSeparator != 'undefined') {
+							if(val.indexOf(userDecimalSeparator) != -1) {
+								val = val.replace(userDecimalSeparator,'.');
+							}
+						}
+						if (val.length==0)
 						{
 							alert(alert_arr.LISTPRICE_CANNOT_BE_EMPTY);
 			                		return false;	
 						}
-						else if(isNaN(elem[i].value)|| elem[i].value <= 0)
+						else if(isNaN(val)|| val <= 0)
                 	                        {
         	                                        alert(alert_arr.INVALID_LIST_PRICE);
                                                 	return false;
@@ -125,6 +147,14 @@ function updateAllListPrice()
         {rdelim}
 {rdelim}
 
+function updateListPriceForField(fieldname,element)
+{ldelim}
+	var unitprice_array = new Array({$UNIT_PRICE_ARRAY});
+	var fieldname_array = new Array({$FIELD_NAME_ARRAY});
+
+	var index = fieldname_array.indexOf(fieldname);
+	updateListPrice(unitprice_array[index],fieldname,element);
+{rdelim}
 </script>
 <script language="javascript" src="modules/Products/Products.js"></script>
 <table width="95%" border="0" cellpadding="0" cellspacing="0">

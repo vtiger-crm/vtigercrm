@@ -288,9 +288,15 @@ class Vtiger_MailScanner {
 
 		$checkTicketId = $this->__toInteger($subjectOrId);
 		if(!$checkTicketId) {
-			$ticketres = $adb->pquery("SELECT ticketid FROM vtiger_troubletickets WHERE title = ?", Array($subjectOrId));
+			$ticketres = $adb->pquery("SELECT ticketid FROM vtiger_troubletickets WHERE title = ? OR ticket_no = ?", Array($subjectOrId, $subjectOrId));
 			if($adb->num_rows($ticketres)) $checkTicketId = $adb->query_result($ticketres, 0, 'ticketid');
 		}
+		// Try with ticket_no before CRMID (case where ticket_no is also just number)
+		if(!$checkTicketId) {
+			$ticketres = $adb->pquery("SELECT ticketid FROM vtiger_troubletickets WHERE ticket_no = ?", Array($subjectOrId));
+			if($adb->num_rows($ticketres)) $checkTicketId = $adb->query_result($ticketres, 0, 'ticketid');
+		}
+		// Nothing found?
 		if(!$checkTicketId) return false;
 
 		if($this->_cachedTicketIds[$checkTicketId]) {
@@ -298,6 +304,7 @@ class Vtiger_MailScanner {
 			return $this->_cachedTicketIds[$checkTicketId];
 		}
 		
+		// Verify ticket is not deleted
 		$ticketid = false;
 		if($checkTicketId) {
 			$crmres = $adb->pquery("SELECT setype, deleted FROM vtiger_crmentity WHERE crmid=?", Array($checkTicketId));

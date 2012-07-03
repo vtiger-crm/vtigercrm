@@ -35,10 +35,10 @@ if($_REQUEST['assigntype' == 'T'] && $_REQUEST['assigned_group_id']!='')
 	$grp_obj->getAllUsersInGroup($_REQUEST['assigned_group_id']);
 	$users_list = constructList($grp_obj->group_users,'INTEGER');
 	if (count($users_list) > 0) {
-		$sql = "select first_name, last_name, email1, email2, yahoo_id from vtiger_users where id in (". generateQuestionMarks($users_list) .")";
+		$sql = "select first_name, last_name, email1, email2, secondaryemail  from vtiger_users where id in (". generateQuestionMarks($users_list) .")";
 		$params = array($users_list);
 	} else {
-		$sql = "select first_name, last_name, email1, email2, yahoo_id from vtiger_users";
+		$sql = "select first_name, last_name, email1, email2, secondaryemail  from vtiger_users";
 		$params = array();
 	}
 	$res = $adb->pquery($sql, $params);
@@ -51,7 +51,7 @@ if($_REQUEST['assigntype' == 'T'] && $_REQUEST['assigned_group_id']!='')
 			$email = $user_info['email2'];
 			if($email == '' || $email == 'NULL')
 			{
-				$email = $user_info['yahoo_id'];
+				$email = $user_info['secondaryemail '];
 			}
 		}	
 		if($user_email=='')
@@ -103,7 +103,7 @@ else
 
 
 //Added code from mysendmail.php which is contributed by Raju(rdhital)
-$parentid= $_REQUEST['parent_id'];
+$parentid= vtlib_purify($_REQUEST['parent_id']);
 $myids=explode("|",$parentid);
 $all_to_emailids = Array();
 $from_name = $current_user->user_name;

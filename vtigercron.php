@@ -8,55 +8,60 @@
  * All Rights Reserved.
  ********************************************************************************/
 
-/** Load the configuration file common to cron tasks. */
-require_once('cron/config.cron.php');
-global $VTIGER_CRON_CONFIGURATION;
 
-/** 
- * To make sure we can work with command line and direct browser invocation.
+
+/**
+ * Start the cron services configured.
  */
-if($argv) {
-	if(!isset($_REQUEST)) $_REQUEST = Array();
+include_once 'vtlib/Vtiger/Cron.php';
+require_once 'config.inc.php';
+if(PHP_SAPI === "cli" || (isset($_SESSION["authenticated_user_id"]) &&	isset($_SESSION["app_unique_key"]) && $_SESSION["app_unique_key"] == $application_unique_key)){
 
-	for($index = 0; $index < count($argv); ++$index) {
-		$value = $argv[$index];
-		if(strpos($value, '=') === false) continue;
-
-		$keyval = explode('=', $value);
-		if(!isset($_REQUEST[$keyval[0]])) {
-			$_REQUEST[$keyval[0]] = $keyval[1];
-		}
-	}
-	
-	/* If app_key is not set, pick the value from cron configuration */
-	if(empty($_REQUEST['app_key'])) $_REQUEST['app_key'] = $VTIGER_CRON_CONFIGURATION['app_key'];
+$cronTasks = false;
+if (isset($_REQUEST['service'])) {
+	// Run specific service
+	$cronTasks = array(Vtiger_Cron::getInstance($_REQUEST['service']));
+}
+else {
+	// Run all service
+	$cronTasks = Vtiger_Cron::listAllActiveInstances();
 }
 
-/** All service invocation needs have valid app_key parameter sent */
-require_once('config.inc.php');
+foreach ($cronTasks as $cronTask) {
+	try {
+		$cronTask->setBulkMode(true);
 
-/** Verify the script call is from trusted place. */
-global $application_unique_key;
-if($_REQUEST['app_key'] != $application_unique_key) {
-	echo "Access denied!";
-	exit;
+		// Not ready to run yet?
+		if (!$cronTask->isRunnable()) {
+			echo sprintf("[INFO]: %s - not ready to run as the time to run again is not completed\n", $cronTask->getName());
+			continue;
 }
 
-/** Include the service file */
-$service = $_REQUEST['service'];
-if($service == 'MailScanner') {
-	include_once('cron/MailScanner.service');
-}
-if($service == 'RecurringInvoice') {
-	include_once('cron/modules/SalesOrder/RecurringInvoice.service');
+		// Timeout could happen if intermediate cron-tasks fails
+		// and affect the next task. Which need to be handled in this cycle.				
+		if ($cronTask->hadTimedout()) {
+			echo sprintf("[INFO]: %s - cron task had timedout as it is not completed last time it run- restarting\n", $cronTask->getName());
 }
 
-if($service == 'com_vtiger_workflow'){
-	include_once('cron/modules/com_vtiger_workflow/com_vtiger_workflow.service');
+		// Mark the status - running		
+		$cronTask->markRunning();
+		
+		checkFileAccess($cronTask->getHandlerFile());		
+		require_once $cronTask->getHandlerFile();
+		
+		// Mark the status - finished
+		$cronTask->markFinished();
+		
+	} catch (Exception $e) {
+		echo sprintf("[ERROR]: %s - cron task execution throwed exception.\n", $cronTask->getName());
+		echo $e->getMessage();
+		echo "\n";
+	}		
+}
 }
 
-if($service == 'VtigerBackup'){
-	include_once('cron/modules/VtigerBackup/VtigerBackup.service');
+else{
+    echo("Access denied!");
 }
 
 ?>

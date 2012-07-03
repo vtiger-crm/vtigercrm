@@ -76,7 +76,8 @@ function validateFile(form)
 				   </tr>
 				   <tr >
 					<td colspan="2" align="left" valign="top" style="padding-left:40px;">
-						{$MOD.LBL_STEP_1_TEXT}
+						{$MOD.LBL_STEP_1_TEXT}<br /><br />
+						<div style="font-weight: bold">{$APP.NOTE}: {$maxUploadFileSize}{$MOD.LBL_MAX_FILE_SIZE}</div>
 					</td>
 				   </tr>
 				   <tr ><td align="left" valign="top" colspan="2">&nbsp;</td></tr>

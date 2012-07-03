@@ -22,8 +22,8 @@
 			<td width="auto;">	
 				<b>{$MOD.LBL_PICKLIST_VALUES}</b>
 				<select multiple id="availList" name="availList" class="small crmFormList" style="overflow:auto; height: 150px;width:200px;border:1px solid #666666;font-family:Arial, Helvetica, sans-serif;font-size:11px;">
-					{foreach item=pick_val from=$PICKVAL}
-						<option value="{$pick_val}">{$pick_val}</option>
+					{foreach item=pick_val key=pick_key from=$PICKVAL}
+						<option value="{$pick_key}">{$pick_val}</option>
 					{/foreach}
 				</select>
 			</td>
@@ -34,8 +34,8 @@
 			<td width="auto;">
 				<b>{$MOD.LBL_PICKLIST_VALUES_ASSIGNED_TO} {$ROLENAME}</b>
 				<select multiple id="selectedColumns" name="selectedColumns" class="small crmFormList" style="overflow:auto; height: 150px;width:200px;border:1px solid #666666;font-family:Arial, Helvetica, sans-serif;font-size:11px;">
-					{foreach item=val from=$ASSIGNED_VALUES}
-						<option value="{$val}">{$val}</option>
+					{foreach item=val key=key from=$ASSIGNED_VALUES}
+						<option value="{$key}">{$val}</option>
 					{/foreach}
         	    </select>
 			</td>

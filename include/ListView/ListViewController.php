@@ -57,8 +57,7 @@ class ListViewController {
 		$isRoleBased = vtws_isRoleBasedPicklist($name);
 		$this->picklistRoleMap[$name] = $isRoleBased;
 		if ($this->picklistRoleMap[$name]) {
-			$this->picklistValueMap[$name] = getAssignedPicklistValues($fieldName,
-					$this->user->roleid, $this->db);
+			$this->picklistValueMap[$name] = getAssignedPicklistValues($name,$this->user->roleid, $this->db);
 		}
 	}
 
@@ -173,6 +172,8 @@ class ListViewController {
 			}
 		}
 
+		$useAsterisk = get_use_asterisk($this->user->id);
+
 		$data = array();
 		for ($i = 0; $i < $rowCount; ++$i) {
 			//Getting the recordId
@@ -196,12 +197,9 @@ class ListViewController {
 					$activityType = $this->db->query_result($result, $i, 'activitytype');
 				}
 
-				if(stristr(html_entity_decode($rawValue), "<a href") === false &&
-						$field->getUIType() != 8){
-					$value = textlength_check($rawValue);
-				}elseif($uitype != 8){
-					$value = html_entity_decode($rawValue,ENT_QUOTES);
-				}else{
+				if($uitype != 8){
+					$value = html_entity_decode($rawValue,ENT_QUOTES,$default_charset);
+				} else {
 					$value = $rawValue;
 				}
 
@@ -255,12 +253,12 @@ class ListViewController {
 							$value = "<a href='index.php?module=uploads&action=downloadfile&".
 									"entityid=$recordId&fileid=$fileId' title='".
 									getTranslatedString("LBL_DOWNLOAD_FILE",$module).
-									"' onclick='javascript:dldCntIncrease($recordId);'>".$value.
+									"' onclick='javascript:dldCntIncrease($recordId);'>".textlength_check($value).
 									"</a>";
 						} elseif($downloadType == 'E') {
 							$value = "<a target='_blank' href='$fileName' onclick='javascript:".
 									"dldCntIncrease($recordId);' title='".
-									getTranslatedString("LBL_DOWNLOAD_FILE",$module)."'>".$value.
+									getTranslatedString("LBL_DOWNLOAD_FILE",$module)."'>".textlength_check($value).
 									"</a>";
 						} else {
 							$value = ' --';
@@ -301,8 +299,8 @@ class ListViewController {
 						$value = ' --';
 					}
 				}elseif ($field->getFieldDataType() == 'picklist') {
-					if (!$is_admin && $this->picklistRoleMap[$fieldName] &&
-							!in_array($tmpValue, $this->picklistValueMap[$fieldName])) {
+					if ($value != '' && !$is_admin && $this->picklistRoleMap[$fieldName] &&
+							!in_array($value, $this->picklistValueMap[$fieldName])) {
 						$value = "<font color='red'>".getTranslatedString('LBL_NOT_ACCESSIBLE',
 								$module)."</font>";
 					} else {
@@ -312,36 +310,52 @@ class ListViewController {
 				}elseif($field->getFieldDataType() == 'date' ||
 						$field->getFieldDataType() == 'datetime') {
 					if($value != '' && $value != '0000-00-00') {
-						$value = getDisplayDate($value);
+						$date = new DateTimeField($value);
+						$value = $date->getDisplayDate();
+						if($field->getFieldDataType() == 'datetime') {
+							$value .= (' ' . $date->getDisplayTime());
+						}
 					} elseif ($value == '0000-00-00') {
 						$value = '';
 					}
-				} elseif($field->getUIType() == 71 || $field->getUIType() == 72) {
+				} elseif($field->getFieldDataType() == 'currency') {
 					if($value != '') {
-						if($fieldName == 'unit_price') {
-							$currencyId = getProductBaseCurrency($recordId,$module);
-							$cursym_convrate = getCurrencySymbolandCRate($currencyId);
-							$value = "<font style='color:grey;'>".$cursym_convrate['symbol'].
-								"</font> ". $value;
+						if($field->getUIType() == 72) {
+							if($fieldName == 'unit_price') {
+								$currencyId = getProductBaseCurrency($recordId,$module);
+								$cursym_convrate = getCurrencySymbolandCRate($currencyId);
+								$currencySymbol = $cursym_convrate['symbol'];
+							} else {
+								$currencyInfo = getInventoryCurrencyInfo($module, $recordId);
+								$currencySymbol = $currencyInfo['currency_symbol'];
+							}
+							$value = number_format($value, 2,'.','');
+							$currencyValue = CurrencyField::convertToUserFormat($value, null, true);
+							$value = CurrencyField::appendCurrencySymbol($currencyValue, $currencySymbol);
 						} else {
-							$rate = $user_info['conv_rate'];
 							//changes made to remove vtiger_currency symbol infront of each
 							//vtiger_potential amount
 							if ($value != 0) {
-								$value = convertFromDollar($value,$rate);
+								$value = CurrencyField::convertToUserFormat($value);
 							}
 						}
 					}
 				} elseif($field->getFieldDataType() == 'url') {
-					$value = '<a href="http://'.$rawValue.'" target="_blank">'.$value.'</a>';
+                    $matchPattern = "^[\w]+:\/\/^";
+                    preg_match($matchPattern, $rawValue, $matches);
+                    if(!empty ($matches[0])){
+                        $value = '<a href="'.$rawValue.'" target="_blank">'.textlength_check($value).'</a>';
+                    }else{
+                        $value = '<a href="http://'.$rawValue.'" target="_blank">'.textlength_check($value).'</a>';
+                    }
 				} elseif ($field->getFieldDataType() == 'email') {
 					if($_SESSION['internal_mailer'] == 1) {
 						//check added for email link in user detailview
 						$fieldId = $field->getFieldId();
 						$value = "<a href=\"javascript:InternalMailer($recordId,$fieldId,".
-						"'$fieldName','$module','record_id');\">$value</a>";
+						"'$fieldName','$module','record_id');\">".textlength_check($value)."</a>";
 					}else {
-						$value = '<a href="mailto:'.$rawValue.'">'.$value.'</a>';
+						$value = '<a href="mailto:'.$rawValue.'">'.textlength_check($value).'</a>';
 					}
 				} elseif($field->getFieldDataType() == 'boolean') {
 					if($value == 1) {
@@ -380,12 +394,17 @@ class ListViewController {
 							}
 						}
 						$value = implode(', ', $tmpArray);
+						$value = textlength_check($value);
 					}
 				} elseif ($field->getFieldDataType() == 'skype') {
-					$value = ($value != "") ? "<a href='skype:$value?call'>$value</a>" : "";
+					$value = ($value != "") ? "<a href='skype:$value?call'>".textlength_check($value)."</a>" : "";
 				} elseif ($field->getFieldDataType() == 'phone') {
-					$value = "<a href='javascript:;' onclick='startCall(&quot;$value&quot;, ".
-						"&quot;$recordId&quot;)'>$value</a>";
+					if($useAsterisk == 'true') {
+						$value = "<a href='javascript:;' onclick='startCall(&quot;$value&quot;, ".
+							"&quot;$recordId&quot;)'>".textlength_check($value)."</a>";
+					} else {
+						$value = textlength_check($value);
+					}
 				} elseif($field->getFieldDataType() == 'reference') {
 					$referenceFieldInfoList = $this->queryGenerator->getReferenceFieldInfoList();
 					$moduleList = $referenceFieldInfoList[$fieldName];
@@ -399,7 +418,7 @@ class ListViewController {
 						$value = textlength_check($this->nameList[$fieldName][$value]);
 						if ($parentMeta->isModuleEntity() && $parentModule != "Users") {
 							$value = "<a href='index.php?module=$parentModule&action=DetailView&".
-								"record=$rawValue' title='$parentModule'>$value</a>";
+								"record=$rawValue' title='".getTranslatedString($parentModule, $parentModule)."'>$value</a>";
 						}
 					} else {
 						$value = '--';
@@ -422,33 +441,21 @@ class ListViewController {
 						$json = new Zend_Json();
 						$value = vt_suppressHTMLTags(implode(',',$json->decode($temp_val)));
 					}
-				} elseif ($fieldName == 'expectedroi' || $fieldName == 'actualroi' ||
-						$fieldName == 'actualcost' || $fieldName == 'budgetcost' ||
-						$fieldName == 'expectedrevenue') {
-					$rate = $user_info['conv_rate'];
-					$value = convertFromDollar($value,$rate);
-				} elseif(($module == 'Invoice' || $module == 'Quotes' || $module == 'PurchaseOrder' ||
-						$module == 'SalesOrder') && ($fieldName == 'hdnGrandTotal' ||
-						$fieldName == 'hdnSubTotal' || $fieldName == 'txtAdjustment' ||
-						$fieldName == 'hdnDiscountAmount' || $fieldName == 'hdnS_H_Amount')) {
-					$currencyInfo = getInventoryCurrencyInfo($module, $recordId);
-					$currencyId = $currencyInfo['currency_id'];
-					$currencySymbol = $currencyInfo['currency_symbol'];
-					$value = $currencySymbol.$value;
-				}
-				if ( in_array($uitype,array(71,72,7,9,90)) ) {
-					$value = "<span align='right'>$value</div>";
+				} elseif ( in_array($uitype,array(7,9,90)) ) {
+					$value = "<span align='right'>".textlength_check($value)."</div>";
+				} else {
+					$value = textlength_check($value);
 				}
 
                                     $parenttab = getParentTab();
 				$nameFields = $this->queryGenerator->getModuleNameFields($module);
 				$nameFieldList = explode(',',$nameFields);
-				if(in_array($fieldName, $nameFieldList) && $module != 'Emails') {
+				if(in_array($fieldName, $nameFieldList) && $module != 'Emails' ) {
 					$value = "<a href='index.php?module=$module&parenttab=$parenttab&action=DetailView&record=".
-					"$recordId' title='$module'>$value</a>";
+					"$recordId' title='".getTranslatedString($module, $module)."'>$value</a>";
 				} elseif($fieldName == $focus->list_link_field && $module != 'Emails') {
 					$value = "<a href='index.php?module=$module&parenttab=$parenttab&action=DetailView&record=".
-					"$recordId' title='$module'>$value</a>";
+					"$recordId' title='".getTranslatedString($module, $module)."'>$value</a>";
 				}
 
 				// vtlib customization: For listview javascript triggers
@@ -543,8 +550,12 @@ class ListViewController {
 		$requestModule = vtlib_purify($_REQUEST['module']);
 		$requestRecord = vtlib_purify($_REQUEST['record']);
 		$requestAction = vtlib_purify($_REQUEST['action']);
+		$requestFile = vtlib_purify($_REQUEST['file']);
 		$isCustomModule = vtlib_isCustomModule($requestModule);
-		if($isCustomModule && !in_array($requestAction, Array('index','ListView'))) {
+
+		if($isCustomModule && (!in_array($requestAction, Array('index','ListView')) &&
+				($requestAction == $requestModule.'Ajax' && !in_array($requestFile, Array('index','ListView'))))) {
+
 			$link = "index.php?module=$requestModule&action=updateRelations&parentid=$requestRecord";
 			$link .= "&destination_module=$module&idlist=$entity_id&mode=delete&parenttab=$parenttab";
 		}
@@ -595,6 +606,9 @@ class ListViewController {
 				if($label =='Amount') {
 					$label .=' ('.getTranslatedString('LBL_IN', $module).' '.
 							$user_info['currency_symbol'].')';
+				}
+				if($field->getUIType() == '9') {
+					$label .=' (%)';
 				}
 				if($module == 'Users' && $fieldName == 'User Name') {
 					$name = "<a href='javascript:;' onClick='getListViewEntries_js(\"".$module.
@@ -675,24 +689,27 @@ class ListViewController {
 			if($i++ == 0) {
 				$selected = "selected";
 			}
-						
+
 			// place option in array for sorting later
 			//$blockName = getTranslatedString(getBlockName($field->getBlockId()), $module);
 			$blockName = getTranslatedString($field->getBlockName(), $module);
 
-			$OPTION_SET[$blockName][$label] = "<option value=\'$fieldName::::$typeOfData\' $selected>$label</option>";
+			$fieldLabelEscaped = str_replace(" ","_",$field->getFieldLabelKey());
+			$optionvalue = $field->getTableName().":".$field->getColumnName().":".$fieldName.":".$module."_".$fieldLabelEscaped.":".$typeOfData;
+
+			$OPTION_SET[$blockName][$label] = "<option value=\'$optionvalue\' $selected>$label</option>";
 
 		}
 	   	// sort array on block label
 	    ksort($OPTION_SET, SORT_STRING);
-	    	    
+
 		foreach ($OPTION_SET as $key=>$value) {
 	  		$shtml .= "<optgroup label='$key' class='select' style='border:none'>";
 	   		// sort array on field labels
 	   		ksort($value, SORT_STRING);
 	  		$shtml .= implode('',$value);
 	  	}
-	    
+
 	    return $shtml;
 	}
 

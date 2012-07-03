@@ -22,17 +22,15 @@ $image_path=$theme_path."images/";
 $tax_details = getAllTaxes();
 $sh_tax_details = getAllTaxes('all','sh');
 
-
 //To save the edited value
 if($_REQUEST['save_tax'] == 'true')
 {
-	for($i=0;$i<count($tax_details);$i++)
-	{
-     		$new_labels[$tax_details[$i]['taxid']] = $_REQUEST[$tax_details[$i]['taxlabel']];
+	for($i=0;$i<count($tax_details); $i++) {
+		$new_labels[$tax_details[$i]['taxid']] = $_REQUEST[bin2hex($tax_details[$i]['taxlabel'])];
 		$new_percentages[$tax_details[$i]['taxid']] = $_REQUEST[$tax_details[$i]['taxname']];
 	}
 	updateTaxPercentages($new_percentages);
-	updateTaxLabels($new_labels);
+	echo updateTaxLabels($new_labels);
 	$getlist = true;
 }
 elseif($_REQUEST['sh_save_tax'] == 'true')
@@ -40,12 +38,12 @@ elseif($_REQUEST['sh_save_tax'] == 'true')
  
 	for($i=0;$i<count($sh_tax_details);$i++)
 	{
-	  $new_labels[$sh_tax_details[$i]['taxid']] = $_REQUEST[$sh_tax_details[$i]['taxlabel']];
+	  $new_labels[$sh_tax_details[$i]['taxid']] = $_REQUEST[bin2hex($sh_tax_details[$i]['taxlabel'])];
 		$new_percentages[$sh_tax_details[$i]['taxid']] = $_REQUEST[$sh_tax_details[$i]['taxname']];
 	}
 	
 	updateTaxPercentages($new_percentages,'sh');
-	updateTaxLabels($new_labels,'sh');
+	echo updateTaxLabels($new_labels,'sh');
 	$getlist = true;
 }
 
@@ -149,19 +147,35 @@ function updateTaxPercentages($new_percentages, $sh='')
  */
 function updateTaxLabels($new_labels, $sh='')
 {
-	global $adb, $log;
+	global $adb, $log, $currentModule;
 	$log->debug("Entering into the function updateTaxPercentages");
 
+	$duplicateTaxLabels = 0;
 	foreach($new_labels as $taxid => $new_val)
 	{
 		if($new_val != '')
 		{
+			//First we will check whether the tax is already available or not
+			if($sh != '' && $sh == 'sh')
+				$check_query = "select taxlabel from vtiger_shippingtaxinfo where taxlabel = ? and taxid != ?";
+			else
+				$check_query = "select taxlabel from vtiger_inventorytaxinfo where taxlabel = ? and taxid != ?";
+			$check_res = $adb->pquery($check_query, array($new_val, $taxid));
+
+			if($adb->num_rows($check_res) > 0) {
+				$duplicateTaxLabels++;
+				continue;
+			}
+
 			if($sh != '' && $sh == 'sh')
 				$query = "update vtiger_shippingtaxinfo set taxlabel= ? where taxid=?";
 			else
 				$query = "update vtiger_inventorytaxinfo set taxlabel = ? where taxid=?";
 			$adb->pquery($query, array($new_val, $taxid));
 		}
+	}
+	if($duplicateTaxLabels > 0) {
+		return "<font color='red'>".getTranslatedString('LBL_ERR_SOME_TAX_LABELS_ALREADY_EXISTS', $currentModule)."</font>";
 	}
 
 	$log->debug("Exiting from the function updateTaxPercentages");
@@ -185,7 +199,7 @@ function addTaxType($taxlabel, $taxvalue, $sh='')
 	$check_res = $adb->pquery($check_query, array($taxlabel));
 
 	if($adb->num_rows($check_res) > 0)
-		return "<font color='red'>This tax is already available</font>";
+		return "<font color='red'>".getTranslatedString('LBL_ERR_TAX_LABEL_ALREADY_EXISTS', $currentModule)."</font>";
 
 	//if the tax is not available then add this tax.
 	//Add this tax as a column in related table	

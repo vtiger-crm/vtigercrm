@@ -9,7 +9,7 @@
  ************************************************************************************/
 global $current_user, $currentModule;
 
-checkFileAccess("modules/$currentModule/$currentModule.php");
+checkFileAccessForInclusion("modules/$currentModule/$currentModule.php");
 require_once("modules/$currentModule/$currentModule.php");
 
 $focus = new $currentModule();
@@ -105,30 +105,6 @@ $search=vtlib_purify($_REQUEST['search_url']);
 
 if($_REQUEST['return_id'] != '') $return_id = vtlib_purify($_REQUEST['return_id']);
 
-//Checking and Sending Mail from reorder level
-global $current_user;
-$productname = $focus->column_fields['productname'];
-$qty_stk = $focus->column_fields['qtyinstock'];
-$reord = $focus->column_fields['reorderlevel'];
-$handler = $focus->column_fields['assigned_user_id'];
-if($qty_stk != '' && $reord != '') {
-	if($qty_stk < $reord) {
-		$handler_name = getUserName($handler);
-		$sender_name = getUserName($current_user->id);
-		$to_address= getUserEmail($handler);
-		$subject =  $productname.' '.$mod_strings['MSG_STOCK_LEVEL'];
-		$body = $mod_strings['MSG_DEAR'].' '.$handler_name.',<br><br>'.
-
-		$mod_strings['MSG_CURRENT_STOCK'].' '.$productname.' '.$mod_strings['MSG_IN_OUR_WAREHOUSE'].' '.$qty_stk.'. '.$mod_strings['MSG_PROCURE_REQUIRED_NUMBER'].' '.$reord.'.<br> '.
-
-		$mod_strings['MSG_SEVERITY'].'<br><br> '.
-		$mod_strings['MSG_THANKS'].'<br> '.
-		$sender_name;
-
-		include("modules/Emails/mail.php");
-		$mail_status = send_mail("Products",$to_address,$current_user->user_name,$current_user->email1,$subject,$body);
-	}
-}
 $parenttab = getParentTab();
 header("Location: index.php?action=$return_action&module=$return_module&record=$return_id&parenttab=$parenttab&start=".vtlib_purify($_REQUEST['pagenumber']).$search);
 

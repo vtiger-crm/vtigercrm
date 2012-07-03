@@ -20,7 +20,7 @@
 	  </p>
 	  <ul>
 		  <li><?php echo $applicationStrings['LBL_RESET_PASSWORD_DESCRIPTION']?>
-			  <a href="http://wiki.vtiger.com/index.php/vtiger520:Upgrading_to_PHP_5.3"><?php echo $applicationStrings['LBL_PLEASE_CLICK'].' '.
+			  <a href="https://wiki.vtiger.com/index.php/520:Upgrading_to_PHP_5.3"><?php echo $applicationStrings['LBL_PLEASE_CLICK'].' '.
 				$applicationStrings['LBL_HERE']; ?></a>
 		  </li>
 	  </ul>

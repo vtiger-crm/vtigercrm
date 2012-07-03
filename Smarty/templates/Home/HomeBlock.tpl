@@ -2,7 +2,7 @@
 <div class='hide_tab' id="editRowmodrss_{$HOME_STUFFID}" style="position:absolute; top:0px;left:0px;">
 	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="small" valign="top">
 	<tr>
-{if $HOME_STUFFTYPE eq "Module" || $HOME_STUFFTYPE eq "RSS" || $HOME_STUFFTYPE eq "Default"}	
+{if $HOME_STUFFTYPE eq "Module" || $HOME_STUFFTYPE eq "RSS" || $HOME_STUFFTYPE eq "Default"}
 		<td align="left" class="homePageMatrixHdr" style="height:28px;" nowrap width="40%">
 			{$MOD.LBL_HOME_SHOW}&nbsp;
 			<select id="maxentries_{$HOME_STUFFID}" name="maxid" class="small" style="width:40px;">
@@ -16,7 +16,7 @@
 		<td align="right" class="homePageMatrixHdr" nowrap style="height:28px;" width=60%>
 			<input type="button" title="{$APP.LBL_SAVE_BUTTON_TITLE}" accessKey="{$APP.LBL_SAVE_BUTTON_KEY}" value="  {$APP.LBL_SAVE_BUTTON_LABEL}  " name="save" class="crmbutton small save" onclick="saveEntries('maxentries_{$HOME_STUFFID}')">
 			<input type="button" title="{$APP.LBL_CANCEL_BUTTON_TITLE}" accessKey="{$APP.LBL_CANCEL_BUTTON_KEY}" value="  {$APP.LBL_CANCEL_BUTTON_LABEL}  " name="cancel" class="crmbutton small cancel" onclick="cancelEntries('editRowmodrss_{$HOME_STUFFID}')">
-		</td>		
+		</td>
 {elseif $HOME_STUFFTYPE eq "DashBoard"}
 		<td  valign="top" align='center' class="homePageMatrixHdr" style="height:28px;" width=60%>
 			<input type="radio" id="dashradio_0" name="dashradio_{$HOME_STUFFID}" value="horizontalbarchart" {if $DASHDETAILS.$HOME_STUFFID.Chart eq 'horizontalbarchart'}checked{/if}>Horizontal
@@ -29,19 +29,32 @@
 			<input type="button" name="save" title="{$APP.LBL_SAVE_BUTTON_TITLE}" accessKey="{$APP.LBL_SAVE_BUTTON_KEY}" value="  {$APP.LBL_SAVE_BUTTON_LABEL}  " class="crmbutton small save" onclick="saveEditDash({$HOME_STUFFID})">
 			<input type="button" name="cancel" title="{$APP.LBL_CANCEL_BUTTON_TITLE}" accessKey="{$APP.LBL_CANCEL_BUTTON_KEY}" value="  {$APP.LBL_CANCEL_BUTTON_LABEL}  " class="crmbutton small cancel" onclick="cancelEntries('editRowmodrss_{$HOME_STUFFID}')">
 			</td>
-		</tr>		
+		</tr>
+{elseif $HOME_STUFFTYPE eq "ReportCharts"}
+		<td  valign="top" align='center' class="homePageMatrixHdr" style="height:28px;" width=60%>
+			<input type="radio" id="reportradio_0" name="reportradio_{$HOME_STUFFID}" value="horizontalbarchart" {if $DASHDETAILS.$HOME_STUFFID.Chart eq 'horizontalbarchart'}checked{/if}>Horizontal
+			<input type="radio" id="reportradio_1" name="reportradio_{$HOME_STUFFID}" value="verticalbarchart"{if $DASHDETAILS.$HOME_STUFFID.Chart eq 'verticalbarchart'}checked{/if}>Vertical
+			<input type="radio" id="reportradio_2" name="reportradio_{$HOME_STUFFID}" value="piechart" {if $DASHDETAILS.$HOME_STUFFID.Chart eq 'piechart'}checked{/if}>Pie
+		</td>
+	</tr>
+	<tr>
+		<td  valign="top" align="center" class="homePageMatrixHdr" nowrap style="height:28px;" width="40%">
+			<input type="button" name="save" title="{$APP.LBL_SAVE_BUTTON_TITLE}" accessKey="{$APP.LBL_SAVE_BUTTON_KEY}" value="  {$APP.LBL_SAVE_BUTTON_LABEL}  " class="crmbutton small save" onclick="saveEditReportCharts({$HOME_STUFFID})">
+			<input type="button" name="cancel" title="{$APP.LBL_CANCEL_BUTTON_TITLE}" accessKey="{$APP.LBL_CANCEL_BUTTON_KEY}" value="  {$APP.LBL_CANCEL_BUTTON_LABEL}  " class="crmbutton small cancel" onclick="cancelEntries('editRowmodrss_{$HOME_STUFFID}')">
+		</td>
+	</tr>
 {/if}
 	</tr>
 	</table>
 </div>
-
+<input type=hidden id="test_{$HOME_STUFFID}" value = {$HOME_STUFFTYPE}/>
 {if $HOME_STUFFTYPE eq "Module"}
 	<input type=hidden id=more_{$HOME_STUFFID} value="{$HOME_STUFF.ModuleName}"/>
 	<input type=hidden id=cvid_{$HOME_STUFFID} value="{$HOME_STUFF.cvid}">
 	<table border=0 cellspacing=0 cellpadding=2 width=100%>
 	{assign var='cvid' value=$HOME_STUFF.cvid}
 	{assign var='modulename' value=$HOME_STUFF.ModuleName}
-	<tr>	   
+	<tr>
 		<td width=5%>
 			&nbsp;
 		</td>
@@ -74,7 +87,7 @@
 {elseif $HOME_STUFFTYPE eq "Default"}
 	<input type=hidden id=more_{$HOME_STUFFID} value="{$HOME_STUFF.Details.ModuleName}"/>
 	<table border=0 cellspacing=0 cellpadding=2 width=100%>
-	<tr>	   
+	<tr>
 		<td width=5%>&nbsp;</td>
 	{foreach item=header from=$HOME_STUFF.Details.Header}
 		<td align="left"><b>{$header}</b></td>
@@ -103,7 +116,7 @@
 		<div class="componentName">{$APP.LBL_NO_DATA}</div>
 	{/if}
 	</table>
-	
+
 {elseif $HOME_STUFFTYPE eq "RSS"}
 	<input type=hidden id=more_{$HOME_STUFFID} value="{$HOME_STUFF.Entries.More}"/>
 	<table border=0 cellspacing=0 cellpadding=2 width=100%>
@@ -117,15 +130,21 @@
 			</tr>
 		{/foreach}
 	</table>
-	
+
 {elseif $HOME_STUFFTYPE eq "DashBoard"}
 	<input type=hidden id=more_{$HOME_STUFFID} value="{$DASHDETAILS[$HOME_STUFFID].DashType}"/>
 	<table border=0 cellspacing=0 cellpadding=5 width=100%>
 		<tr>
 			<td align="left">{$HOME_STUFF}</td>
 		</tr>
-	</table>		
-
+	</table>
+{elseif $HOME_STUFFTYPE eq "ReportCharts"}
+        <input type=hidden id=more_{$HOME_STUFFID} value="{$DASHDETAILS[$HOME_STUFFID].ReportId}"/>
+	<table border=0 cellspacing=0 cellpadding=5 width=100%>
+		<tr>
+			<td align="left">{$HOME_STUFF}</td>
+		</tr>
+	</table>
 {/if}
 {if $HOME_STUFF.Details|@is_array == 'true'}
 <input id='search_qry_{$HOME_STUFFID}' name='search_qry_{$HOME_STUFFID}' type='hidden' value='{$HOME_STUFF.Details.search_qry}' />

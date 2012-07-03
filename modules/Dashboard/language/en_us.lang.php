@@ -14,7 +14,7 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header: /advent/projects/wesat/vtiger_crm/sugarcrm/modules/Dashboard/language/en_us.lang.php,v 1.4 2005/01/25 06:01:38 jack Exp $
- * Description:  Defines the English language pack for the Account module.
+ * Description:  Defines the English language pack for the DashBoard module.
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.
  * All Rights Reserved.
  * Contributor(s): ______________________________________..
@@ -58,21 +58,21 @@ $mod_strings = Array(
 "leadstatus" => "Leads By Status",
 "leadindustry" => "Leads By Industry",
 "salesbyleadsource" => "Sales by LeadSource",
-"salesbyaccount" => "Sales by Accounts",
+"salesbyaccount" => "Sales by Organizations",
 "salesbyuser" => "Sales by User",
 "salesbyteam"=>"Sales by Team",
-"accountindustry" => "Account By Industry",
+"accountindustry" => "Organization By Industry",
 "productcategory" => "Products by Category",
 "productbyqtyinstock" => "Products by Quantity in stock",
 "productbypo" => "Products by PurchaseOrder",
 "productbyquotes" => "Products by Quotes",
 "productbyinvoice" => "Products by Invoice",
-"sobyaccounts" => "Sales Order by Accounts",
+"sobyaccounts" => "Sales Order by Organizations",
 "sobystatus" => "Sales Order by Status",
 "pobystatus" => "Purchase Order by Status",
-"quotesbyaccounts" => "Quotes by Accounts",
+"quotesbyaccounts" => "Quotes by Organizations",
 "quotesbystage" => "Quotes by Stage",
-"invoicebyacnts" => "Invoices by Accounts",
+"invoicebyacnts" => "Invoices by Organizations",
 "invoicebystatus" => "Invoices by Status",
 "ticketsbystatus" => "Tickets by Status",
 "ticketsbypriority" => "Tickets by Priority",
@@ -81,7 +81,7 @@ $mod_strings = Array(
 "ticketsbyteam"=>"Tickets by Team",
 "ticketsbyproduct"=>"Tickets by Product",
 "contactbycampaign"=>"Contacts by Campaign",
-"ticketsbyaccount"=>"Tickets by Account",
+"ticketsbyaccount"=>"Tickets by Organization",
 "ticketsbycontact"=>"Tickets by Contact",
 
 'LBL_DASHBRD_HOME'=>'Dashboard Home',

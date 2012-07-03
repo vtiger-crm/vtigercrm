@@ -6,58 +6,120 @@
 * Portions created by vtiger are Copyright (C) vtiger.
 * All Rights Reserved.
 ********************************************************************************/
-#positioningdiv {
-	left:5%;
-	right:5%;
-	width:600px;
-	position:absolute;
-	border:1px solid violet;
+
+body {
+	font-family: Arial, Helvetica, san-serif;
+	margin: 0;
 }
 
-.small {
-	
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 11px;
-        color:#000000;
-	line-height:18px;
+a {
+	text-decoration: none;
+	color: #000000;
 }
 
-input {
-	border:1px solid #999999;
+a:hover {
+	text-decoration: underline;
+	color: #0000FF;
 }
 
-select {
-	border:1px solid #999999;
+.loginContainer {
+    width: 100%;
+	height: 100%;
 }
 
-input[src] {
-	border:0px solid #999999;
+.loginWrapper {
+	padding: 10px;
+	background: rgb(255,255,255); /* Old browsers */
+	background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(123,165,216,1) 50%, rgba(123,165,216,1) 50%, rgba(255,255,255,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(50%,rgba(123,165,216,1)), color-stop(50%,rgba(255,255,255,1)rgba(123,165,216,1)), color-stop(100%,rgba(255,255,255,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(123,165,216,1) 50%,rgba(123,165,216,1) 50%,rgba(255,255,255,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(123,165,216,1) 50%,rgba(123,165,216,1) 50%,rgba(255,255,255,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(123,165,216,1) 50%,rgba(123,165,216,1) 50%,rgba(255,255,255,1) 100%); /* IE10+ */
+	background: linear-gradient(top, rgba(255,255,255,1) 0%,rgba(123,165,216,1) 50%,rgba(123,165,216,1) 50%,rgba(255,255,255,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#7ba5d8',GradientType=0 ); /* IE6-9 */
 }
 
-
-.bg {
-	background-image:url(images/topBg.gif);
-	background-repeat:repeat-x;
-	background-position:bottom;
+.loginForm, .importantLinks {
+	width:400px;
 }
 
-#loginTable {
-	border-left:1px solid #C0C0FF;
-	border-right:1px solid #C0C0FF;
-	border-bottom:1px solid #C0C0FF;
-
+.loginForm {
+	padding: 30px;
 }
 
-.z1 {
-	border-left:2px solid #c0c0ff;
-	border-bottom:2px solid #c0c0ff;
-}
-.z2 {
-	border-right:2px solid #c0c0ff;
-	border-bottom:2px solid #c0c0ff;
+.importantLinks {
+	text-align: center;
+	padding: 30px;
+	padding-top: 10px;
+	font-size: 0.8em;
 }
 
-.signinHdr {
-	border-bottom:2px dotted #c0c0ff;
-	padding:5px;
+.pluginsPromotionDiv {
+	background-color: #D0DDED;
+	-webkit-box-shadow: 3px 3px 3px 3px rgba(150, 150, 150, 0.5);
+	-moz-box-shadow: 3px 3px 3px 3px rgba(150, 150, 150, 0.5);
+	box-shadow: 3px 3px 3px 3px rgba(150, 150, 150, 0.5);
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 50px;
+	padding-right: 50px;
+}
+
+.loginForm {
+	background: rgb(80,133,206); /* Old browsers */
+	background: -moz-linear-gradient(top, rgba(80,133,206,1) 0%, rgba(123,165,216,1) 15%, rgba(255,255,255,1) 50%, rgba(255,255,255,1) 50%, rgba(123,165,216,1) 85%, rgba(80,133,206,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(80,133,206,1)), color-stop(15%,rgba(123,165,216,1)), color-stop(50%,rgba(255,255,255,1)), color-stop(50%,rgba(255,255,255,1)), color-stop(85%,rgba(123,165,216,1)), color-stop(100%,rgba(80,133,206,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, rgba(80,133,206,1) 0%,rgba(123,165,216,1) 15%,rgba(255,255,255,1) 50%,rgba(255,255,255,1) 50%,rgba(123,165,216,1) 85%,rgba(80,133,206,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, rgba(80,133,206,1) 0%,rgba(123,165,216,1) 15%,rgba(255,255,255,1) 50%,rgba(255,255,255,1) 50%,rgba(123,165,216,1) 85%,rgba(80,133,206,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, rgba(80,133,206,1) 0%,rgba(123,165,216,1) 15%,rgba(255,255,255,1) 50%,rgba(255,255,255,1) 50%,rgba(123,165,216,1) 85%,rgba(80,133,206,1) 100%); /* IE10+ */
+	background: linear-gradient(top, rgba(80,133,206,1) 0%,rgba(123,165,216,1) 15%,rgba(255,255,255,1) 50%,rgba(255,255,255,1) 50%,rgba(123,165,216,1) 85%,rgba(80,133,206,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5085ce', endColorstr='#FFFFFF',GradientType=0 ); /* IE6-9 */
+}
+
+.loginForm {
+	-webkit-box-shadow: 3px 3px 3px 3px rgba(150, 150, 150, 0.5);
+	-moz-box-shadow: 3px 3px 3px 3px rgba(150, 150, 150, 0.5);
+	box-shadow: 3px 3px 3px 3px rgba(150, 150, 150, 0.5);
+	text-align: left;
+}
+
+.loginForm .poweredBy {
+	width: 100%;
+	font-size: 0.8em;
+	text-align: right;
+	padding-bottom: 1.5em;
+	color: #2d3642;
+}
+
+.loginForm .label {
+	font-weight: bold;
+}
+
+.loginForm .input input {
+	width: 350px;
+	font-size: large;
+	color: #3D698E;
+}
+
+.loginForm .input input:focus {
+	border: 2px solid #3D698E;
+}
+
+.loginForm .button #submitButton {
+	cursor: pointer;
+	background-color: #3D698E;
+	color: #ffffff;
+	text-align: center;
+	font-size: medium;
+	font-weight: bold;
+	border: 2px outset #3D698E;
+	width: 10em;
+}
+
+.importantLinks, .communityLinks {
+	font-size: 0.8em;
+}
+
+.errorMessage {
+	color: #FF0000;
 }

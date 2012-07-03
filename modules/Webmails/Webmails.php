@@ -12,7 +12,7 @@ require_once('include/logging.php');
 require_once('modules/Webmails/conf.php');
 require_once('modules/Webmails/functions.php');
 require_once('include/database/PearDatabase.php');
-require_once('data/SugarBean.php');
+require_once('include/utils/CommonUtils.php');
 require_once('data/CRMEntity.php');
 class result
 {
@@ -47,6 +47,7 @@ class Webmails extends CRMEntity {
 	var $mbox;
 	var $email;
 	var $relationship = array();
+	var $replyToInformation = array();
 	var $has_attachments = false;
 
 
@@ -82,8 +83,16 @@ class Webmails extends CRMEntity {
 		$this->db->println("Exiting Webmail($mbox,$mailid)");
 
 		$this->relationship = $this->find_relationships(); // Added by Puneeth for 5231
+		$this->replyToInformation = null;
         }
 
+	public function getReplyToInformation() {
+		if(empty($this->replyToInformation)) {
+			$this->replyToInformation = $this->findRelationshipsForReplyToSender();
+		}
+		return $this->replyToInformation;
+	}
+	
 	function delete() {
 		imap_delete($this->mbox, $this->mailid);
 	}
@@ -217,7 +226,7 @@ class Webmails extends CRMEntity {
 		return array('type'=>"Contacts",'id'=>$this->db->query_result($res,0,"contactid"),'name'=>$this->db->query_result($res,0,"firstname")." ".$this->db->query_result($res,0,"lastname"));
 
 	// vtiger_accounts search
-	$sql = "SELECT * from vtiger_account left join vtiger_crmentity on vtiger_crmentity.crmid=vtiger_account.accountid where vtiger_account.email1 = ? OR vtiger_account.email1=?  AND vtiger_crmentity.deleted='0'";
+	$sql = "SELECT * from vtiger_account left join vtiger_crmentity on vtiger_crmentity.crmid=vtiger_account.accountid where vtiger_account.email1 = ? OR vtiger_account.email2=?  AND vtiger_crmentity.deleted='0'";
 	$res = $this->db->pquery($sql, array(trim($this->from), trim($this->from)), true,"Error: "."<BR>$query");
 	$numRows = $this->db->num_rows($res);
 	if($numRows > 0)
@@ -226,6 +235,53 @@ class Webmails extends CRMEntity {
 	return array();
     }
 
+
+	public function searchModule($module) { 
+		global $current_user; 
+		$queryGenerator = new QueryGenerator($module, $current_user); 
+		$queryGenerator->initForGlobalSearchByType('email', trim($this->reply_to[0]), 'e'); 
+		$query = $queryGenerator->getQuery(); 
+		$res = $this->db->pquery($query,array(),true,"Error: "."<BR>$query"); 
+		$meta = $queryGenerator->getMeta($module); 
+		$fieldList = $meta->getFieldListByType('email'); 
+		$found = false; 
+		$fieldId = null; 
+		$numRows = $this->db->num_rows($res); 
+		if($numRows > 0) { 
+				foreach ($fieldList as $field) { 
+						$value = from_html($this->db->query_result($res,0,$field->getColumnName())); 
+						if($value == trim($this->reply_to[0])) { 
+								$found = true; 
+								$fieldId = $field->getFieldId(); 
+								break; 
+						} 
+				} 
+				$nameListFields = explode(',', $meta->getNameFields()); 
+				$name = ''; 
+				foreach ($nameListFields as $nameColumn) { 
+						$name .= $this->db->query_result($res,0,$nameColumn); 
+				} 
+				if($found) { 
+						return array('type'=>$module,'fieldId'=>$fieldId ,'id'=>$this->db->query_result($res,0, 
+										$meta->getIdColumn()),'name'=>$name); 
+				} 
+		} 
+		return null; 
+	} 
+
+	function findRelationshipsForReplyToSender() { 
+		$result = $this->searchModule('Contacts'); 
+		if(empty($result)) { 
+				$result = $this->searchModule('Leads'); 
+		} 
+		if(empty($result)) { 
+				$result = $this->searchModule('Accounts'); 
+		} 
+		if(empty($result)) { 
+				$result = array(); 
+		} 
+		return $result; 
+	} 
     
 	function dl_inline()
 	{

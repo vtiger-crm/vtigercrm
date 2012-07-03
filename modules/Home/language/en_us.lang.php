@@ -14,7 +14,7 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header: /advent/projects/wesat/vtiger_crm/sugarcrm/modules/Home/language/en_us.lang.php,v 1.5 2005/03/04 15:18:47 jack Exp $
- * Description:  Defines the English language pack 
+ * Description:  Defines the English language pack for Home Module.
  ********************************************************************************/
  
 $mod_strings = Array(
@@ -22,8 +22,8 @@ $mod_strings = Array(
 'LBL_FIRST_NAME'=>'First Name:',
 'LBL_LAST_NAME'=>'Last Name:',
 'LBL_LIST_LAST_NAME'=>'Last Name',
-'LBL_ACCOUNT_NAME'=>'Account Name:',
-'LBL_LIST_ACCOUNT_NAME'=>'Account Name',
+'LBL_ACCOUNT_NAME'=>'Organization Name:',
+'LBL_LIST_ACCOUNT_NAME'=>'Organization Name',
 'LBL_PHONE'=>'Phone:',
 'LBL_EMAIL_ADDRESS'=>'Email:',
 'LBL_TOTAL'=>'Total : ',
@@ -100,8 +100,8 @@ $mod_strings = Array(
 // END
 
 // Default home page widget's title
-'Top Accounts'=>'Top Accounts',
-'Top Potentials'=>'Top Potentials',
+'Top Accounts'=>'Top Organizations',
+'Top Potentials'=>'Top Opportunities',
 'Top Quotes'=>'Top Quotes',
 'Top Trouble Tickets'=>'Top Trouble Tickets',
 'Top Invoices'=>'Top Invoices',
@@ -119,6 +119,15 @@ $mod_strings = Array(
 'MSG_NO_FILTERS' => 'No Filters Available',
 'MSG_NO_FIELDS' => 'No Fields Available',
 
+//Customization Phase 6 -- Monolithic
+'LBL_REPORTCHARTS' => 'ReportCharts',
+'LBL_HOME_REPORT_NAME'=> 'Report Name',
+'LBL_HOME_REPORT_TYPE' => 'Report Type',
+//END
+
+//added for Default Widgets
+'LBL_DEFAULT_WIDGET'=>'Default Widgets',
+'LBL_NO_WIDGETS_HIDDEN'=>'No default widgets are hidden',
 );
 
 ?>

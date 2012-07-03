@@ -11,6 +11,10 @@
 -->*}
 <!-- BEGIN: main -->
 <div id="roleLay" style="z-index:12;display:block;width:400px;" class="layerPopup">
+	<input name="excludedRecords" type="hidden" id="excludedRecords" value="{$EXE_REC}">
+	<input name='search_url' id="search_url" type='hidden' value='{$SEARCH_URL}'>
+	<input name='viewid' id="viewid" type='hidden' value='{$VIEWID}'>
+	<input name='recordid' id="recordid" type='hidden' value='{$RECORDID}'>
 	<table border=0 cellspacing=0 cellpadding=5 width=100% class=layerHeadingULine>
 		<tr>
 			<td width="90%" align="left" class="genHeaderSmall">{$MOD.SELECT_EMAIL}

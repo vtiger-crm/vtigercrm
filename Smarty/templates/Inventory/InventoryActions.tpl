@@ -13,21 +13,14 @@
 -->*}
 
 <!-- Avoid this actions display for PriceBook module-->
-{if $MODULE neq 'PriceBooks'}
-
 
 <!-- Added this file to display the Inventory Actions based on the Inventory Modules -->
 <table width="100%" border="0" cellpadding="5" cellspacing="0">
-   <tr>
-	<td>&nbsp;</td>
-   </tr>
 
    <!-- This if condition is added to avoid display Tools heading because now there is no options in Tools. -->
-   {if $MODULE neq 'PurchaseOrder' && $MODULE neq 'Invoice'}
-   <tr>
+	<tr>
 	<td align="left" class="genHeaderSmall">{$APP.LBL_ACTIONS}</td>
    </tr>
-   {/if}
 
 
 
@@ -155,7 +148,7 @@
 {if $CUSTOM_LINKS && $CUSTOM_LINKS.DETAILVIEWBASIC}
 	{foreach item=CUSTOMLINK from=$CUSTOM_LINKS.DETAILVIEWBASIC}
 	<tr>
-		<td align="left" style="padding-left:10px;">
+		<td align="left" style="padding-left:5px;">
 			{assign var="customlink_href" value=$CUSTOMLINK->linkurl}
 			{assign var="customlink_label" value=$CUSTOMLINK->linklabel}
 			{if $customlink_label eq ''}
@@ -245,7 +238,7 @@
 
 
 <!-- Following condition is added to avoid the Tools section in Products and Vendors because we are not providing the Print and Email Now links throughout all the modules. when we provide these links we will remove this if condition -->
-{if $MODULE neq 'Products' && $MODULE neq 'Services' && $MODULE neq 'Vendors'}
+{if $MODULE neq 'Products' && $MODULE neq 'Services' && $MODULE neq 'Vendors' && $MODULE neq 'PriceBooks'}
 
    <tr>
 	<td align="left">
@@ -282,26 +275,7 @@
    </tr>
 {/if}
 {/if}
-<!-- To display the Export To PDF link for PO, SO, Quotes and Invoice - ends -->
 
-
-
-   <!-- The following links are common to all the inventory modules -->
-<!--   <tr>
-	<td align="left" style="padding-left:10px;">
-		<img src="{'pointer.gif'|@vtiger_imageurl:$THEME}" hspace="5" align="absmiddle"/>
-		<a href="#" class="webMnu">Print</a> 
-	</td>
-   </tr>
-   <tr>
-	<td align="left" style="padding-left:10px;">
-		<img src="{'pointer.gif'|@vtiger_imageurl:$THEME}" hspace="5" align="absmiddle"/>
-		<a href="#" class="webMnu">Email Now </a> 
-	</td>
-   </tr>
--->
-
-{/if}
 <!-- Above if condition is added to avoid the Tools section in Products and Vendors because we are not providing the Print and Email Now links throughout all the modules. when we provide these links we will remove this if condition -->
 
 
@@ -318,13 +292,13 @@ function sendpdf_submit()
 {/literal}
 
 	{if $MODULE eq 'Invoice'}
-		OpenCompose('{$ID}','Invoice');
+		OpenCompose('{$INV_NO}','Invoice');
 	{elseif $MODULE eq 'Quotes'}
-		OpenCompose('{$ID}','Quote');
+		OpenCompose('{$QUO_NO}','Quote');
 	{elseif $MODULE eq 'PurchaseOrder'}
-		OpenCompose('{$ID}','PurchaseOrder');
+		OpenCompose('{$PO_NO}','PurchaseOrder');
 	{elseif $MODULE eq 'SalesOrder'}
-		OpenCompose('{$ID}','SalesOrder');
+		OpenCompose('{$SO_NO}','SalesOrder');
 	{/if}
 {literal}
 }

@@ -19,10 +19,11 @@
 			if(isset($row['count(*)'])){
 				return DataTransform::sanitizeDataWithCountColumn($row,$meta);
 			}
-			$fieldColumn = $meta->getFieldColumnMapping();
-			$columnField = array_flip($fieldColumn);
+			$fieldColumnMapping = $meta->getFieldColumnMapping();
+			$columnFieldMapping = array_flip($fieldColumnMapping);
 			foreach($row as $col=>$val){
-				$newRow[$columnField[$col]] = $val;
+				if(array_key_exists($col,$columnFieldMapping))
+					$newRow[$columnFieldMapping[$col]] = $val;
 			}
 			$newRow = DataTransform::sanitizeData($newRow,$meta,true);
 			return $newRow;
@@ -60,22 +61,22 @@
 					$components = vtws_getIdComponents($row['parent_id']);
 					$userObj = VtigerWebserviceObject::fromName($adb,'Users');
 					$parentTypeId = $components[0];
- 		                        if($components[0] == $userObj->getEntityId()){
+ 		            if($components[0] == $userObj->getEntityId()){
 						$associatedToUser = true;
 					}
 				}
 			}
                         // added to handle the setting reminder time
 			if(strtolower($meta->getEntityName()) == "events"){
-				if(isset($row['reminder_time'])&& $row['reminder_time']!= null){
+				if(isset($row['reminder_time'])&& $row['reminder_time']!= null && $row['reminder_time'] != 0){
 					$_REQUEST['set_reminder'] = "Yes";
 					$_REQUEST['mode'] = 'edit';
 
 					$reminder = $row['reminder_time'];
-					$seconds = $reminder%60;
-					$minutes = ($reminder/60)%60;
-					$hours = ($reminder/(60*60))%24;
-					$days =  ($reminder/(60*60*24));
+					$seconds = (int)$reminder%60;
+					$minutes = (int)($reminder/60)%60;
+					$hours = (int)($reminder/(60*60))%24;
+					$days =  (int)($reminder/(60*60*24));
 
 					//at vtiger there cant be 0 minutes reminder so we are setting to 1
 					if($minutes == 0){
@@ -114,7 +115,7 @@
 					if($associatedToUser === true){
 						$_REQUEST['module'] = 'Emails';
 						$row['parent_id'] = $row['parent_id']."@-1|";
-						$_REQUEST['parent_id'] = $row['parent_id']; 
+						$_REQUEST['parent_id'] = $row['parent_id'];
 					}else{
 						$referenceHandler = vtws_getModuleHandlerFromId($parentTypeId,
 								$meta->getUser());
@@ -130,6 +131,10 @@
 			if(isset($row[$meta->getObectIndexColumn()])){
 				unset($row[$meta->getObectIndexColumn()]);
 			}
+
+			$row = DataTransform::sanitizeDateFieldsForInsert($row,$meta);
+			$row = DataTransform::sanitizeCurrencyFieldsForInsert($row,$meta);
+
 			return $row;
 			
 		}
@@ -240,7 +245,33 @@
 			}
 			return $row;
 		}
-		
+
+		function sanitizeDateFieldsForInsert($row,$meta){
+			global $current_user;
+			$moduleFields = $meta->getModuleFields();
+			foreach($moduleFields as $fieldName=>$fieldObj){
+				if($fieldObj->getFieldDataType()=="date"){
+					if(!empty($row[$fieldName])){
+						$dateFieldObj = new DateTimeField($row[$fieldName]);
+						$row[$fieldName] = $dateFieldObj->getDisplayDate($current_user);
+					}
+				}
+			}
+			return $row;
+		}
+
+		function sanitizeCurrencyFieldsForInsert($row,$meta){
+			global $current_user;
+			$moduleFields = $meta->getModuleFields();
+			foreach($moduleFields as $fieldName=>$fieldObj){
+				if($fieldObj->getFieldDataType()=="currency"){
+					if(!empty($row[$fieldName])){
+						$row[$fieldName] = CurrencyField::convertToUserFormat($row[$fieldName],$current_user,true);
+					}
+				}
+			}
+			return $row;
+		}
 	}
 	
 ?>

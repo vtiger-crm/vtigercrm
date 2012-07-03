@@ -14,23 +14,23 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header: /advent/projects/wesat/vtiger_crm/sugarcrm/modules/Accounts/language/en_us.lang.php,v 1.18 2005/03/19 08:59:20 rank Exp $
- * Description:  Defines the English language pack 
+ * Description:  Defines the English language pack
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.
  * All Rights Reserved.
  * Contributor(s): ______________________________________..
  ********************************************************************************/
- 
+
 $mod_strings = Array(
-'LBL_MODULE_NAME'=>'Accounts',
-'LBL_MODULE_TITLE'=>'Accounts: Home',
-'LBL_SEARCH_FORM_TITLE'=>'Account Search',
-'LBL_LIST_FORM_TITLE'=>'Account List',
-'LBL_NEW_FORM_TITLE'=>'New Account',
+'LBL_MODULE_NAME'=>'Organizations',
+'LBL_MODULE_TITLE'=>'Organizations: Home',
+'LBL_SEARCH_FORM_TITLE'=>'Organization Search',
+'LBL_LIST_FORM_TITLE'=>'Organization List',
+'LBL_NEW_FORM_TITLE'=>'New Organization',
 'LBL_MEMBER_ORG_FORM_TITLE'=>'Member Organizations',
-// Label for Top Accounts in Home Page, added for 4.2 GA
-'LBL_TOP_ACCOUNTS'=>'My Top Accounts', 
+// Label for Top Organizations in Home Page, added for 4.2 GA
+'LBL_TOP_ACCOUNTS'=>'My Top Organizations',
 'LBL_TOP_AMOUNT'=>'Amount',
-'LBL_LIST_ACCOUNT_NAME'=>'Account Name',
+'LBL_LIST_ACCOUNT_NAME'=>'Organization Name',
 'LBL_LIST_CITY'=>'City',
 'LBL_LIST_WEBSITE'=>'Website',
 'LBL_LIST_STATE'=>'State',
@@ -46,8 +46,8 @@ $mod_strings = Array(
 
 //END DON'T CONVERT
 
-'LBL_ACCOUNT'=>'Account:',
-'LBL_ACCOUNT_NAME'=>'Account Name:',
+'LBL_ACCOUNT'=>'Organization:',
+'LBL_ACCOUNT_NAME'=>'Organization Name:',
 'LBL_PHONE'=>'Phone:',
 'LBL_WEBSITE'=>'Website:',
 'LBL_FAX'=>'Fax:',
@@ -66,7 +66,7 @@ $mod_strings = Array(
 'LBL_TYPE'=>'Type:',
 'LBL_ANNUAL_REVENUE'=>'Annual Revenue:',
 'LBL_ADDRESS_INFORMATION'=>'Address Information',
-'LBL_ACCOUNT_INFORMATION'=>'Account Information',
+'LBL_ACCOUNT_INFORMATION'=>'Organization Information',
 'LBL_CUSTOM_INFORMATION'=>'Custom Information',
 'LBL_BILLING_ADDRESS'=>'Billing Address:',
 'LBL_SHIPPING_ADDRESS'=>'Shipping Address:',
@@ -80,18 +80,18 @@ $mod_strings = Array(
 'NTC_COPY_BILLING_ADDRESS'=>'Copy billing address to shipping address',
 'NTC_COPY_SHIPPING_ADDRESS'=>'Copy shipping address to billing address',
 'NTC_REMOVE_MEMBER_ORG_CONFIRMATION'=>'Are you sure you want to remove this record as a member organization?',
-'LBL_DUPLICATE'=>'Potential Duplicate Accounts',
-'MSG_DUPLICATE' => 'Creating this vtiger_account may vtiger_potentialy create a duplicate vtiger_account. You may either select an vtiger_account from the list below or you may click on Create New Account to continue creating a new vtiger_account with the previously entered data.',
+'LBL_DUPLICATE'=>'Potential Duplicate Organizations',
+'MSG_DUPLICATE' => 'Creating this vtiger_account may vtiger_potentialy create a duplicate vtiger_account. You may either select an vtiger_account from the list below or you may click on Create New Organization to continue creating a new vtiger_account with the previously entered data.',
 
 'LBL_INVITEE'=>'Contacts',
 'ERR_DELETE_RECORD'=>"A record number must be specified to delete the vtiger_account.",
 
-'LBL_SELECT_ACCOUNT'=>'Select Account',
+'LBL_SELECT_ACCOUNT'=>'Select Organization',
 'LBL_GENERAL_INFORMATION'=>'General Information',
 
 //for v4 release added
-'LBL_NEW_POTENTIAL'=>'New Potential',
-'LBL_POTENTIAL_TITLE'=>'Potentials',
+'LBL_NEW_POTENTIAL'=>'New Opportunity',
+'LBL_POTENTIAL_TITLE'=>'Opportunities',
 
 'LBL_NEW_TASK'=>'New Task',
 'LBL_TASK_TITLE'=>'Tasks',
@@ -112,9 +112,9 @@ $mod_strings = Array(
 'LBL_PARTNER'=>'Partner',
 
 // Added for 4GA
-'LBL_TOOL_FORM_TITLE'=>'Account Tools',
+'LBL_TOOL_FORM_TITLE'=>'Organization Tools',
 //Added for 4GA
-'Account Name'=>'Account Name',
+'Account Name'=>'Organization Name',
 'Phone'=>'Phone',
 'Website'=>'Website',
 'Fax'=>'Fax',
@@ -211,18 +211,18 @@ $mod_strings = Array(
 // Added/Updated for vtiger CRM 5.0.4
 
 //added to fix the issue #4081
-'LBL_ACCOUNT_EXIST' => 'Account Name Already Exists!',
+'LBL_ACCOUNT_EXIST' => 'Organization Name Already Exists!',
 
 // mailer export
 'LBL_MAILER_EXPORT' => 'Mailer Export',
 'LBL_MAILER_EXPORT_CONTACTS_TYPE'=>'Select Contacts:',
 'LBL_MAILER_EXPORT_CONTACTS_DESCR'=>'Contacts can also be selected via "Custom Fields" and some standard fields.',
 'LBL_MAILER_EXPORT_RESULTS_TYPE'=>'Select export type:',
-'LBL_MAILER_EXPORT_RESULTS_DESCR'=>'The data will gathered from the Accounts and their Contacts, that were returned
+'LBL_MAILER_EXPORT_RESULTS_DESCR'=>'The data will gathered from the Organizations and their Contacts, that were returned
  from the previous search.',
 'LBL_EXPORT_RESULTS_EMAIL' => 'Export E-Mailer data',
-'LBL_EXPORT_RESULTS_EMAIL_CORP'=>'Export E-Mail data, using "Company Email" from the Account if the Contacts "Email" is empty',
-'LBL_EXPORT_RESULTS_FULL'=>'Export data with the Contacts, E-Mail, Account name, Address, Telephone, etc.',
+'LBL_EXPORT_RESULTS_EMAIL_CORP'=>'Export E-Mail data, using "Company Email" from the Organization if the Contacts "Email" is empty',
+'LBL_EXPORT_RESULTS_FULL'=>'Export data with the Contacts, E-Mail, Organization name, Address, Telephone, etc.',
 'LBL_EXPORT_RESULTS_GO'=>'Export',
 'LBL_MAILER_EXPORT_IGNORE' => '--ignore--',
 'LBL_MAILER_EXPORT_CHECKED' =>'Checked',
@@ -231,11 +231,12 @@ $mod_strings = Array(
 // Added after 5.0.4 GA
 
 //Module Sequence Numbering
-'Account No'=>'Account No',
+'Account No'=>'Organization No',
 // END
 
-// Account Hierarchy
-'LBL_SHOW_ACCOUNT_HIERARCHY' => 'Show Account Hierarchy', 
+// Organization Hierarchy
+'LBL_SHOW_ACCOUNT_HIERARCHY' => 'Show Organization Hierarchy',
+'Accounts ID' => 'Organizations ID',
 
 );
 

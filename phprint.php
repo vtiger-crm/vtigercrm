@@ -51,13 +51,13 @@ require_once("include/utils/utils.php");
 if (!isset($_GET['action']) || !isset($_GET['module'])) {
 	die("Error: invalid print link");
 }
-$record = (isset($_GET['record'])) ? $_GET['record'] : "";
+$record = (isset($_GET['record'])) ? vtlib_purify($_GET['record']) : "";
 //Added activity mode for events or tasks for Back
 if($_GET['module'] == 'Activities')
 {
         $activity_mode = '&activity_mode='.vtlib_purify($_REQUEST['activity_mode']);
 }
-$url = $site_URL . "/index.php?module={$_GET['module']}&action={$_GET['action']}&record=$record$activity_mode";
+$url = $site_URL . "/index.php?module=".vtlib_purify($_GET['module'])."&action=".vtlib_purify($_GET['action'])."&record=$record$activity_mode";
 $lang_crm = (empty($_GET['lang_crm'])) ? $default_language : $_GET['lang_crm'];
 $app_strings = return_application_language($lang_crm);
 insert_charset_header();

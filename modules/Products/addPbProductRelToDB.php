@@ -27,7 +27,7 @@ if(isset($_REQUEST['pricebook_id']) && $_REQUEST['pricebook_id']!='')
 	{
 		if($id != '') {
 			$lp_name = $id.'_listprice';
-			$list_price = $_REQUEST[$lp_name];
+			$list_price = CurrencyField::convertToDBFormat($_REQUEST[$lp_name], null,	false);
 			//Updating the vtiger_pricebook product rel vtiger_table
 			 $log->info("Products :: Inserting vtiger_products to price book");
 			$query= "insert into vtiger_pricebookproductrel (pricebookid,productid,listprice,usedcurrency) values(?,?,?,?)";
@@ -48,7 +48,7 @@ elseif(isset($_REQUEST['product_id']) && $_REQUEST['product_id']!='')
 		if($id != '') {
 			$currency_id = getPriceBookCurrency($id);
 			$lp_name = $id.'_listprice';
-			$list_price = $_REQUEST[$lp_name];
+			$list_price = CurrencyField::convertToDBFormat($_REQUEST[$lp_name], null,	false);
 			//Updating the vtiger_pricebook product rel vtiger_table
 			 $log->info("Products :: Inserting PriceBooks to Product");
 			$query= "insert into vtiger_pricebookproductrel (pricebookid,productid,listprice,usedcurrency) values(?,?,?,?)";

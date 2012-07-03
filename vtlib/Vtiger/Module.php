@@ -50,11 +50,13 @@ class Vtiger_Module extends Vtiger_ModuleBasic {
 
 		if(empty($moduleInstance)) return;
 
-		Vtiger_Utils::CreateTable(
-			'vtiger_crmentityrel',
-			'(crmid INT NOT NULL, module VARCHAR(100) NOT NULL, relcrmid INT NOT NULL, relmodule VARCHAR(100) NOT NULL)',
-			true
-		);
+		if(!Vtiger_Utils::CheckTable('vtiger_crmentityrel')) {
+			Vtiger_Utils::CreateTable(
+				'vtiger_crmentityrel',
+				'(crmid INT NOT NULL, module VARCHAR(100) NOT NULL, relcrmid INT NOT NULL, relmodule VARCHAR(100) NOT NULL)',
+				true
+			);
+		}
 
 		$relation_id = $this->__getRelatedListUniqueId();
 		$sequence = $this->__getNextRelatedListSequence();
@@ -91,30 +93,30 @@ class Vtiger_Module extends Vtiger_ModuleBasic {
 
 		if(empty($label)) $label = $moduleInstance->name;
 
-		$adb->pquery("DELETE FROM vtiger_relatedlists WHERE tabid=? AND related_tabid=? AND name=? AND label=?", 
+		$adb->pquery("DELETE FROM vtiger_relatedlists WHERE tabid=? AND related_tabid=? AND name=? AND label=?",
 			Array($this->id, $moduleInstance->id, $function_name, $label));
 
-		self::log("Unsetting relation with $moduleInstance->name ... DONE");		
+		self::log("Unsetting relation with $moduleInstance->name ... DONE");
 	}
 
 	/**
 	 * Add custom link for a module page
-	 * @param String Type can be like 'DETAILVIEW', 'LISTVIEW' etc.. 
+	 * @param String Type can be like 'DETAILVIEW', 'LISTVIEW' etc..
  	 * @param String Label to use for display
-	 * @param String HREF value to use for generated link 
+	 * @param String HREF value to use for generated link
 	 * @param String Path to the image file (relative or absolute)
 	 * @param Integer Sequence of appearance
 	 *
-	 * NOTE: $url can have variables like $MODULE (module for which link is associated), 
+	 * NOTE: $url can have variables like $MODULE (module for which link is associated),
 	 * $RECORD (record on which link is dispalyed)
 	 */
-	function addLink($type, $label, $url, $iconpath='', $sequence=0) {
-		Vtiger_Link::addLink($this->id, $type, $label, $url, $iconpath, $sequence);
+	function addLink($type, $label, $url, $iconpath='', $sequence=0, $handlerInfo=null) {
+		Vtiger_Link::addLink($this->id, $type, $label, $url, $iconpath, $sequence, $handlerInfo);
 	}
 
 	/**
 	 * Delete custom link of a module
-	 * @param String Type can be like 'DETAILVIEW', 'LISTVIEW' etc.. 
+	 * @param String Type can be like 'DETAILVIEW', 'LISTVIEW' etc..
  	 * @param String Display label to lookup
 	 * @param String URL value to lookup
 	 */
@@ -134,6 +136,13 @@ class Vtiger_Module extends Vtiger_ModuleBasic {
 	 */
 	function initWebservice() {
 		Vtiger_Webservice::initialize($this);
+	}
+
+	/**
+	 * De-Initialize webservice setup for this module instance.
+	 */
+	function deinitWebservice() {
+		Vtiger_Webservice::uninitialize($this);
 	}
 
 	/**
@@ -167,7 +176,7 @@ class Vtiger_Module extends Vtiger_ModuleBasic {
 
 		$instance = false;
 		$filepath = "modules/$modulename/$modulename.php";
-		if(Vtiger_Utils::checkFileAccess($filepath, false)) {
+		if(Vtiger_Utils::checkFileAccessForInclusion($filepath, false)) {
 			include_once($filepath);
 			if(class_exists($modulename)) {
 				$instance = new $modulename();

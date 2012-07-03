@@ -162,6 +162,10 @@ class VTWSEntityType{
 							$et->type = 'Number';
 							$et->format = 'Decimal';
 							break;
+						case 'currency':
+							$et->type = 'Number';
+							$et->format = 'Decimal';
+							break;
 						default:	
 							print_r($type);
 							throw new Exception($type["name"]." is not supported yet.");

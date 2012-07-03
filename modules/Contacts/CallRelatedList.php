@@ -72,7 +72,7 @@ if($singlepane_view == 'true' && $_REQUEST['action'] == 'CallRelatedList') {
 	$smarty->assign("ID",$focus->id);
 	$smarty->assign("NAME",$focus->name);
 	$smarty->assign("EMAIL",$focus->column_fields['email']);
-	$smarty->assign("YAHOO",$focus->column_fields['yahooid']);
+	$smarty->assign("SECONDARY_EMAIL",$focus->column_fields['secondaryemail']);
 	
 	// Module Sequence Numbering
 	$mod_seq_field = getModuleSequenceField($currentModule);

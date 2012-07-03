@@ -30,7 +30,7 @@ if($rfid != "")
                 if ($res != "")
                         header("Location: index.php?action=ReportsAjax&mode=ajax&file=ListView&module=Reports");
                 else {
-                        include('themes/'.$theme.'/header.php');
+                        include('modules/Vtiger/header.php');
                         $errormessage = "<font color='red'><B>Error Message<ul>
                         <li><font color='red'>Error while deleting the reports of the folder</font>
                         </ul></B></font> <br>" ;
@@ -38,7 +38,7 @@ if($rfid != "")
                 }
         }else
         {
-                include('themes/'.$theme.'/header.php');
+                include('modules/Vtiger/header.php');
                 $errormessage = "<font color='red'><B>Error Message<ul>
                 <li><font color='red'>Error while deleting the folder</font>
                 </ul></B></font> <br>" ;

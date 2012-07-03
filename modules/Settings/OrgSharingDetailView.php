@@ -38,7 +38,7 @@ foreach($defSharingPermissionData as $tab_id => $def_perr)
 	$access_privileges[] = $entity_name;
 	$access_privileges[] = $entity_perr;
 	if($entity_perr != 'Private')	
-		$access_privileges[] = $mod_strings['LBL_USR_CAN_ACCESS'] .str_replace('Public:','',$mod_strings[$entity_perr]). $mod_strings['LBL_USR_OTHERS'] . $app_strings[$entity_name];
+		$access_privileges[] = $mod_strings['LBL_DESCRIPTION_'.$entity_perr] . $app_strings[$entity_name];
 	else
 	        $access_privileges[] = $mod_strings['LBL_USR_CANNOT_ACCESS'] . $app_strings[$entity_name];
 	$row++;

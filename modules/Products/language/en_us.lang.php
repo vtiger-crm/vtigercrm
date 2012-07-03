@@ -57,8 +57,8 @@ $mod_strings = Array(
 'LBL_FILE'=>'File Name',
 
 //for v4 release added
-'LBL_NEW_POTENTIAL'=>'New Potential',
-'LBL_POTENTIAL_TITLE'=>'Potentials',
+'LBL_NEW_POTENTIAL'=>'New Opportunity',
+'LBL_POTENTIAL_TITLE'=>'Opportunities',
 
 'LBL_NEW_TICKET'=>'New Ticket',
 'LBL_TICKET_TITLE'=>'Tickets',
@@ -84,7 +84,7 @@ $mod_strings = Array(
 //'Product Code'=>'Part Number',
 'Part Number'=>'Part Number',
 'Product Active'=>'Product Active',
-'Commission Rate'=>'Commission Rate (%)',
+'Commission Rate'=>'Commission Rate',
 'Qty/Unit'=>'Qty/Unit',
 'Unit Price'=>'Unit Price',
 'Manufacturer'=>'Manufacturer',
@@ -216,6 +216,9 @@ $mod_strings = Array(
 // END
 
 'LBL_NO_TAXES_ASSOCIATED'=>'No taxes associated with this product',
+'Parent Product' => 'Parent Product',
+
+'Products ID' => 'Products ID',
 );
 
 ?>

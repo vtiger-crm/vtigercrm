@@ -37,6 +37,8 @@
 						fetch_homeDB({$tablestuff.Stuffid});
 					{elseif $tablestuff.Stufftype eq 'DashBoard'}
 						loadStuff({$tablestuff.Stuffid},'{$tablestuff.Stufftype}');
+					{elseif $tablestuff.Stufftype eq 'ReportCharts'}
+						loadStuff({$tablestuff.Stuffid},'{$tablestuff.Stufftype}');
 					{/if}
 				</script>
 			{/foreach}
@@ -44,15 +46,15 @@
 	</td>
 </tr>
 </table>
-	
+
 {*<!-- Main Contents Ends Here -->*}
 <script>
 var Vt_homePageWidgetInfoList = [
 {if $HOMEFRAME|@count > 0}
 	{assign var=HOMEFRAME value=$HOMEFRAME|@array_reverse}
 	{foreach item=tablestuff key=index from=$HOMEFRAME name="homeframe"}
-		{if ($tablestuff.Stufftype neq 'Default' || $tablestuff.Stufftitle neq
-				'Home Page Dashboard'|@getTranslatedString:'Home') && $tablestuff.Stufftype neq 'DashBoard'}
+		{if ($tablestuff.Stufftype neq 'Default' || $tablestuff.Stufftitle neq 'Home Page Dashboard'|@getTranslatedString:'Home')
+				&& $tablestuff.Stufftype neq 'DashBoard' && $tablestuff.Stufftype neq 'ReportCharts'}
 			{ldelim}
 				'widgetId':{$tablestuff.Stuffid},
 				'widgetType':'{$tablestuff.Stufftype}'
@@ -78,6 +80,7 @@ function fnAddWindow(obj,CurrObj){
 	tagName.style.display = 'block';
 	document.getElementById("addmodule").href="javascript:chooseType('Module');fnRemoveWindow();setFilter($('selmodule_id'))";
 	document.getElementById("addNotebook").href="javascript:chooseType('Notebook');fnRemoveWindow();show('addWidgetsDiv');placeAtCenter($('addWidgetsDiv'));";
+    document.getElementById("defaultwidget").href="javascript:chooseType('defaultwidget');fnRemoveWindow();";
 	//document.getElementById("addURL").href="javascript:chooseType('URL');fnRemoveWindow();show('addWidgetsDiv');placeAtCenter($('addWidgetsDiv'));";
 {/literal}
 {if $ALLOW_RSS eq "yes"}
@@ -86,9 +89,16 @@ function fnAddWindow(obj,CurrObj){
 {if $ALLOW_DASH eq "yes"}
 	document.getElementById("adddash").href="javascript:chooseType('DashBoard');fnRemoveWindow()";
 {/if}
-{literal}	
+{if $ALLOW_REPORT eq "yes"}
+    document.getElementById("addReportCharts").href="javascript:chooseType('ReportCharts');fnRemoveWindow()";
+{/if}
+{literal}
 }
-{/literal}	
+{/literal}
 </script>
 
 
+{* First time login *}
+{if $FIRST_TIME_LOGIN}
+	{include file="Home/FirstTimeLogin.tpl"}
+{/if}

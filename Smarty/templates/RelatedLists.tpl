@@ -60,14 +60,14 @@ function gotoUpdateListPrice(id,pbid,proid)
 	<td class="showPanelBg" valign=top width=100%>
 		<!-- PUBLIC CONTENTS STARTS-->
 		<div class="small" style="padding:20px">
- 	        {* Module Record numbering, used MOD_SEQ_ID instead of ID *}	
+ 	        {* Module Record numbering, used MOD_SEQ_ID instead of ID *}
 			 <span class="lvtHeaderText"><font color="purple">[ {$MOD_SEQ_ID} ] </font>{$NAME} -  {$SINGLE_MOD} {$APP.LBL_MORE} {$APP.LBL_INFORMATION}</span> <br>
 			 {$UPDATEINFO}
-			 </span>&nbsp;&nbsp;<span id="vtbusy_info" style="display:none;" valign="bottom"><img src="{$IMAGE_PATH}vtbusy.gif" border="0"></span><span id="vtbusy_info" style="visibility:hidden;" valign="bottom"><img src="{$IMAGE_PATH}vtbusy.gif" border="0"></span>
+			 </span>&nbsp;&nbsp;<span id="vtbusy_info" style="display:none;" valign="bottom"><img src="{'vtbusy.gif'|@vtiger_imageurl:$THEME}" border="0"></span><span id="vtbusy_info" style="visibility:hidden;" valign="bottom"><img src="{'vtbusy.gif'|@vtiger_imageurl:$THEME}" border="0"></span>
 
 			 <hr noshade size=1>
-			 <br> 
-		
+			 <br>
+
 			<!-- Account details tabs -->
 			<table border=0 cellspacing=0 cellpadding=0 width=95% align=center>
 			<tr>
@@ -107,7 +107,7 @@ function gotoUpdateListPrice(id,pbid,proid)
 					                                                        {include file='RelatedListContents.tpl'}
                                         						        </div>
 												</form>
-										  {*-- End of Blocks--*} 
+										  {*-- End of Blocks--*}
 										</td>
 									</tr>
 								</table>
@@ -153,6 +153,6 @@ function gotoUpdateListPrice(id,pbid,proid)
 <script>
 function OpenWindow(url)
 {ldelim}
-	openPopUp('xAttachFile',this,url,'attachfileWin',380,375,'menubar=no,toolbar=no,location=no,status=no,resizable=no');	
+	openPopUp('xAttachFile',this,url,'attachfileWin',380,375,'menubar=no,toolbar=no,location=no,status=no,resizable=no');
 {rdelim}
 </script>

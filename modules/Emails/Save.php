@@ -103,12 +103,12 @@ if($file_name != '' && $_FILES['filename']['size'] == 0)
 	else{}
 	if($errormessage != ""){
 		$ret_error = 1;
-		$ret_parentid = $_REQUEST['parent_id'];
-		$ret_toadd = $_REQUEST['parent_name'];
-		$ret_subject = $_REQUEST['subject'];
-		$ret_ccaddress = $_REQUEST['ccmail'];
-		$ret_bccaddress = $_REQUEST['bccmail'];
-		$ret_description = $_REQUEST['description'];
+		$ret_parentid = vtlib_purify($_REQUEST['parent_id']);
+		$ret_toadd = vtlib_purify($_REQUEST['parent_name']);
+		$ret_subject = vtlib_purify($_REQUEST['subject']);
+		$ret_ccaddress = vtlib_purify($_REQUEST['ccmail']);
+		$ret_bccaddress = vtlib_purify($_REQUEST['bccmail']);
+		$ret_description = vtlib_purify($_REQUEST['description']);
 		echo $errormessage;
         	include("EditView.php");	
 		exit();
@@ -151,11 +151,22 @@ function checkIfContactExists($mailid)
 }
 //assign the focus values
 $focus->filename = $_REQUEST['file_name'];
-$focus->parent_id = $_REQUEST['parent_id'];
-$focus->parent_type = $_REQUEST['parent_type'];
+$focus->parent_id = vtlib_purify($_REQUEST['parent_id']);
+$focus->parent_type = vtlib_purify($_REQUEST['parent_type']);
 $focus->column_fields["assigned_user_id"]=$current_user->id;
 $focus->column_fields["activitytype"]="Emails";
 $focus->column_fields["date_start"]= date(getNewDisplayDate());//This will be converted to db date format in save
+if((!empty($_REQUEST['record'])&& $_REQUEST['send_mail']==false &&
+		!empty($_REQUEST['mode']))) {
+	$focus->mode = 'edit';
+} elseif(empty($_REQUEST['record']) ||(!empty($_REQUEST['record'])&& $_REQUEST['send_mail']== false
+		&& empty($_REQUEST['mode'])) || !empty($_REQUEST['record'])&& $_REQUEST['send_mail']==true
+		&& empty($_REQUEST['mode'])) {
+	$focus->mode = '';
+	$focus->id = '';
+} else {
+	$focus->mode = 'edit';
+}
 $focus->save("Emails");
 $return_id = $focus->id;
 
@@ -188,19 +199,18 @@ if(isset($_REQUEST['send_mail']) && $_REQUEST['send_mail'] && $_REQUEST['parent_
         	
 		$error_msg = "<font color=red><strong>".$mod_strings['LBL_CHECK_USER_MAILID']."</strong></font>";
 	        $ret_error = 1;
-		$ret_parentid = $_REQUEST['parent_id'];
-	        $ret_toadd = $_REQUEST['parent_name'];
-        	$ret_subject = $_REQUEST['subject'];
-	        $ret_ccaddress = $_REQUEST['ccmail'];
-        	$ret_bccaddress = $_REQUEST['bccmail'];
-	        $ret_description = $_REQUEST['description'];
+		$ret_parentid = vtlib_purify($_REQUEST['parent_id']);
+	        $ret_toadd = vtlib_purify($_REQUEST['parent_name']);
+        	$ret_subject = vtlib_purify($_REQUEST['subject']);
+	        $ret_ccaddress = vtlib_purify($_REQUEST['ccmail']);
+        	$ret_bccaddress = vtlib_purify($_REQUEST['bccmail']);
+	        $ret_description = vtlib_purify($_REQUEST['description']);
         	echo $error_msg;
 	        include("EditView.php");
         	exit();
 	}
 
 }
-
 $focus->retrieve_entity_info($return_id,"Emails");
 
 //this is to receive the data from the Select Users button

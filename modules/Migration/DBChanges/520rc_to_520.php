@@ -129,5 +129,8 @@ function VT520GA_picklistMigrate(){
 
 VT520GA_picklistMigrate();
 
+ExecuteQuery('DELETE FROM vtiger_cvstdfilter WHERE startdate is NULL AND enddate is NULL');
+
 $migrationlog->debug("\n\nDB Changes from 5.2.0 RC to 5.2.0 -------- Ends \n\n");
+
 ?>

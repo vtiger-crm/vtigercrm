@@ -63,17 +63,59 @@ class Appointment
 		global $current_user,$adb;
 		require('user_privileges/user_privileges_'.$current_user->id.'.php');
 		require('user_privileges/sharing_privileges_'.$current_user->id.'.php');
-		$and = "AND ((vtiger_activity.date_start between ? AND ?)
-			OR (vtiger_activity.date_start < ? AND vtiger_activity.due_date > ?)
-			OR (vtiger_activity.due_date between ? AND ?))";
+		$and = "AND (
+					(
+						(
+							(CAST(CONCAT(date_start,' ',time_start) AS DATETIME) >= ? AND CAST(CONCAT(date_start,' ',time_start) AS DATETIME) <= ?)
+							OR	(CAST(CONCAT(due_date,' ',time_end) AS DATETIME) >= ? AND CAST(CONCAT(due_date,' ',time_end) AS DATETIME) <= ? )
+							OR	(CAST(CONCAT(date_start,' ',time_start) AS DATETIME) <= ? AND CAST(CONCAT(due_date,' ',time_end) AS DATETIME) >= ?)
+						)
+						AND vtiger_recurringevents.activityid is NULL
+					)
+				OR (
+						(CAST(CONCAT(vtiger_recurringevents.recurringdate,' ',time_start) AS DATETIME) >= ?
+							AND CAST(CONCAT(vtiger_recurringevents.recurringdate,' ',time_start) AS DATETIME) <= ?)
+						OR	(CAST(CONCAT(due_date,' ',time_end) AS DATETIME) >= ? AND CAST(CONCAT(due_date,' ',time_end) AS DATETIME) <= ?)
+						OR	(CAST(CONCAT(vtiger_recurringevents.recurringdate,' ',time_start) AS DATETIME) <= ?
+							AND CAST(CONCAT(due_date,' ',time_end) AS DATETIME) >= ?)
+					)
+				)";
 		
-        	$q= "select vtiger_activity.*, vtiger_crmentity.*, case when (vtiger_users.user_name not like '') then vtiger_users.user_name else vtiger_groups.groupname end as user_name FROM vtiger_activity inner join vtiger_crmentity on vtiger_activity.activityid = vtiger_crmentity.crmid left join vtiger_recurringevents on vtiger_activity.activityid=vtiger_recurringevents.activityid left join vtiger_groups on vtiger_groups.groupid = vtiger_crmentity.smownerid LEFT JOIN vtiger_users ON vtiger_users.id = vtiger_crmentity.smownerid WHERE vtiger_crmentity.deleted = 0 and vtiger_activity.activitytype not in ('Emails','Task') $and ";
+		$userNameSql = getSqlForNameInDisplayFormat(array('first_name'=>
+							'vtiger_users.first_name', 'last_name' => 'vtiger_users.last_name'), 'Users');
+		
+        	$q= "select vtiger_activity.*, vtiger_crmentity.*,
+					case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name
+					FROM vtiger_activity
+						inner join vtiger_crmentity on vtiger_activity.activityid = vtiger_crmentity.crmid
+						left join vtiger_recurringevents on vtiger_activity.activityid=vtiger_recurringevents.activityid
+						left join vtiger_groups on vtiger_groups.groupid = vtiger_crmentity.smownerid
+						LEFT JOIN vtiger_users ON vtiger_users.id = vtiger_crmentity.smownerid
+					WHERE vtiger_crmentity.deleted = 0 and vtiger_activity.activitytype not in ('Emails','Task') $and ";
 
 		// User Select Customization: Changes should made also in (calendayLaout getEventList) and one more BELOW
 		$query_filter_prefix = calendarview_getSelectedUserFilterQuerySuffix(); 
 		$q .= $query_filter_prefix; 
 		// END
-		$params = array($from_datetime->get_formatted_date(), $to_datetime->get_formatted_date(), $from_datetime->get_formatted_date(), $from_datetime->get_formatted_date(), $from_datetime->get_formatted_date(), $to_datetime->get_formatted_date());
+		$h = $from_datetime->z_hour;
+		$m = $from_datetime->min;
+		if(empty($m)) {
+			$m = '00';
+		}
+		$startDate = new DateTimeField($from_datetime->year."-".$from_datetime->z_month."-".
+				$from_datetime->z_day." $h:$m");
+		$h = '23';
+		$m = '59';
+		$endDate = new DateTimeField($to_datetime->year."-".$to_datetime->z_month."-".
+				$to_datetime->z_day." $h:$m");
+		$params = array(
+			$startDate->getDBInsertDateTimeValue(), $endDate->getDBInsertDateTimeValue(),
+			$startDate->getDBInsertDateTimeValue(), $endDate->getDBInsertDateTimeValue(),
+			$startDate->getDBInsertDateTimeValue(), $endDate->getDBInsertDateTimeValue(),
+			$startDate->getDBInsertDateTimeValue(), $endDate->getDBInsertDateTimeValue(),
+			$startDate->getDBInsertDateTimeValue(), $endDate->getDBInsertDateTimeValue(),
+			$startDate->getDBInsertDateTimeValue(), $endDate->getDBInsertDateTimeValue()
+		);
 		if($is_admin==false && $profileGlobalPermission[1] == 1 && $profileGlobalPermission[2] == 1 && $defaultOrgSharingPermission[16] == 3)
 		{
 			//Added for User Based Custom View for Calendar
@@ -93,17 +135,19 @@ class Appointment
         {
 			
 			$result = $adb->fetchByAssoc($r);
-			$start_timestamp = strtotime($result["date_start"]);
-			$end_timestamp = strtotime($result["due_date"]);
-			if($from_datetime->ts <= $start_timestamp) $from = $start_timestamp;
-			else $from = $from_datetime->ts;
-			if($to_datetime->ts <= $end_timestamp) $to = $to_datetime->ts;
-			else $to = $end_timestamp;
+			$from = strtotime($result['date_start']);
+			$to = strtotime($result['due_date']. ' '. $result["time_end"]);
+			$windowTo = strtotime($endDate->getDBInsertDateTimeValue());
 			for($j = $from; $j <= $to; $j=$j+(60*60*24))
 			{
 
 				$obj = &new Appointment();
 				$temp_start = date("Y-m-d",$j);
+				$endTime = strtotime($temp_start. ' '.  $result['time_start']);
+				if($endTime > $windowTo) {
+					break;
+				}
+			
 				$result["date_start"]= $temp_start ;
 				list($obj->temphour,$obj->tempmin) = explode(":",$result["time_start"]);
 				if($start_timestamp != $end_timestamp && $view == 'day'){
@@ -127,15 +171,15 @@ class Appointment
 			
         }
 		//Get Recurring events
-		$q = "SELECT vtiger_activity.*, vtiger_crmentity.*, case when (vtiger_users.user_name not like '') then vtiger_users.user_name else vtiger_groups.groupname end as user_name , vtiger_recurringevents.recurringid, vtiger_recurringevents.recurringdate as date_start ,vtiger_recurringevents.recurringtype,vtiger_groups.groupname from vtiger_activity inner join vtiger_crmentity on vtiger_activity.activityid = vtiger_crmentity.crmid inner join vtiger_recurringevents on vtiger_activity.activityid=vtiger_recurringevents.activityid left join vtiger_groups on vtiger_groups.groupid = vtiger_crmentity.smownerid LEFT JOIN vtiger_users ON vtiger_users.id = vtiger_crmentity.smownerid";
+		$q = "SELECT vtiger_activity.*, vtiger_crmentity.*, case when (vtiger_users.user_name not like '') then $userNameSql else vtiger_groups.groupname end as user_name , vtiger_recurringevents.recurringid, vtiger_recurringevents.recurringdate as date_start ,vtiger_recurringevents.recurringtype,vtiger_groups.groupname from vtiger_activity inner join vtiger_crmentity on vtiger_activity.activityid = vtiger_crmentity.crmid inner join vtiger_recurringevents on vtiger_activity.activityid=vtiger_recurringevents.activityid left join vtiger_groups on vtiger_groups.groupid = vtiger_crmentity.smownerid LEFT JOIN vtiger_users ON vtiger_users.id = vtiger_crmentity.smownerid";
 		$q .= getNonAdminAccessControlQuery('Calendar',$current_user);
-        $q.=" where vtiger_crmentity.deleted = 0 and vtiger_activity.activitytype not in ('Emails','Task') AND (recurringdate between ? and ?) ";
+        $q.=" where vtiger_crmentity.deleted = 0 and vtiger_activity.activitytype not in ('Emails','Task') AND (cast(concat(recurringdate, ' ', time_start) as datetime) between ? and ?) ";
 		
 		// User Select Customization
 		$q .= $query_filter_prefix;
 		// END
 
-		$params = array($from_datetime->get_formatted_date(), $to_datetime->get_formatted_date());
+		$params = array($startDate->getDBInsertDateTimeValue(), $endDate->getDBInsertDateTimeValue());
 													
         $q .= " ORDER by vtiger_recurringevents.recurringid";
 		$r = $adb->pquery($q, $params);
@@ -193,17 +237,19 @@ class Appointment
 			$this->recurring="Recurring.gif";
 		
 		$this->record            = $act_array["activityid"];
+		$date = new DateTimeField($act_array["date_start"].' '. $act_array['time_start']);
+		$eventStartDate = DateTimeField::convertToDBFormat($date->getDisplayDate());
+		list($eventStartHour) = explode(':', $date->getDisplayTime());
 		list($styear,$stmonth,$stday) = explode("-",$act_array["date_start"]);
+		list($sthour, $stmin) = explode(':', $act_array['time_start']);
 		if($act_array["notime"] != 1){
-			$st_hour = twoDigit($this->temphour);
-			list($sthour,$stmin) = split(":",$act_array["time_start"]);
+			$st_hour = $eventStartHour;
 		}else{
 			$st_hour = 'notime';
-			$stmin = '00';
-			$sthour= '00';
+			$act_array["time_start"] = "00:00";
 		}
 		list($eyear,$emonth,$eday) = explode("-",$act_array["due_date"]);
-		list($end_hour,$end_min) = split(":",$act_array["time_end"]);
+		list($end_hour,$end_min) = explode(":",$act_array['time_end']);
 
 		$start_date_arr = Array(
 			'min'   => $stmin,
@@ -223,16 +269,17 @@ class Appointment
                 $this->end_time          = new vt_DateTime($end_date_arr,true);
 		if($view == 'day' || $view == 'week')
 		{
-			$this->formatted_datetime= $act_array["date_start"].":".$st_hour;
+			$this->formatted_datetime= DateTimeField::convertToUserFormat($eventStartDate)
+					.":".$st_hour;
 		}
 		elseif($view == 'year')
 		{
-			list($year,$month,$date) = explode("-",$act_array["date_start"]);
+			list($year,$month,$date) = explode("-",$eventStartDate);
 			$this->formatted_datetime = $month;
 		}
 		else
 		{
-			$this->formatted_datetime= $act_array["date_start"];
+			$this->formatted_datetime= DateTimeField::convertToUserFormat($eventStartDate);
 		}
 		return;
 	}

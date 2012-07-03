@@ -208,53 +208,105 @@ function DeleteFolder(folderId)
 
 function MoveFile(id,foldername)
 {
-		fninvsh('movefolderlist');
-        var select_options  =  document.getElementById('allselectedboxes').value;
-        var x = select_options.split(";");
-	    var searchurl= document.getElementById('search_url').value;
-        var count=x.length
-        var viewid =getviewId();
-        var idstring = "";
-        if (count > 1)
-        {
-            document.getElementById('idlist').value=select_options;
-            idstring = select_options;
-        }
-        else
-        {
-            alert(alert_arr.SELECT);
-            return false;
-        }
+	fninvsh('movefolderlist');
+	var searchurl= $('search_url').value;
+	var viewid =getviewId();
+	var idstring = '';
+	var select_options = '';
+	var excludedRecords = '';
+	var obj = document.getElementsByName('folderidVal');
+	var folderid='0';
+	var numOfRows=0;
+	var activation='false';
+	if(obj){
+		for(var i=0;i<obj.length;i++){
+			var folid=obj[i].value;
+			if($('selectedboxes_selectall'+folid).value == 'all'){
+				excludedRecords = excludedRecords + $('excludedRecords_selectall'+folid).value;
+				var rows = $('numOfRows_selectall'+folid).value;
+				numOfRows = numOfRows+parseInt(rows);
+				folderid = folid+';'+folderid;
+				activation = 'true';
+			} else {
+				select_options = select_options + $('selectedboxes_selectall'+folid).value;
+			}
+		}
+	}
+	var x = select_options.split(";");
+	var count = x.length;
+	numOfRows = numOfRows + count-1;
+	if(activation == 'true'){
+		if(select_options == ''){
+			select_options = 'all';
+		}
+		document.getElementById('idlist').value=select_options;
+		idstring = select_options;
+		var skiprecords = excludedRecords.split(";");
+		var excount=skiprecords.length;
+		if(excount > 1){
+			count = numOfRows - excount + 1;
+		} else {
+			count = numOfRows;
+		}
+	} else {
+		if (count > 1) {
+			document.getElementById('idlist').value=select_options;
+			idstring = select_options;
+		} else {
+			alert(alert_arr.SELECT);
+			return false;
+		}
+		//we have to decrese the count value by 1 because when we split with semicolon we will get one extra count
+		count = count - 1;
+	}
 
-    if(idstring != '')
-	{
-		if(confirm(alert_arr.LBL_ARE_YOU_SURE_TO_MOVE_TO + foldername + alert_arr.LBL_FOLDER))
-        	{
-			$('status').style.display = "block";
-			new Ajax.Request(
-                        'index.php',
-                        {queue: {position: 'end', scope: 'command'},
-                                method: 'post',
-                                postBody: 'action=DocumentsAjax&file=MoveFile&from_folderid=0&module=Documents&folderid='+id+'&idlist='+idstring,
-                                onComplete: function(response) {
-						var item = response.responseText;
-						$('status').style.display = "none";
-						if(item.indexOf("NOT_PERMITTED") > -1 )                                                                     							{
-							$("lblError").innerHTML="<table cellpadding=0 cellspacing=0 border=0 width=100%><tr><td class=small bgcolor=red><font color=white size=2><b>"+alert_arr.NOT_PERMITTED+"</b></font></td></tr></table>";
-							setTimeout(hidelblError,3000);
+	if(idstring != '') {
+		if(count > getMaxMassOperationLimit()) {
+			confirm_str=alert_arr.MORE_THAN_500;
+			if(confirm(confirm_str)) {
+				confirm_status=true;
+			} else {
+				return false;
+			}
+		} else {
+			confirm_status=true;
+		}
+
+		if(confirm_status) {
+			if(confirm(alert_arr.LBL_ARE_YOU_SURE_TO_MOVE_TO + foldername + alert_arr.LBL_FOLDER)) {
+
+				var url = "&viewname="+viewid+searchurl+"&excludedRecords="+excludedRecords+"&folderidstring="+folderid+"&selectallmode="+activation;
+				$('status').style.display = "block";
+				new Ajax.Request(
+					'index.php',
+					{
+						queue: {
+							position: 'end',
+							scope: 'command'
+						},
+						method: 'post',
+						postBody: 'action=DocumentsAjax&file=MoveFile&from_folderid=0&module=Documents&folderid='+id+'&idlist='+idstring+url,
+						onComplete: function(response) {
+							var item = response.responseText;
+							$('status').style.display = "none";
+							if(item.indexOf("NOT_PERMITTED") > -1 ) {
+								$("lblError").innerHTML="<table cellpadding=0 cellspacing=0 border=0 width=100%><tr><td class=small bgcolor=red><font color=white size=2><b>"+alert_arr.NOT_PERMITTED+"</b></font></td></tr></table>";
+								setTimeout(hidelblError,3000);
+							}
+							else
+								getObj('ListViewContents').innerHTML = item;
 						}
-						else
-							getObj('ListViewContents').innerHTML = item;
-           				}
 
 					}
-			);
-		}else{
+				);
+			} else {
+				return false;
+			}
+		} else {
 			return false;
 		}
 			
-	}else
-	{
+	} else {
 		alert(alert_arr.LBL_SELECT_ONE_FILE);
 		return false;
 	}

@@ -38,5 +38,19 @@ class Vtiger_Webservice {
 			}
 		}
 	}
+
+	/**
+	 * Initialize webservice for the given module
+	 * @param Vtiger_Module Instance of the module.
+	 */
+	static function uninitialize($moduleInstance) {
+		if($moduleInstance->isentitytype) {
+			// TODO: Enable support when webservice API support is added.
+			if(function_exists('vtws_deleteWebserviceEntity')) { 
+				vtws_deleteWebserviceEntity($moduleInstance->name);
+				self::log("De-Initializing webservices support ...DONE");
+			}
+		}
+	}
 }
 ?>

@@ -88,9 +88,9 @@ function getPrimaryColumnsHTML($module)
 		if(isset($ogReport->pri_module_columnslist[$module][$value]) && !$block_listed[$value])
 		{
 			$block_listed[$value] = true;
-			$shtml .= "<optgroup label=\"".$app_list_strings['moduleList'][$module]." ".getTranslatedString($value)."\" class=\"select\" style=\"border:none\">";
+			$shtml .= "<optgroup label=\"".getTranslatedString($module, $module)." ".getTranslatedString($value)."\" class=\"select\" style=\"border:none\">";
 			if($id_added==false){
-				$shtml .= "<option value=\"vtiger_crmentity:crmid:".$module."_ID:crmid:I\">".getTranslatedString(getTranslatedString($module).' ID')."</option>";
+				$shtml .= "<option value=\"vtiger_crmentity:crmid:".$module."_ID:crmid:I\">".getTranslatedString($module.' ID', $module)."</option>";
 				$id_added=true;
 			}
 			foreach($ogReport->pri_module_columnslist[$module][$value] as $field=>$fieldlabel)

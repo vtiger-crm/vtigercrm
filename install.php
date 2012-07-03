@@ -11,8 +11,9 @@
 include('adodb/adodb.inc.php');
 
 if(version_compare(phpversion(), '5.0') < 0) {
-        require_once('phpversionfail.php');
-        die();
+	$serverPhpVersion = phpversion();
+	require_once('phpversionfail.php');
+	die();
 }
 
 /** Function to  return a string with backslashes stripped off
@@ -45,7 +46,7 @@ if(empty($_REQUEST['file']) && is_array($vtconfig) && $vtconfig['quickbuild'] ==
 } elseif (!empty($_REQUEST['file'])) $the_file = $_REQUEST['file'];
 else $the_file = "welcome.php";
 
-Common_Install_Wizard_Utils::checkFileAccess("install/".$the_file);
+Common_Install_Wizard_Utils::checkFileAccessForInclusion("install/".$the_file);
 include("install/".$the_file);
 
 ?>

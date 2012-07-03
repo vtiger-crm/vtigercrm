@@ -19,79 +19,25 @@ require_once("modules/Reports/Reports.php");
 global $tmp_dir, $root_directory;
 
 $fname = tempnam($root_directory.$tmp_dir, "merge2.xls");
-$workbook = &new writeexcel_workbook($fname);
-$worksheet =& $workbook->addworksheet();
-
-# Set the column width for columns 1, 2, 3 and 4
-$worksheet->set_column(0, 3, 15);
-
-# Create a format for the column headings
-$header =& $workbook->addformat();
-$header->set_bold();
-$header->set_size(12);
-$header->set_color('blue');
 
 # Write out the data
 $reportid = vtlib_purify($_REQUEST["record"]);
 $oReport = new Reports($reportid);
 $filtercolumn = $_REQUEST['stdDateFilterField'];
-$filter = $_REQUEST['stdDateFilter'];
-$startdate = getDBInsertDateValue($_REQUEST['startdate']);
-$enddate = getDBInsertDateValue($_REQUEST['enddate']);
-
+$startdate = ($_REQUEST['startdate']);
+$enddate = ($_REQUEST['enddate']);
+if(!empty($startdate) && !empty($enddate) && $startdate != "0000-00-00" && 
+		$enddate != "0000-00-00" ) {
+	$filter = $_REQUEST['stdDateFilter'];
+	$date = new DateTimeField($_REQUEST['startdate']);
+	$endDate = new DateTimeField($_REQUEST['enddate']);
+	$startdate = $date->getDBInsertDateValue();//Convert the user date format to DB date format
+	$enddate = $endDate->getDBInsertDateValue();//Convert the user date format to DB date format
+}
 $oReportRun = new ReportRun($reportid);
 $filterlist = $oReportRun->RunTimeFilter($filtercolumn,$filter,$startdate,$enddate);
-$arr_val = $oReportRun->GenerateReport("PDF",$filterlist);
-$totalxls = $oReportRun->GenerateReport("TOTALXLS",$filterlist);
 
-if(isset($arr_val))
-{
-	foreach($arr_val[0] as $key=>$value)
-	{
-		$worksheet->write(0, $count, $key , $header);
-		$count = $count + 1;
-	}
-	$rowcount=1;
-	foreach($arr_val as $key=>$array_value)
-	{
-		$dcount = 0;
-		foreach($array_value as $hdr=>$value)
-		{
-			//$worksheet->write($key+1, $dcount, iconv("UTF-8", "ISO-8859-1", $value));
-			$value = decode_html($value);
-			$worksheet->write($key+1, $dcount, utf8_decode($value));
-			$dcount = $dcount + 1;
-		}
-		$rowcount++; 
-	}
-
-	$rowcount++;
-	$count=1;
-	if(is_array($totalxls[0])) {
-		foreach($totalxls[0] as $key=>$value)
-		{
-				$chdr=substr($key,-3,3);
-			$worksheet->write($rowcount, $count, $mod_strings[$chdr]);
-			$count = $count + 1;
-		}
-	}
-	$rowcount++;
-	foreach($totalxls as $key=>$array_value)
-	{
-			$dcount = 1;
-			foreach($array_value as $hdr=>$value)
-			{
-					//$worksheet->write($key+1, $dcount, iconv("UTF-8", "ISO-8859-1", $value));
-					if ($dcount==1)
-							$worksheet->write($key+$rowcount, 0, utf8_decode(substr($hdr,0,strlen($hdr)-4)));
-				$value = decode_html($value);
-					$worksheet->write($key+$rowcount, $dcount, utf8_decode($value));
-					$dcount = $dcount + 1;
-			}
-	} 
-}
-
-$workbook->close();
+$oReportRun->writeReportToExcelFile($fname, $filterlist);
 
 if(isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'],'MSIE'))
 {

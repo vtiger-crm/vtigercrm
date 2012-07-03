@@ -11,7 +11,12 @@ include_once 'include/InventoryPDFController.php';
 include_once dirname(__FILE__). '/SalesOrderPDFHeaderViewer.php';
 class Vtiger_SalesOrderPDFController extends Vtiger_InventoryPDFController{
 	function buildHeaderModelTitle() {
-		return sprintf("%s: %s", rtrim($this->moduleName, 's'), $this->focusColumnValue('salesorder_no'));
+		$singularModuleNameKey = 'SINGLE_'.$this->moduleName;
+		$translatedSingularModuleLabel = getTranslatedString($singularModuleNameKey, $this->moduleName);
+		if($translatedSingularModuleLabel == $singularModuleNameKey) {
+			$translatedSingularModuleLabel = getTranslatedString($this->moduleName, $this->moduleName);
+		}
+		return sprintf("%s: %s", $translatedSingularModuleLabel, $this->focusColumnValue('salesorder_no'));
 	}
 
 	function getHeaderViewer() {

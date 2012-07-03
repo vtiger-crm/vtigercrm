@@ -28,7 +28,7 @@ if($_POST['config_chk'] == 'true')
 	exit();
 }
 if(isset($_REQUEST['file']) && $_REQUEST['file']!='' && !isset($_REQUEST['ajax'])){
-	checkFileAccess("modules/".$_REQUEST['module']."/".$_REQUEST['file'].".php");
+	checkFileAccessForInclusion("modules/".$_REQUEST['module']."/".$_REQUEST['file'].".php");
 	require_once("modules/".$_REQUEST['module']."/".$_REQUEST['file'].".php");
 	exit();
 }
@@ -38,7 +38,7 @@ if(isset($_REQUEST["mailbox"]) && $_REQUEST["mailbox"] != "") {$mailbox=vtlib_pu
 $adb->println("Inside WebmailsAjax.php");
 
 if(isset($_POST["file"]) && $_POST["ajax"] == "true") {
-	checkFileAccess("modules/".$_REQUEST["module"]."/".$_POST["file"].".php");
+	checkFileAccessForInclusion("modules/".$_REQUEST["module"]."/".$_POST["file"].".php");
 	require_once("modules/".$_REQUEST["module"]."/".$_POST["file"].".php");
 }
 

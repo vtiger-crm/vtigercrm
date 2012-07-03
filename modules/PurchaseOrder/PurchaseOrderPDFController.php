@@ -12,7 +12,12 @@ include_once 'include/InventoryPDFController.php';
 
 class Vtiger_PurchaseOrderPDFController extends Vtiger_InventoryPDFController{
 	function buildHeaderModelTitle() {
-		return sprintf("%s: %s", rtrim($this->moduleName, 's'), $this->focusColumnValue('purchaseorder_no'));
+		$singularModuleNameKey = 'SINGLE_'.$this->moduleName;
+		$translatedSingularModuleLabel = getTranslatedString($singularModuleNameKey, $this->moduleName);
+		if($translatedSingularModuleLabel == $singularModuleNameKey) {
+			$translatedSingularModuleLabel = getTranslatedString($this->moduleName, $this->moduleName);
+		}
+		return sprintf("%s: %s", $translatedSingularModuleLabel, $this->focusColumnValue('purchaseorder_no'));
 	}
 
 	function buildHeaderModelColumnCenter() {

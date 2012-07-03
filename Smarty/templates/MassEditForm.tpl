@@ -90,17 +90,15 @@
 </table>
 
 <script type="text/javascript" id="massedit_javascript">
-
-        var mass_fieldname = new Array({$VALIDATION_DATA_FIELDNAME});
-
-        var mass_fieldlabel = new Array({$VALIDATION_DATA_FIELDLABEL});
-
-        var mass_fielddatatype = new Array({$VALIDATION_DATA_FIELDDATATYPE});
-
-		var mass_count=0;
-	
-		massedit_initOnChangeHandlers(); 
-		
-
-
+	fieldname = new Array({$VALIDATION_DATA_FIELDNAME});
+	fieldlabel = new Array({$VALIDATION_DATA_FIELDLABEL});
+	fielddatatype = new Array({$VALIDATION_DATA_FIELDDATATYPE});
+	count=0;
+	massedit_initOnChangeHandlers();
 </script>
+
+{if $PICKIST_DEPENDENCY_DATASOURCE neq ''}
+<script type="text/javascript">
+	(new FieldDependencies({$PICKIST_DEPENDENCY_DATASOURCE})).setup();
+</script>
+{/if}

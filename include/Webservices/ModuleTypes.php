@@ -8,9 +8,28 @@
  * All Rights Reserved.
  *************************************************************************************/
 	
-	function vtws_listtypes($user){
+	function vtws_listtypes($fieldTypeList, $user){
+		// Bulk Save Mode: For re-using information
+		static $webserviceEntities = false;
+		// END
+
+		static $types = array();
+		if(!empty($fieldTypeList)) {
+			$fieldTypeList = array_map(strtolower, $fieldTypeList);
+			sort($fieldTypeList);
+			$fieldTypeString = implode(',', $fieldTypeList);
+		} else {
+			$fieldTypeString = 'all';
+		}
+		if(!empty($types[$user->id][$fieldTypeString])) {
+			return $types[$user->id][$fieldTypeString];
+		}
 		try{
-			global $adb,$log;
+			global $log;
+			/**
+			 * @var PearDatabase
+			 */
+			$db = PearDatabase::getInstance();
 			
 			vtws_preserveGlobal('current_user',$user);
 			//get All the modules the current user is permitted to Access.
@@ -18,21 +37,65 @@
 			if(array_search('Calendar',$allModuleNames) !== false){
 				array_push($allModuleNames,'Events');
 			}
+
+			if(!empty($fieldTypeList)) {
+				$sql = "SELECT distinct(vtiger_field.tabid) as tabid FROM vtiger_field LEFT JOIN vtiger_ws_fieldtype ON ".
+				"vtiger_field.uitype=vtiger_ws_fieldtype.uitype
+				 INNER JOIN vtiger_profile2field ON vtiger_field.fieldid = vtiger_profile2field.fieldid
+				 INNER JOIN vtiger_def_org_field ON vtiger_def_org_field.fieldid = vtiger_field.fieldid
+				 INNER JOIN vtiger_role2profile ON vtiger_profile2field.profileid = vtiger_role2profile.profileid
+				 INNER JOIN vtiger_user2role ON vtiger_user2role.roleid = vtiger_role2profile.roleid
+				 where vtiger_profile2field.visible=0 and vtiger_def_org_field.visible = 0
+				 and vtiger_field.presence in (0,2)
+				 and vtiger_user2role.userid=? and fieldtype in (".
+				generateQuestionMarks($fieldTypeList).')';
+				$params = array();
+				$params[] = $user->id;
+				foreach($fieldTypeList as $fieldType)
+					$params[] = $fieldType;
+				$result = $db->pquery($sql, $params);
+				$it = new SqlResultIterator($db, $result);
+				$moduleList = array();
+				foreach ($it as $row) {
+					$moduleList[] = getTabModuleName($row->tabid);
+				}
+				$allModuleNames = array_intersect($moduleList, $allModuleNames);
+
+				$params = $fieldTypeList;
+
+				$sql = "select name from vtiger_ws_entity inner join vtiger_ws_entity_tables on ".
+				"vtiger_ws_entity.id=vtiger_ws_entity_tables.webservice_entity_id inner join ".
+				"vtiger_ws_entity_fieldtype on vtiger_ws_entity_fieldtype.table_name=".
+				"vtiger_ws_entity_tables.table_name where fieldtype=(".
+				generateQuestionMarks($fieldTypeList).')';
+				$result = $db->pquery($sql, $params);
+				$it = new SqlResultIterator($db, $result);
+				$entityList = array();
+				foreach ($it as $row) {
+					$entityList[] = $row->name;
+				}
+			}
 			//get All the CRM entity names.
-			$webserviceEntities = vtws_getWebserviceEntities();
+			if($webserviceEntities === false || !CRMEntity::isBulkSaveMode()) {
+				// Bulk Save Mode: For re-using information
+				$webserviceEntities = vtws_getWebserviceEntities();
+			}
+
 			$accessibleModules = array_values(array_intersect($webserviceEntities['module'],$allModuleNames));
 			$entities = $webserviceEntities['entity'];
 			$accessibleEntities = array();
-			foreach($entities as $entity){
-				$webserviceObject = VtigerWebserviceObject::fromName($adb,$entity);
-				$handlerPath = $webserviceObject->getHandlerPath();
-				$handlerClass = $webserviceObject->getHandlerClass();
-				
-				require_once $handlerPath;
-				$handler = new $handlerClass($webserviceObject,$user,$adb,$log);
-				$meta = $handler->getMeta();
-				if($meta->hasAccess()===true){
-					array_push($accessibleEntities,$entity);
+			if(empty($fieldTypeList)) {
+				foreach($entities as $entity){
+					$webserviceObject = VtigerWebserviceObject::fromName($db,$entity);
+					$handlerPath = $webserviceObject->getHandlerPath();
+					$handlerClass = $webserviceObject->getHandlerClass();
+
+					require_once $handlerPath;
+					$handler = new $handlerClass($webserviceObject,$user,$db,$log);
+					$meta = $handler->getMeta();
+					if($meta->hasAccess()===true){
+						array_push($accessibleEntities,$entity);
+					}
 				}
 			}
 		}catch(WebServiceException $exception){
@@ -65,7 +128,9 @@
 		}
 		
 		VTWS_PreserveGlobal::flush();
-		return array("types"=>array_merge($accessibleModules,$accessibleEntities),'information'=>$informationArray);
+		$types[$user->id][$fieldTypeString] = array("types"=>array_merge($accessibleModules,$accessibleEntities),
+			'information'=>$informationArray);
+		return $types[$user->id][$fieldTypeString];
 	}
 
 ?>

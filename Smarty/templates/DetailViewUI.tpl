@@ -13,22 +13,18 @@
 -->*}
 
 <!-- This file is used to display the fields based on the ui type in detailview -->
-		{if $keyid eq '1' || $keyid eq 2 || $keyid eq '11' || $keyid eq '7' || $keyid eq '9' || $keyid eq '55' || $keyid eq '71' || $keyid eq '72' || $keyid eq '103' || $keyid eq '255'} <!--TextBox-->
+		{if $keyid eq '1' || $keyid eq 2 || $keyid eq '11' || $keyid eq '7' || $keyid eq '9' || $keyid eq '55' || $keyid eq '71' || $keyid eq '72' || $keyid eq '103' || $keyid eq '255' || $keyid eq '14'} <!--TextBox-->
 			<td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');" valign="top">
 				{if $keyid eq '55' || $keyid eq '255'}<!--SalutationSymbol-->
 					{if $keyaccess eq $APP.LBL_NOT_ACCESSIBLE}
-						<font color='red'>{$APP.LBL_NOT_ACCESSIBLE}</font>	
+						<font color='red'>{$APP.LBL_NOT_ACCESSIBLE}</font>
 					{else}
 						{$keysalut}
 					{/if}
 				{/if}
 
-				{if $keyid eq 11}
-					{if $USE_ASTERISK eq 'true'}
-						&nbsp;&nbsp;<span id="dtlview_{$label}"><a href='javascript:;' onclick='startCall("{$keyval}", "{$ID}")'>{$keyval}</a></span>
-					{else}
-						&nbsp;&nbsp;<span id="dtlview_{$label}">{$keyval}</span>
-					{/if}
+				{if $keyid eq 11 && $USE_ASTERISK eq 'true'}
+                    &nbsp;&nbsp;<span id="dtlview_{$label}"><a href='javascript:;' onclick='startCall("{$keyval}", "{$ID}")'>{$keyval}</a></span>
 				{else}
 					&nbsp;&nbsp;<span id="dtlview_{$label}">{$keyval}</span>
 				{/if}
@@ -37,13 +33,13 @@
                     <br><input name="button_{$label}" type="button" class="crmbutton small save" value="{$APP.LBL_SAVE_LABEL}" onclick="dtlViewAjaxSave('{$label}','{$MODULE}',{$keyid},'{$keytblname}','{$keyfldname}','{$ID}');fnhide('crmspanid');"/> {$APP.LBL_OR}
                     <a href="javascript:;" onclick="hndCancel('dtlview_{$label}','editarea_{$label}','{$label}')" class="link">{$APP.LBL_CANCEL_BUTTON_LABEL}</a>
                 </div>
-                {if $keyid eq '71' && $keyfldname eq 'unit_price'}	
-                	{if $PRICE_DETAILS|@count > 0}				
+                {if $keyid eq '71' && $keyfldname eq 'unit_price'}
+                	{if $PRICE_DETAILS|@count > 0}
 						<span id="multiple_currencies" width="38%" style="align:right;">
 							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0);" onclick="toggleShowHide('currency_class','multiple_currencies');">{$APP.LBL_MORE_CURRENCIES} &raquo;</a>
 						</span>
-						
-						<div id="currency_class" class="multiCurrencyDetailUI">					
+
+						<div id="currency_class" class="multiCurrencyDetailUI">
 							<table width="100%" height="100%" class="small" cellpadding="5">
 							<tr>
 								<th colspan="2">
@@ -52,7 +48,7 @@
 								<th align="right">
 									<img border="0" style="cursor: pointer;" onclick="toggleShowHide('multiple_currencies','currency_class');" src="{'close.gif'|@vtiger_imageurl:$THEME}"/>
 								</th>
-							</tr>							
+							</tr>
 							<tr class="detailedViewHeader">
 								<th>{$APP.LBL_CURRENCY}</th>
 								<th colspan="2">{$APP.LBL_PRICE}</th>
@@ -88,7 +84,7 @@
                 </div>
 				<div id="internal_mailer_{$keyfldname}" style="display: none;">{$keyfldid}####{$smarty.session.internal_mailer}</div>
                                                   </td>
-						                     {elseif $keyid eq '15' || $keyid eq '16'} <!--ComboBox-->
+	{elseif $keyid eq '15' || $keyid eq '16' || $keyid eq '31' || $keyid eq '32'} <!--ComboBox-->
 						{foreach item=arr from=$keyoptions}
 							{if $arr[0] eq $APP.LBL_NOT_ACCESSIBLE && $arr[2] eq 'selected'}
 								{assign var=keyval value=$APP.LBL_NOT_ACCESSIBLE}
@@ -96,7 +92,7 @@
 							{else}
                                                                 {assign var=fontval value=''}
 							{/if}
-						{/foreach}               
+						{/foreach}
 							<td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');"><span id="dtlview_{$label}"><font color="{$fontval}">{if $APP.$keyval!=''}{$APP.$keyval}{elseif $MOD.$keyval!=''}{$MOD.$keyval}{else}{$keyval}{/if}</font></span>
                                               		<div id="editarea_{$label}" style="display:none;">
                     							   <select id="txtbox_{$label}" name="{$keyfldname}" class="small">
@@ -152,7 +148,7 @@
                     							   <select id="txtbox_{$label}" name="{$keyfldname}" class="small">
 									{foreach item=arr key=uivalueid from=$keyoptions}
 									{foreach key=sel_value item=value from=$arr}
-										<option value="{$uivalueid}" {$value}>{$sel_value|@getTranslatedCurrencyString}</option>	
+										<option value="{$uivalueid}" {$value}>{$sel_value|@getTranslatedCurrencyString}</option>
 									{/foreach}
 									{/foreach}
                     							   </select>
@@ -161,12 +157,12 @@
                     							</div>
 								{else}
                							<td width=25% class="dvtCellInfo" align="left">{$keyval}
-								{/if}	
+								{/if}
 
-                                        		
+
                							</td>
                                              {elseif $keyid eq '17'} <!--WebSite-->
-                                                  <td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');">&nbsp;<span id="dtlview_{$label}"><a href="http://{$keyval}" target="_blank">{$keyval}</a></span>
+                                                  <td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');">&nbsp;<span id="dtlview_{$label}"><a href="{$keyval}" target="_blank">{$keyval}</a></span>
                                               		<div id="editarea_{$label}" style="display:none;">
                                               		  <input class="detailedViewTextBox" onFocus="this.className='detailedViewTextBoxOn'" onBlur="this.className='detailedViewTextBox'" onkeyup="validateUrl('{$keyfldname}');" type="text" id="txtbox_{$label}" name="{$keyfldname}" maxlength='100' value="{$keyval}"></input>
                                               		  <br><input name="button_{$label}" type="button" class="crmbutton small save" value="{$APP.LBL_SAVE_LABEL}" onclick="dtlViewAjaxSave('{$label}','{$MODULE}',{$keyid},'{$keytblname}','{$keyfldname}','{$ID}');fnhide('crmspanid');"/> {$APP.LBL_OR}
@@ -180,7 +176,7 @@
                                                           <br><input name="button_{$label}" type="button" class="crmbutton small save" value="{$APP.LBL_SAVE_LABEL}" onclick="dtlViewAjaxSave('{$label}','{$MODULE}',{$keyid},'{$keytblname}','{$keyfldname}','{$ID}');fnhide('crmspanid');"/> {$APP.LBL_OR}
                                                           <a href="javascript:;" onclick="hndCancel('dtlview_{$label}','editarea_{$label}','{$label}')" class="link">{$APP.LBL_CANCEL_BUTTON_LABEL}</a>
                                                        </div>
-                                                  </td>	
+                                                  </td>
                                              {elseif $keyid eq '19' || $keyid eq '20'} <!--TextArea/Description-->
 						<!-- we will empty the value of ticket and faq comment -->
 						{if $label eq $MOD.LBL_ADD_COMMENT}
@@ -206,7 +202,7 @@
                                              {elseif $keyid eq '21' || $keyid eq '24' || $keyid eq '22'} <!--TextArea/Street-->
                                                   <td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');">&nbsp;<span id="dtlview_{$label}">{$keyval}</span>
                                               		<div id="editarea_{$label}" style="display:none;">
-                                              		  <textarea id="txtbox_{$label}" name="{$keyfldname}"  class=detailedViewTextBox onFocus="this.className='detailedViewTextBoxOn'"onBlur="this.className='detailedViewTextBox'" rows=2>{$keyval|regex_replace:"/<br\s*\/>/":""}</textarea>                                            		  
+                                              		  <textarea id="txtbox_{$label}" name="{$keyfldname}"  class=detailedViewTextBox onFocus="this.className='detailedViewTextBoxOn'"onBlur="this.className='detailedViewTextBox'" rows=2>{$keyval|regex_replace:"/<br\s*\/>/":""}</textarea>
                                               		  <br><input name="button_{$label}" type="button" class="crmbutton small save" value="{$APP.LBL_SAVE_LABEL}" onclick="dtlViewAjaxSave('{$label}','{$MODULE}',{$keyid},'{$keytblname}','{$keyfldname}','{$ID}');fnhide('crmspanid');"/> {$APP.LBL_OR}
                                               		  <a href="javascript:;" onclick="hndCancel('dtlview_{$label}','editarea_{$label}','{$label}')" class="link">{$APP.LBL_CANCEL_BUTTON_LABEL}</a>
                                                        </div>
@@ -219,7 +215,7 @@
                                                   	<td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}">&nbsp;<a href="{$keyseclink}">{$keyval}</a></td>
                                              {elseif $keyid eq '59'} <!--ProductPopup-->
                                                   <td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');">&nbsp;<span id="dtlview_{$label}"><a href="{$keyseclink}">{$keyval}</a></span>
-                                              		<div id="editarea_{$label}" style="display:none;">                                              		  
+                                              		<div id="editarea_{$label}" style="display:none;">
                                                          <input id="popuptxt_{$label}" name="product_name" readonly type="text" value="{$keyval}"><input id="txtbox_{$label}" name="{$keyfldname}" type="hidden" value="{$keysecid}">&nbsp;<img src="{'select.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_SELECT}" title="{$APP.LBL_SELECT}" LANGUAGE=javascript onclick='return window.open("index.php?module=Products&action=Popup&html=Popup_picker&form=HelpDeskEditView&popuptype=specific","test","width=600,height=602,resizable=1,scrollbars=1,top=150,left=200");' align="absmiddle" style='cursor:hand;cursor:pointer'>&nbsp;<input type="image" src="{'clear_field.gif'|@vtiger_imageurl:$THEME}" alt="{$APP.LBL_CLEAR}" title="{$APP.LBL_CLEAR}" LANGUAGE=javascript onClick="this.form.product_id.value=''; this.form.product_name.value=''; return false;" align="absmiddle" style='cursor:hand;cursor:pointer'>
                                                          <br><input name="button_{$label}" type="button" class="crmbutton small save" value="{$APP.LBL_SAVE_LABEL}" onclick="dtlViewAjaxSave('{$label}','{$MODULE}',{$keyid},'{$keytblname}','{$keyfldname}','{$ID}');fnhide('crmspanid');"/> {$APP.LBL_OR}
                                               		  <a href="javascript:;" onclick="hndCancel('dtlview_{$label}','editarea_{$label}','{$label}')" class="link">{$APP.LBL_CANCEL_BUTTON_LABEL}</a>
@@ -240,7 +236,7 @@
                                              {elseif $keyid eq 80} <!--SalesOrderPopup-->
                                                   <td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}">&nbsp;<a href="{$keyseclink}">{$keyval}</a>
                                                   </td>
-					     {elseif $keyid eq '52' || $keyid eq '77'} 
+					     {elseif $keyid eq '52' || $keyid eq '77'}
                                                                 <td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');">&nbsp;<span id="dtlview_{$label}">{$keyval}</span>
                                                         <div id="editarea_{$label}" style="display:none;">
                                                                            <select id="txtbox_{$label}" name="{$keyfldname}" class="small">
@@ -254,12 +250,12 @@
                                                                            <br><input name="button_{$label}" type="button" class="crmbutton small save" value="{$APP.LBL_SAVE_LABEL}" onclick="dtlViewAjaxSave('{$label}','{$MODULE}',{$keyid},'{$keytblname}','{$keyfldname}','{$ID}');fnhide('crmspanid');"/> {$APP.LBL_OR}
                                                            <a href="javascript:;" onclick="hndCancel('dtlview_{$label}','editarea_{$label}','{$label}')" class="link">{$APP.LBL_CANCEL_BUTTON_LABEL}</a>
                                                                         </div>
-                                                                </td>	
+                                                                </td>
 						{elseif $keyid eq '53'} <!--Assigned To-->
 							<td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onmouseover="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');">&nbsp;<span id="dtlview_{$label}">
 							{if $keyadmin eq 1}
-								<a href="{$keyseclink.0}">{$keyval}</a>         
-							{else}	
+								<a href="{$keyseclink.0}">{$keyval}</a>
+							{else}
 								{$keyval}
 							{/if}
 							&nbsp;</span>
@@ -319,17 +315,17 @@
                             	<input id="txtbox_{$label}" name="{$keyfldname}" type="checkbox" style="border:1px solid #bababa;" checked value="0">
                         	{else}
                           		<input id="txtbox_{$label}" type="checkbox" name="{$keyfldname}" style="border:1px solid #bababa;" value="1">
-                       		{/if}                      	
+                       		{/if}
                        	{/if}
                          <br><input name="button_{$label}" type="button" class="crmbutton small save" value="{$APP.LBL_SAVE_LABEL}" onclick="dtlViewAjaxSave('{$label}','{$MODULE}',{$keyid},'{$keytblname}','{$keyfldname}','{$ID}');"/> {$APP.LBL_OR}
                           <a href="javascript:;" onclick="hndCancel('dtlview_{$label}','editarea_{$label}','{$label}')" class="link">{$APP.LBL_CANCEL_BUTTON_LABEL}</a>
                         </div>
-                        </td>    
+                        </td>
 			{elseif $keyid eq '156'} <!--CheckBox for is admin-->
-			{if $smarty.request.record neq $CURRENT_USERID && $keyadmin eq 1} 
+			{if $smarty.request.record neq $CURRENT_USERID && $keyadmin eq 1}
                       <td width=25% class="dvtCellInfo" align="left" id="mouseArea_{$label}" onMouseOver="hndMouseOver({$keyid},'{$label}');" onmouseout="fnhide('crmspanid');">&nbsp;<span id="dtlview_{$label}">{if $APP.$keyval!=''}{$APP.$keyval}{elseif $MOD.$keyval!=''}{$MOD.$keyval}{else}{$keyval}{/if}&nbsp;</span>
                     	<div id="editarea_{$label}" style="display:none;">
-                        {if $keyval eq 'on'}                                              		  
+                        {if $keyval eq 'on'}
                             <input id="txtbox_{$label}" name="{$keyfldname}" type="checkbox" style="border:1px solid #bababa;" checked value="1">
                         {else}
                           <input id="txtbox_{$label}" type="checkbox" name="{$keyfldname}" style="border:1px solid #bababa;" value="0">
@@ -340,13 +336,13 @@
 			{else}
 				 <td width=25% class="dvtCellInfo" align="left">{$keyval}
 			{/if}
-                        </td>    
-			 
+                        </td>
+
 						{elseif $keyid eq 83}<!-- Handle the Tax in Inventory -->
 							{foreach item=tax key=count from=$TAX_DETAILS}
 								<td align="right" class="dvtCellLabel">
 									{$tax.taxlabel} {$APP.COVERED_PERCENTAGE}
-							
+
 								</td>
 								<td class="dvtCellInfo" align="left">
 									{$tax.percentage}
@@ -379,6 +375,6 @@
 
 				{elseif $keyid eq 69}<!-- for Image Reflection -->
      				<td align="left" width=25%">&nbsp;{$keyval}</td>
-				{else}									
+				{else}
 					<td class="dvtCellInfo" align="left" width=25%">&nbsp;{$keyval}</td>
 				{/if}

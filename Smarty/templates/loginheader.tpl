@@ -1,24 +1,29 @@
-<!--
-/*********************************************************************************
- * The contents of this file are subject to the SugarCRM Public License Version 1.2
- * ("License"); You may not use this file except in compliance with the 
- * License. You may obtain a copy of the License at http://www.sugarcrm.com/SPL
- * Software distributed under the License is distributed on an  "AS IS"  basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
- * the specific language governing rights and limitations under the License.
- * The Original Code is:  SugarCRM Open Source
- * The Initial Developer of the Original Code is SugarCRM, Inc.
- * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.;
- * All Rights Reserved.
- * Contributor(s): ______________________________________.
- ********************************************************************************/
--->
+{*<!--
+/*+********************************************************************************
+  * The contents of this file are subject to the vtiger CRM Public License Version 1.0
+  * ("License"); You may not use this file except in compliance with the License
+  * The Original Code is:  vtiger CRM Open Source
+  * The Initial Developer of the Original Code is vtiger.
+  * Portions created by vtiger are Copyright (C) vtiger.
+  * All Rights Reserved.
+  *********************************************************************************/
+-->*}
 <!DOCTYPE html PUBLIC "-//W3C//DTD html 4.01 Transitional//EN">
 <html>
 <head>
-<link REL="SHORTCUT ICON" HREF="themes/images/vtigercrm_icon.ico">
 <meta http-equiv="Content-Type" content="text/html; charset={$LBL_CHARSET}">
 <title>{$APP.LBL_BROWSER_TITLE}</title>
 <style type="text/css">@import url("include/style.css");</style>
+<script language="JavaScript" type="text/javascript" src="include/js/popup.js"></script>
+<script type="text/javascript" language="JavaScript">
+function set_focus() {ldelim}
+	if (document.DetailView.user_name.value != '') {ldelim}
+		document.DetailView.user_password.focus();
+		document.DetailView.user_password.select();
+	{rdelim}
+	else document.DetailView.user_name.focus();
+{rdelim}
+</script>
 </head>
-<body onload=set_focus() style="padding:0; margin:0;">
+<body onload="set_focus()">
+	<div class="loginContainer">

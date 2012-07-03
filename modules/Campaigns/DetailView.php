@@ -25,7 +25,7 @@ if(isset($_REQUEST['isDuplicate']) && $_REQUEST['isDuplicate'] == 'true')
 {
         $focus->id = "";
 }
-global $app_strings,$mod_strings,$theme,$currentModule,$default_module_view,$adb;
+global $app_strings,$mod_strings,$theme,$currentModule,$default_module_view,$adb,$list_max_entries_per_page;
 
 $theme_path="themes/".$theme."/";
 $image_path=$theme_path."images/";
@@ -95,6 +95,8 @@ $smarty->assign("TODO_PERMISSION",CheckFieldPermission('parent_id','Calendar'));
 $smarty->assign("EVENT_PERMISSION",CheckFieldPermission('parent_id','Events'));
 $smarty->assign("MODULE",$currentModule);
 $smarty->assign("EDIT_PERMISSION",isPermitted($currentModule,'EditView',$_REQUEST['record']));
+$smarty->assign("RECORDID", $_REQUEST['record']);
+$smarty->assign('MAX_RECORDS', $list_max_entries_per_page);
 
 if(PerformancePrefs::getBoolean('DETAILVIEW_RECORD_NAVIGATION', true) && isset($_SESSION[$currentModule.'_listquery'])){
 	$recordNavigationInfo = ListViewSession::getListViewNavigation($focus->id);

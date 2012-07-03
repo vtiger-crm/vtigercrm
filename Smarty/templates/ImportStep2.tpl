@@ -360,8 +360,10 @@ function showMergeOptions(curObj, arg)
 						   			</tr>
 								</table>
 									<div id='option_div' style="display:none;">
-										&nbsp;&nbsp;&nbsp;&nbsp;<input name="auto_type" value="ignore" type="radio" checked>{$MOD.Ignore_Duplicate}<br>
-	                                                        &nbsp;&nbsp;&nbsp;&nbsp;<input name="auto_type" value="overwrite" type="radio">{$MOD.Overwrite_Duplicate}
+                                                                            &nbsp;&nbsp;&nbsp;&nbsp;<input name="auto_type" value="merge" type="radio"  checked>{$MOD.LBL_MERGE_FIELDS_DUPLICATE}<br>
+                                                                            &nbsp;&nbsp;&nbsp;&nbsp;<input name="auto_type" value="ignore" type="radio">{$MOD.Ignore_Duplicate}<br>
+                                                                            &nbsp;&nbsp;&nbsp;&nbsp;<input name="auto_type" value="overwrite" type="radio">{$MOD.Overwrite_Duplicate}
+                                        
 									</div>
 								<input type="hidden" name="selectedColumnsString"/>
 								<table class="searchUIBasic small" border="0" cellpadding="5" cellspacing="0" width="80%" height="10" align="center">

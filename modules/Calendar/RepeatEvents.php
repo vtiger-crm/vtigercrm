@@ -122,40 +122,32 @@ class Calendar_RepeatEvents {
 	/**
 	 * Repeat Activity instance till given limit.
 	 */
-	static function repeat($focus) {
-
-		global $log;
-		$repeat = getrecurringObjValue();
-		$frequency = $repeat->recur_freq;
-		$repeattype= $repeat->recur_type;
-	
+	static function repeat($focus, $recurObj) {
+		
+		$frequency = $recurObj->recur_freq;
+		$repeattype= $recurObj->recur_type;
+		
 		$base_focus = new Activity();
-		$base_focus->retrieve_entity_info($focus->id,'Events');
-		$base_focus->id = $_REQUEST['record'];
-
-		$base_focus_start = $base_focus->column_fields['date_start'].' '.$base_focus->column_fields['time_start'];
-		$base_focus_end = $base_focus->column_fields['due_date'].' '.$base_focus->column_fields['time_end'];
-
-		$repeat_limit = getDBInsertDateValue($_REQUEST['calendar_repeat_limit_date']).' '.$base_focus->column_fields['time_start'];
-
-		$repeatIntervals = self::getRepeatInterval($repeattype, $frequency, $repeat, $base_focus_start, $repeat_limit);
-
-		$base_focus_start = self::mktime($base_focus_start);
-		$base_focus_end   = self::mktime($base_focus_end);
+		$base_focus->column_fields = $focus->column_fields;
+		$base_focus->id = $focus->id;
 
 		$skip_focus_fields = Array ('record_id', 'createdtime', 'modifiedtime', 'recurringtype');
 
 		/** Create instance before and reuse */
 		$new_focus = new Activity();
 
-		$numberOfRepeats = count($repeatIntervals);
-		foreach($repeatIntervals as $index => $interval) {
-			$new_focus_start_timing = self::nexttime($base_focus_start, "+$interval days");
-			$new_focus_start_timing = self::splittime(self::formattime($new_focus_start_timing));
-
-			$new_focus_end_timing = self::nexttime($base_focus_end, "+$interval days");
-			$new_focus_end_timing = self::splittime(self::formattime($new_focus_end_timing));
-
+		$eventStartDate = $focus->column_fields['date_start'];
+		$interval = strtotime($focus->column_fields['due_date']) - 
+				strtotime($focus->column_fields['date_start']);
+		
+		foreach ($recurObj->recurringdates as $index => $startDate) {
+			if($index == 0 && $eventStartDate == $startDate) {
+				continue;
+			}
+			$startDateTimestamp = strtotime($startDate);
+			$endDateTime = $startDateTimestamp + $interval;
+			$endDate = date('Y-m-d', $endDateTime);
+			
 			// Reset the new_focus and prepare for reuse
 			if(isset($new_focus->id)) unset($new_focus->id);
 			$new_focus->column_fields = array();
@@ -164,13 +156,9 @@ class Calendar_RepeatEvents {
 				if(in_array($key, $skip_focus_fields)) {
 					// skip copying few fields
 				} else if($key == 'date_start') {
-					$new_focus->column_fields['date_start'] = $new_focus_start_timing[0];				
-				} else if($key == 'time_start') {
-					$new_focus->column_fields['time_start'] = $new_focus_start_timing[1];				
-				} else if($key == 'time_end') {
-					$new_focus->column_fields['time_end']   = $new_focus_end_timing[1];				
+					$new_focus->column_fields['date_start'] = $startDate;
 				} else if($key == 'due_date') {
-					$new_focus->column_fields['due_date']   = $new_focus_end_timing[0];				
+					$new_focus->column_fields['due_date']   = $endDate;
 				} else {
 					$new_focus->column_fields[$key]         = $value;
 				}
@@ -180,6 +168,12 @@ class Calendar_RepeatEvents {
 			}
 			$new_focus->save('Calendar');
 		}
+	}
+
+	static function repeatFromRequest($focus) {
+		global $log, $default_charset, $current_user;
+		$recurObj = getrecurringObjValue();
+		self::repeat($focus, $recurObj);
 	}
 }
 

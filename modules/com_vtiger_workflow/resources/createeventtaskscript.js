@@ -60,18 +60,23 @@ function VTCreateTodoTask($){
 			var result;
 			var successResult = [true];
 			var failureResult = [false, 'invalid_date_range_message', []];
-			if(this.fieldValue('startDatefield') == this.fieldValue('endDatefield')){
-				var startTime = this.fieldValue('startTime');
-				var endTime = this.fieldValue('endTime');
-				var startDays = parseInt(this.fieldValue('startDays'), 10);
-				var endDays = parseInt(this.fieldValue('endDays'), 10);
+
+			var startTime = this.fieldValue('startTime');
+			var endTime = this.fieldValue('endTime');
+			var startDays = parseInt(this.fieldValue('startDays'), 10);
+			var endDays = parseInt(this.fieldValue('endDays'), 10);
+
+			if(this.fieldValue('startDatefield') == this.fieldValue('endDatefield') || isNaN(endDays)){
 				var startDirection = this.fieldValue('startDirection')=="After"?1:-1;
 				var endDirection = this.fieldValue('endDirection')=="After"?1:-1;
 				var dd = endDays*endDirection - startDays*startDirection;
-				if(dd<0){
+
+				if(isNaN(dd) && ((!isNaN(startDays) && (startDays*startDirection) > 0) || (!isNaN(endDays) && (endDays*endDirection) <= 0))) {
 					result = failureResult;
-				}else if(dd==0){
-					if(parse12HoursTime(startTime)>=parse12HoursTime(startTime)){
+				}else if(dd<0){
+					result = failureResult;
+				}else if(dd==0 || (isNaN(startDays) && isNaN(endDays))){
+					if(parse12HoursTime(startTime)>=parse12HoursTime(endTime)){
 						result = failureResult;
 					}else{
 						result = successResult;
@@ -99,7 +104,7 @@ function VTCreateTodoTask($){
 				fillPicklist('event_status', fieldsMap['eventstatus'], eventStatus);
 				$('#event_status_busyicon').hide();
 				$('#event_status').show();
-				
+
 				fillPicklist('event_type', fieldsMap['activitytype'], eventType);
 				$('#event_type_busyicon').hide();
 				$('#event_type').show();

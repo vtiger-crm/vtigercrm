@@ -10,9 +10,9 @@
 
 require_once('include/database/PearDatabase.php');
 require_once('user_privileges/default_module_view.php');
-global $adb, $singlepane_view, $currentModule;
+global $singlepane_view, $currentModule;
 $idlist = vtlib_purify($_REQUEST['idlist']);
-$update_mod = vtlib_purify($_REQUEST['destination_module']);
+$dest_mod = vtlib_purify($_REQUEST['destination_module']);
 $parenttab = getParentTab();
 
 $forCRMRecord = vtlib_purify($_REQUEST['parentid']);
@@ -21,19 +21,6 @@ if($singlepane_view == 'true')
 	$action = "DetailView";
 else
 	$action = "CallRelatedList";
-	
-if($update_mod == 'Leads')
-{
-	$rel_table = 'vtiger_campaignleadrel';
-}
-elseif($update_mod == 'Contacts')
-{
-	$rel_table = 'vtiger_campaigncontrel';
-}
-elseif($update_mod == 'Accounts')
-{
-	$rel_table = 'vtiger_campaignaccountrel';
-}
 
 $storearray = array();
 if(!empty($_REQUEST['idlist'])) {
@@ -43,17 +30,8 @@ if(!empty($_REQUEST['idlist'])) {
 	$storearray = array($_REQUEST['entityid']);
 }
 $focus = CRMEntity::getInstance($currentModule);
-foreach($storearray as $id)
-{
-	if($id != '')
-	{
-		if ($update_mod == 'Leads' || $update_mod == 'Contacts' || $update_mod == 'Accounts') {
-			$sql = "insert into $rel_table values(?,?,1)";
-			$adb->pquery($sql, array($forCRMRecord, $id));
-		} else {
-			$focus->save_related_module($currentModule, $forCRMRecord, $update_mod, $id);
-		}
-	}
+if(!empty($storearray)) {
+	relateEntities($focus, $currentModule, $forCRMRecord, $dest_mod, $storearray);
 }
 
 header("Location: index.php?action=$action&module=$currentModule&record=".$forCRMRecord."&parenttab=".$parenttab);

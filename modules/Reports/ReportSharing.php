@@ -36,7 +36,7 @@ $report_std_filter->assign("DATEFORMAT",$current_user->date_format);
 $report_std_filter->assign("JS_DATEFORMAT",parse_calendardate($app_strings['NTC_DATE_FORMAT']));
 
 $roleid = $current_user->column_fields['roleid'];
-$user_array = getRoleAndSubordinateUsers($roleid);
+$user_array = getAllUserName();
 $userIdStr = "";
 $userNameStr = "";
 $m=0;
@@ -53,21 +53,17 @@ foreach($user_array as $userid=>$username){
 	}
 }
 
-require_once('include/utils/GetUserGroups.php');
-$userGroups = new GetUserGroups();
-$userGroups->getAllUserGroups($current_user->id);
-$user_groups = $userGroups->user_groups;
+$user_groups = getAllGroupName();
 $groupIdStr = "";
 $groupNameStr = "";
 $l=0;
-foreach($user_groups as $i=>$grpid){
-	$grp_details = getGroupDetails($grpid);
+foreach($user_groups as $grpid=>$groupname){
 	if($l!=0){
 		$groupIdStr .= ",";
 		$groupNameStr .= ",";
 	}
-	$groupIdStr .= "'".$grp_details[0]."'";
-	$groupNameStr .= "'".escape_single_quotes(decode_html($grp_details[1]))."'";
+	$groupIdStr .= "'".$grpid."'";
+	$groupNameStr .= "'".escape_single_quotes(decode_html($groupname))."'";
 	$l++;
 }
 if(isset($_REQUEST["record"]) && $_REQUEST['record']!='')

@@ -7,7 +7,7 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ********************************************************************************/
-		    
+
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -26,18 +26,25 @@
 		<td class="cwHeadBg" align=right><img src="include/install/images/vtigercrm5.gif" alt="vtiger CRM 5" title="vtiger CRM 5"></td>
 	</tr>
 	</table>
-	
+
 	<table border=0 cellspacing=0 cellpadding=0 width=80% align=center>
 	<tr>
 		<td background="include/install/images/topInnerShadow.gif" align=left><img src="include/install/images/topInnerShadow.gif" ></td>
 	</tr>
 	</table>
-	
+
 	<table border=0 cellspacing=0 cellpadding=10 width=80% align=center>
 	<tr>
 		<td class="small" bgcolor="#FFFFFF" align=center>
-			PHP 5.0.x or above is required. Your current PHP version is <?php echo phpversion() ?> <br/>
-			Kindly upgrade the PHP installation, any try again! <br/>
+			PHP 5.2.x or above is required. Your current PHP version is
+			<?php
+				if(isset($serverPhpVersion)) {
+					echo $serverPhpVersion;
+				} else  {
+					echo '???';
+				}
+			?> <br/>
+			Kindly upgrade the PHP installation, and try again! <br/>
 		</td>
 	</tr>
 	</table>

@@ -62,7 +62,8 @@ $smarty->assign("BLOCKS", getBlocks($currentModule,"detail_view",'',$focus->colu
 
 $smarty->assign("CUSTOMFIELD", $cust_fld);
 $smarty->assign("ID", vtlib_purify($_REQUEST['record']));
-
+$invoice_no = getModuleSequenceNumber($currentModule,vtlib_purify($_REQUEST['record']));
+$smarty->assign("INV_NO",$invoice_no);
 // Module Sequence Numbering
 $mod_seq_field = getModuleSequenceField($currentModule);
 if ($mod_seq_field != null) {

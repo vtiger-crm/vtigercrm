@@ -23,6 +23,11 @@ function isRelatedListBlockLoaded(id,urldata){
 }
 
 function loadRelatedListBlock(urldata,target,imagesuffix) {
+	if( $('return_module').value == 'Campaigns'){
+		var selectallActivation = $(imagesuffix+'_selectallActivate').value;
+		var excludedRecords = $(imagesuffix+'_excludedRecords').value = $(imagesuffix+'_excludedRecords').value;
+		var numofRows = $(imagesuffix+'_numOfRows').value;
+	}
 	var showdata = 'show_'+imagesuffix;
 	var showdata_element = $(showdata);
 
@@ -49,11 +54,32 @@ function loadRelatedListBlock(urldata,target,imagesuffix) {
                 postBody: urldata,
                 onComplete: function(response) {
 					var responseData = trim(response.responseText);
-      				target_element.innerHTML = responseData;
+      				target_element.update(responseData);
 					target_element.show();
       				showdata_element.hide();
       				hidedata_element.show();
       				indicator_element.hide();
+					if($('return_module').value == 'Campaigns'){
+						var obj = document.getElementsByName(imagesuffix+'_selected_id');
+						var relatedModule = imagesuffix.replace('Campaigns_',"");
+						$(relatedModule+'_count').innerHTML = numofRows;
+						if(selectallActivation == 'true'){
+							$(imagesuffix+'_selectallActivate').value='true';
+							$(imagesuffix+'_linkForSelectAll').show();
+							$(imagesuffix+'_selectAllRec').style.display='none';
+							$(imagesuffix+'_deSelectAllRec').style.display='inline';
+							var exculdedArray=excludedRecords.split(';');
+							if (obj) {
+								var viewForSelectLink = showSelectAllLink(obj,exculdedArray);
+								$(imagesuffix+'_selectCurrentPageRec').checked = viewForSelectLink;
+								$(imagesuffix+'_excludedRecords').value = $(imagesuffix+'_excludedRecords').value+excludedRecords;
+							}
+						}else{
+							$(imagesuffix+'_linkForSelectAll').hide();
+							rel_toggleSelect(false,imagesuffix+'_selected_id',relatedModule);
+						}
+						updateParentCheckbox(obj,imagesuffix);
+					}
 				}
         }
 	);
@@ -136,6 +162,11 @@ function disableRelatedListBlock(urldata,target,imagesuffix){
 						<img id="delete_{$MODULE}_{$header|replace:' ':''}" style="display:none;" src="{'windowMinMax.gif'|@vtiger_imageurl:$THEME}" border="0" align="absmiddle" />
 					</a>
 				</div>
+				{if $MODULE eq 'Campaigns'}
+				<input id="{$MODULE}_{$header|replace:' ':''}_numOfRows" type="hidden" value="">
+				<input id="{$MODULE}_{$header|replace:' ':''}_excludedRecords" type="hidden" value="">
+				<input id="{$MODULE}_{$header|replace:' ':''}_selectallActivate" type="hidden" value="false">
+				{/if}
 			</div>
 		</td>
 	</tr>

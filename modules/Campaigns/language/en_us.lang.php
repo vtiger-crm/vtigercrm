@@ -14,7 +14,7 @@
  ********************************************************************************/
 /*********************************************************************************
  * $Header$
- * Description:  Defines the English language pack
+ * Description:  Defines the English language pack for Campaign Module
  * Portions created by SugarCRM are Copyright (C) SugarCRM, Inc.
  * All Rights Reserved.
  * Contributor(s): ______________________________________..
@@ -88,9 +88,9 @@ $mod_strings = Array(
 '--None--'=>'--None--',
 'Contacted - Successful' => 'Contacted - Successful',
 'Contacted - Unsuccessful' => 'Contacted - Unsuccessful',
-'Contacted - Never Contact Again' => 'Contacted - Never Contact Again'
+'Contacted - Never Contact Again' => 'Contacted - Never Contact Again',
 // END
-
+'Campaigns ID' => 'Campaigns ID',
 );
 
 ?>

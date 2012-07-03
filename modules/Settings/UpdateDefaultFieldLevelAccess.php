@@ -22,8 +22,9 @@ foreach($field_module as $fld_module=>$fld_name)
 		$fieldid =  $adb->query_result($fieldListResult,$i,"fieldid");
 		$displaytype = $adb->query_result($fieldListResult,$i,"displaytype");
 		$tab_id = $adb->query_result($fieldListResult,$i,"tabid");
+		$presence = $adb->query_result($fieldListResult,$i,"presence");
 		$visible = vtlib_purify($_REQUEST[$fieldid]);
-		if($visible == 'on')
+		if($visible == 'on' || $presence == '0')
 		{
 			$visible_value = 0;
 		}

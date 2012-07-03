@@ -35,12 +35,12 @@ class Vtiger_Profile {
 
 		// Allow field access to all
 		$adb->pquery("INSERT INTO vtiger_def_org_field (tabid, fieldid, visible, readonly) VALUES(?,?,?,?)",
-			Array($fieldInstance->getModuleId(), $fieldInstance->id, '0', '1'));
+			Array($fieldInstance->getModuleId(), $fieldInstance->id, '0', '0'));
 
 		$profileids = self::getAllIds();
 		foreach($profileids as $profileid) {
 			$adb->pquery("INSERT INTO vtiger_profile2field (profileid, tabid, fieldid, visible, readonly) VALUES(?,?,?,?,?)",
-				Array($profileid, $fieldInstance->getModuleId(), $fieldInstance->id, '0', '1'));
+				Array($profileid, $fieldInstance->getModuleId(), $fieldInstance->id, '0', '0'));
 		}
 	}
 

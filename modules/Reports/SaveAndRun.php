@@ -23,18 +23,23 @@ global $adb,$mod_strings,$app_strings;
 
 $reportid = vtlib_purify($_REQUEST["record"]);
 $folderid = vtlib_purify($_REQUEST["folderid"]);
-$filtercolumn = vtlib_purify($_REQUEST["stdDateFilterField"]);
-$filter = vtlib_purify($_REQUEST["stdDateFilter"]);
-// Added to fix the issue
+$now_action = vtlib_purify($_REQUEST['action']);
 
 $sql = "select * from vtiger_report where reportid=?";
 $res = $adb->pquery($sql, array($reportid));
 $Report_ID = $adb->query_result($res,0,'reportid');
+if(empty($folderid)) {
+	$folderid = $adb->query_result($res,0,'folderid');
+}
+$reporttype = $adb->query_result($res,0,'reporttype');
+$showCharts = false;
+if($reporttype == 'summary'){
+	$showCharts = true;
+}
+//END Customization
 $numOfRows = $adb->num_rows($res);
-if($numOfRows > 0)
-{
-	$startdate = getDBInsertDateValue($_REQUEST["startdate"]);//Convert the user date format to DB date format 
-	$enddate = getDBInsertDateValue($_REQUEST["enddate"]);//Convert the user date format to DB date format
+
+if($numOfRows > 0) {
 
 	global $primarymodule,$secondarymodule,$orderbylistsql,$orderbylistcolumns,$ogReport;
 	//added to fix the ticket #5117
@@ -60,59 +65,97 @@ if($numOfRows > 0)
 		if(isPermitted("$mod",'Export','')!='yes')
 			$modules_export_permitted = false;
 	}
-	
-	if(isPermitted($primarymodule,'index') == "yes" && $modules_permitted == true)
-	{
+
+	if(isPermitted($primarymodule,'index') == "yes" && $modules_permitted == true) {
 		$oReportRun = new ReportRun($reportid);
-		$filterlist = $oReportRun->RunTimeFilter($filtercolumn,$filter,$startdate,$enddate);
-		
-		// Performance Optimization: Direct output of the report result
+
+		require_once 'include/Zend/Json.php';
+		$json = new Zend_Json();
+
+		$advft_criteria = $_REQUEST['advft_criteria'];
+		if(!empty($advft_criteria)) $advft_criteria = $json->decode($advft_criteria);
+		$advft_criteria_groups = $_REQUEST['advft_criteria_groups'];
+		if(!empty($advft_criteria_groups)) $advft_criteria_groups = $json->decode($advft_criteria_groups);
+
+		if($_REQUEST['submode'] == 'saveCriteria') {
+			updateAdvancedCriteria($reportid,$advft_criteria,$advft_criteria_groups);
+		}
+
+		$filtersql = $oReportRun->RunTimeAdvFilter($advft_criteria,$advft_criteria_groups);
+
 		$list_report_form = new vtigerCRM_Smarty;
-				
-		//$sshtml = $oReportRun->GenerateReport("HTML",$filterlist);
-		//if(is_array($sshtml))$totalhtml = $oReportRun->GenerateReport("TOTALHTML",$filterlist);
-		
-		$sshtml = array();
+		//Monolithic phase 6 changes
+		if($showCharts == true){
+			$list_report_form->assign("SHOWCHARTS",$showCharts);
+			require_once 'modules/Reports/CustomReportUtils.php';
+			require_once 'include/ChartUtils.php';
+
+			$groupBy = $oReportRun->getGroupingList($reportid);
+			if(!empty($groupBy)){
+				foreach ($groupBy as $key => $value) {
+					//$groupByConditon = explode(" ",$value);
+					//$groupByNew = explode("'",$groupByConditon[0]);
+					list($tablename,$colname,$module_field,$fieldname,$single) = split(":",$key);
+					list($module,$field)= split("_",$module_field);
+					$fieldDetails = $key;
+					break;
+				}
+				//$groupByField = $oReportRun->GetFirstSortByField($reportid);
+				$queryReports = CustomReportUtils::getCustomReportsQuery($Report_ID,$filtersql);
+				$queryResult = $adb->pquery($queryReports,array());
+				//ChartUtils::generateChartDataFromReports($queryResult, strtolower($groupByNew[1]));
+                if($adb->num_rows($queryResult)){
+					$pieChart = ChartUtils::getReportPieChart($queryResult, strtolower($module_field),$fieldDetails,$reportid);
+					$barChart = ChartUtils::getReportBarChart($queryResult, strtolower($module_field),$fieldDetails,$reportid);
+					$list_report_form->assign("PIECHART",$pieChart);
+					$list_report_form->assign("BARCHART",$barChart);
+				}
+				else{
+					$showCharts = false;
+				}
+			}
+			else{
+				$showCharts = false;
+			}
+			$list_report_form->assign("SHOWCHARTS",$showCharts);
+		}
+		//Monolithic Changes Ends
+
+        // Performance Optimization: Direct output of the report result
+        if($_REQUEST['submode'] == 'generateReport' && empty($advft_criteria)) {
+			$filtersql = '';
+		}
+        $sshtml = array();
 		$totalhtml = '';
 		$list_report_form->assign("DIRECT_OUTPUT", true);
 		$list_report_form->assign_by_ref("__REPORT_RUN_INSTANCE", $oReportRun);
-		$list_report_form->assign_by_ref("__REPORT_RUN_FILTER_LIST", $filterlist);
-		// END		
-		
-		$ogReport->getSelectedStandardCriteria($reportid);
-		//commented to omit dashboards for vtiger_reports
-		//require_once('modules/Dashboard/ReportsCharts.php');
-		//$image = get_graph_by_type('Report','Report',$primarymodule,'',$sshtml[2]);
-		//$list_report_form->assign("GRAPH", $image);
+		$list_report_form->assign_by_ref("__REPORT_RUN_FILTER_SQL", $filtersql);
+        //Ends
 
-		$BLOCK1 = getPrimaryStdFilterHTML($ogReport->primodule,$ogReport->stdselectedcolumn);
-		$BLOCK1 .= getSecondaryStdFilterHTML($ogReport->secmodule,$ogReport->stdselectedcolumn);
-		// Check if selectedcolumn is found in the filters (Fix for ticket #4866)
-		$selectedcolumnvalue = '"'. decode_html($ogReport->stdselectedcolumn) . '"';
-		if (!$is_admin && isset($ogReport->stdselectedcolumn) && strpos($BLOCK1, $selectedcolumnvalue) === false) {
-			$BLOCK1 .= "<option selected value='Not Accessible'>".$app_strings['LBL_NOT_ACCESSIBLE']."</option>";
-		}
-		$list_report_form->assign("BLOCK1",$BLOCK1);
-		$BLOCKJS = $ogReport->getCriteriaJS();
-		$list_report_form->assign("BLOCKJS",$BLOCKJS);
+		$ogReport->getPriModuleColumnsList($ogReport->primodule);
+		$ogReport->getSecModuleColumnsList($ogReport->secmodule);
+		$ogReport->getAdvancedFilterList($reportid);
 
-		$BLOCKCRITERIA = $ogReport->getSelectedStdFilterCriteria($ogReport->stdselectedfilter);
-		$list_report_form->assign("BLOCKCRITERIA",$BLOCKCRITERIA);
-		if(isset($ogReport->startdate) && isset($ogReport->enddate))
-		{
-			$list_report_form->assign("STARTDATE",getDisplayDate($ogReport->startdate));
-			$list_report_form->assign("ENDDATE",getDisplayDate($ogReport->enddate));
-		}else
-		{
-			$list_report_form->assign("STARTDATE",$ogReport->startdate);
-			$list_report_form->assign("ENDDATE",$ogReport->enddate);	
-		}	
+		$COLUMNS_BLOCK = getPrimaryColumns_AdvFilter_HTML($ogReport->primodule, $ogReport);
+		$COLUMNS_BLOCK .= getSecondaryColumns_AdvFilter_HTML($ogReport->secmodule, $ogReport);
+		$list_report_form->assign("COLUMNS_BLOCK", $COLUMNS_BLOCK);
+
+		$FILTER_OPTION = Reports::getAdvCriteriaHTML();
+		$list_report_form->assign("FOPTION",$FILTER_OPTION);
+
+		$rel_fields = $ogReport->adv_rel_fields;
+		$list_report_form->assign("REL_FIELDS",Zend_Json::encode($rel_fields));
+
+		$list_report_form->assign("CRITERIA_GROUPS",$ogReport->advft_criteria);
+
 		$list_report_form->assign("MOD", $mod_strings);
 		$list_report_form->assign("APP", $app_strings);
 		$list_report_form->assign("IMAGE_PATH", $image_path);
 		$list_report_form->assign("REPORTID", $reportid);
 		$list_report_form->assign("IS_EDITABLE", $ogReport->is_editable);
-		
+
+		$list_report_form->assign("REP_FOLDERS",$ogReport->sgetRptFldr());
+
 		$list_report_form->assign("REPORTNAME", htmlspecialchars($ogReport->reportname,ENT_QUOTES,$default_charset));
 		if(is_array($sshtml))$list_report_form->assign("REPORTHTML", $sshtml);
 		else $list_report_form->assign("ERROR_MSG", getTranslatedString('LBL_REPORT_GENERATION_FAILED', $currentModule) . "<br>" . $sshtml);
@@ -134,20 +177,18 @@ if($numOfRows > 0)
 		if($_REQUEST['mode'] != 'ajax')
 		{
 			$list_report_form->assign("REPINFOLDER", $reports_array);
-			include('themes/'.$theme.'/header.php');
+			include('modules/Vtiger/header.php');
 			$list_report_form->display('ReportRun.tpl');
 		}
 		else
 		{
 			$list_report_form->display('ReportRunContents.tpl');
 		}
-	}
-	else
-	{
-		if($_REQUEST['mode'] != 'ajax')
-		{
-			include('themes/'.$theme.'/header.php');
-		}	
+
+	} else {
+		if($_REQUEST['mode'] != 'ajax') {
+			include('modules/Vtiger/header.php');
+		}
 		echo "<table border='0' cellpadding='5' cellspacing='0' width='100%' height='450px'><tr><td align='center'>";
 		echo "<div style='border: 3px solid rgb(153, 153, 153); background-color: rgb(255, 255, 255); width: 80%; position: relative; z-index: 10000000;'>
 
@@ -157,17 +198,16 @@ if($numOfRows > 0)
 		<td style='border-bottom: 1px solid rgb(204, 204, 204);' nowrap='nowrap' width='70%'><span class='genHeaderSmall'>".$mod_strings['LBL_NO_ACCESS']." : ".implode(",",$restrictedmodules)." </span></td>
 		</tr>
 		<tr>
-		<td class='small' align='right' nowrap='nowrap'>			   	
+		<td class='small' align='right' nowrap='nowrap'>
 		<a href='javascript:window.history.back();'>$app_strings[LBL_GO_BACK]</a><br>								   		     </td>
 		</tr>
-		</tbody></table> 
+		</tbody></table>
 		</div>";
 		echo "</td></tr></table>";
 	}
-}
-else
-{
-		echo "<link rel='stylesheet' type='text/css' href='themes/$theme/style.css'>";	
+
+} else {
+		echo "<link rel='stylesheet' type='text/css' href='themes/$theme/style.css'>";
 		echo "<table border='0' cellpadding='5' cellspacing='0' width='100%' height='450px'><tr><td align='center'>";
 		echo "<div style='border: 3px solid rgb(153, 153, 153); background-color: rgb(255, 255, 255); width: 80%; position: relative; z-index: 10000000;'>
 
@@ -184,12 +224,13 @@ else
 		</div>";
 		echo "</td></tr></table>";
 }
-	/** Function to get the StdfilterHTML strings for the given  primary module 
-	 *  @ param $module : Type String
-	 *  @ param $selected : Type String(optional)	
-	 *  This Generates the HTML Combo strings for the standard filter for the given reports module  
-	 *  This Returns a HTML sring
-	 */
+
+/** Function to get the StdfilterHTML strings for the given  primary module
+ *  @ param $module : Type String
+ *  @ param $selected : Type String(optional)
+ *  This Generates the HTML Combo strings for the standard filter for the given reports module
+ *  This Returns a HTML sring
+ */
 function getPrimaryStdFilterHTML($module,$selected="")
 {
 
@@ -228,10 +269,10 @@ function getPrimaryStdFilterHTML($module,$selected="")
 	return $shtml;
 }
 
-	/** Function to get the StdfilterHTML strings for the given secondary module 
+	/** Function to get the StdfilterHTML strings for the given secondary module
 	 *  @ param $module : Type String
-	 *  @ param $selected : Type String(optional)	
-	 *  This Generates the HTML Combo strings for the standard filter for the given reports module  
+	 *  @ param $selected : Type String(optional)
+	 *  This Generates the HTML Combo strings for the standard filter for the given reports module
 	 *  This Returns a HTML sring
 	 */
 function getSecondaryStdFilterHTML($module,$selected="")
@@ -273,31 +314,112 @@ function getSecondaryStdFilterHTML($module,$selected="")
 					}
                 		}
         		}
-		
+
 		}
 	}
 	return $shtml;
 }
-	/** Function to get the reports under a report folder 
-	 *  @ param $folderid : Type Integer 
-	 *  This Returns $reports_array in the following format 
-	 *  		$reports_array = array ($reportid=>$reportname,$reportid=>$reportname1,.............,$reportidn=>$reportname)
-	 */
-function getReportsinFolder($folderid)
-{
-	global $adb;
-	$query = 'select reportid,reportname from vtiger_report where folderid=?';
-	$result = $adb->pquery($query, array($folderid));
-	$reports_array = Array();
-	for($i=0;$i < $adb->num_rows($result);$i++)	
-	{
-		$reportid = $adb->query_result($result,$i,'reportid');
-		$reportname = $adb->query_result($result,$i,'reportname');
-		$reports_array[$reportid] = $reportname; 
-	}
-	if(count($reports_array) > 0)
-		return $reports_array;
-	else
-		return false;
+
+function getPrimaryColumns_AdvFilter_HTML($module, $ogReport, $selected='') {
+    global $app_list_strings, $current_language;
+	$mod_strings = return_module_language($current_language,$module);
+	$block_listed = array();
+    foreach($ogReport->module_list[$module] as $key=>$value)
+    {
+    	if(isset($ogReport->pri_module_columnslist[$module][$value]) && !$block_listed[$value])
+    	{
+			$block_listed[$value] = true;
+			$shtml .= "<optgroup label=\"".$app_list_strings['moduleList'][$module]." ".getTranslatedString($value)."\" class=\"select\" style=\"border:none\">";
+			foreach($ogReport->pri_module_columnslist[$module][$value] as $field=>$fieldlabel)
+			{
+				if(isset($mod_strings[$fieldlabel]))
+				{
+					//fix for ticket 5191
+					$selected = decode_html($selected);
+					$field = decode_html($field);
+					//fix ends
+					if($selected == $field)
+					{
+						$shtml .= "<option selected value=\"".$field."\">".$mod_strings[$fieldlabel]."</option>";
+					}else
+					{
+						$shtml .= "<option value=\"".$field."\">".$mod_strings[$fieldlabel]."</option>";
+					}
+				}else
+				{
+					if($selected == $field)
+					{
+						$shtml .= "<option selected value=\"".$field."\">".$fieldlabel."</option>";
+					}else
+					{
+						$shtml .= "<option value=\"".$field."\">".$fieldlabel."</option>";
+					}
+				}
+			}
+       }
+    }
+    return $shtml;
+}
+
+
+function getSecondaryColumns_AdvFilter_HTML($module, $ogReport, $selected="") {
+	global $app_list_strings;
+    global $current_language;
+
+    if($module != "")
+    {
+    	$secmodule = explode(":",$module);
+    	for($i=0;$i < count($secmodule) ;$i++)
+    	{
+            $mod_strings = return_module_language($current_language,$secmodule[$i]);
+            if(vtlib_isModuleActive($secmodule[$i])){
+				$block_listed = array();
+				foreach($ogReport->module_list[$secmodule[$i]] as $key=>$value)
+                {
+					if(isset($ogReport->sec_module_columnslist[$secmodule[$i]][$value]) && !$block_listed[$value])
+					{
+						$block_listed[$value] = true;
+                		  $shtml .= "<optgroup label=\"".$app_list_strings['moduleList'][$secmodule[$i]]." ".getTranslatedString($value)."\" class=\"select\" style=\"border:none\">";
+						  foreach($ogReport->sec_module_columnslist[$secmodule[$i]][$value] as $field=>$fieldlabel)
+						  {
+							if(isset($mod_strings[$fieldlabel]))
+							{
+								if($selected == $field)
+								{
+									$shtml .= "<option selected value=\"".$field."\">".$mod_strings[$fieldlabel]."</option>";
+								}else
+								{
+									$shtml .= "<option value=\"".$field."\">".$mod_strings[$fieldlabel]."</option>";
+								}
+							}else
+							{
+								if($selected == $field)
+								{
+									$shtml .= "<option selected value=\"".$field."\">".$fieldlabel."</option>";
+								}else
+								{
+									$shtml .= "<option value=\"".$field."\">".$fieldlabel."</option>";
+								}
+							}
+						  }
+					}
+                }
+            }
+    	}
+    }
+    return $shtml;
+}
+
+function getAdvCriteria_HTML($adv_filter_options, $selected="") {
+
+	 foreach($adv_filter_options as $key=>$value) {
+		if($selected == $key) {
+			$shtml .= "<option selected value=\"".$key."\">".$value."</option>";
+		} else {
+			$shtml .= "<option value=\"".$key."\">".$value."</option>";
+		}
+	 }
+
+    return $shtml;
 }
 ?>

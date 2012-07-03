@@ -137,8 +137,7 @@ $num_act_util_per = $adb->num_rows($act_utility_result);
 	}
 
 
-
-	$modArr=getFieldModuleAccessArray(); 
+$modArr=getModuleAccessArray(); 
 
 foreach($modArr as $fld_module => $fld_label)
 {
@@ -157,6 +156,8 @@ foreach($modArr as $fld_module => $fld_label)
 		{
 			$visible_value = 1;
 		}
+		$readonlyfieldid = $fieldid.'_readonly';
+		$readOnlyValue = $_REQUEST[$readonlyfieldid];
 		//Updating the Mandatory vtiger_fields
 		$uitype = $adb->query_result($fieldListResult,$i,"uitype");
 		$displaytype =  $adb->query_result($fieldListResult,$i,"displaytype");
@@ -168,8 +169,8 @@ foreach($modArr as $fld_module => $fld_label)
 			$visible_value = 0;
 		}
 		//Updating the database
-		$update_query = "update vtiger_profile2field set visible=? where fieldid=? and profileid=? and tabid=?";
-		$adb->pquery($update_query, array($visible_value, $fieldid, $profileid, $tab_id));
+		$update_query = "update vtiger_profile2field set visible=?, readonly=? where fieldid=? and profileid=? and tabid=?";
+		$adb->pquery($update_query, array($visible_value, $readOnlyValue, $fieldid, $profileid, $tab_id));
 
 	}
 }

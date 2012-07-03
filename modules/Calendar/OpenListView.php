@@ -31,7 +31,7 @@ function getPendingActivities($mode,$view=''){
 	require_once('data/Tracker.php');
 	require_once('include/utils/utils.php');
 	require_once('user_privileges/default_module_view.php');
-	
+
 	global $currentModule;
 	global $singlepane_view;
 	global $theme;
@@ -45,22 +45,33 @@ function getPendingActivities($mode,$view=''){
 
 	$theme_path="themes/".$theme."/";
 	$image_path=$theme_path."images/";
-	
+
 	if($_REQUEST['activity_view']==''){
 		$activity_view='today';
 	}else{
 		$activity_view=vtlib_purify($_REQUEST['activity_view']);
 	}
 
-	$today = date("Y-m-d", time());
+	$dbStartDateTime = new DateTimeField(date('Y-m-d H:i:s'));
+	$userStartDate = $dbStartDateTime->getDisplayDate();
+	$userStartDateTime = new DateTimeField($userStartDate.' 00:00:00');
+	$startDateTime = $userStartDateTime->getDBInsertDateTimeValue();
+
+	$userEndDateTime = new DateTimeField($userStartDate.' 23:59:00');
+	$endDateTime = $userEndDateTime->getDBInsertDateTimeValue();
+
 	if($view == 'today'){
-		$upcoming_condition = " AND (date_start = '$today' OR vtiger_recurringevents.recurringdate = '$today')";
-		$pending_condition = " AND (due_date = '$today' OR vtiger_recurringevents.recurringdate = '$today')";
+		$upcoming_condition = " AND (CAST((CONCAT(date_start,' ',time_start)) AS DATETIME) BETWEEN '$startDateTime' AND '$endDateTime'
+									OR CAST((CONCAT(vtiger_recurringevents.recurringdate,' ',time_start)) AS DATETIME) BETWEEN '$startDateTime' AND '$endDateTime')";
+		$pending_condition = " AND (CAST((CONCAT(date_start,' ',time_start)) AS DATETIME) BETWEEN '$startDateTime' AND '$endDateTime'
+									OR CAST((CONCAT(vtiger_recurringevents.recurringdate,' ',time_start)) AS DATETIME) BETWEEN '$startDateTime' AND '$endDateTime')";
 	}else if($view == 'all'){
-		$upcoming_condition = " AND (date_start >= '$today' OR vtiger_recurringevents.recurringdate >= '$today')";
-		$pending_condition = " AND (due_date <= '$today' OR vtiger_recurringevents.recurringdate <= '$today')";
+		$upcoming_condition = " AND (CAST((CONCAT(date_start,' ',time_start)) AS DATETIME) >= '$startDateTime'
+									OR CAST((CONCAT(vtiger_recurringevents.recurringdate,' ',time_start)) AS DATETIME) >= '$startDateTime')";
+		$pending_condition = " AND (CAST((CONCAT(date_start,' ',time_start)) AS DATETIME) <= '$startDateTime'
+									OR CAST((CONCAT(vtiger_recurringevents.recurringdate,' ',time_start)) AS DATETIME) <= '$startDateTime')";
 	}
-	
+
 	if($mode != 1){
 		$list_query = " select vtiger_crmentity.crmid,vtiger_crmentity.smownerid,vtiger_crmentity.".
 		"setype, vtiger_recurringevents.recurringdate, vtiger_activity.activityid, ".
@@ -74,7 +85,7 @@ function getPendingActivities($mode,$view=''){
 		"('Emails') AND ( vtiger_activity.status is NULL OR vtiger_activity.status not in".
 		"('Completed','Deferred')) and ( vtiger_activity.eventstatus is NULL OR vtiger_activity.".
 		"eventstatus not in ('Held','Not Held') )".$upcoming_condition;
-		
+
 	}else{
 		$list_query = "select vtiger_crmentity.crmid,vtiger_crmentity.smownerid,vtiger_crmentity".
 		"setype, vtiger_recurringevents.recurringdate, vtiger_activity.activityid, vtiger_activity".
@@ -88,7 +99,7 @@ function getPendingActivities($mode,$view=''){
 		"activitytype not in ('Emails')) AND (vtiger_activity.status is NULL OR vtiger_activity.".
 		"status not in ('Completed','Deferred')) and (vtiger_activity.eventstatus is NULL OR ".
 		"vtiger_activity.eventstatus not in ('Held','Not Held')) ".$pending_condition;
-	
+
 		$list_query.= " GROUP BY vtiger_activity.activityid";
 		$list_query.= " ORDER BY date_start,time_start ASC";
 		$res = $adb->query($list_query);
@@ -97,23 +108,33 @@ function getPendingActivities($mode,$view=''){
 		$noofrows = $adb->num_rows($res);
 		if (count($res)>0){
 			for($i=0;$i<$noofrows;$i++){
+				$dateValue = $adb->query_result($res,$i,'date_start') . ' ' .
+						$adb->query_result($res,$i,'time_start');
+				$endDateValue = $adb->query_result($res,$i,'due_date') . ' ' .
+						$adb->query_result($res,$i,'time_end');
+				$recurringDateValue = $adb->query_result($res,$i,'due_date') . ' ' .
+						$adb->query_result($res,$i,'time_start');
+				$date = new DateTimeField($dateValue);
+				$endDate = new DateTimeField($endDateValue);
+				$recurringDate = new DateTimeField($recurringDateValue);
+
 				$open_activity_list[] = Array('name' => $adb->query_result($res,$i,'subject'),
 						'id' => $adb->query_result($res,$i,'activityid'),
 						'type' => $adb->query_result($res,$i,'activitytype'),
 						'module' => $adb->query_result($res,$i,'setype'),
-						'date_start' => getDisplayDate($adb->query_result($res,$i,'date_start')),
-						'due_date' => getDisplayDate($adb->query_result($res,$i,'due_date')),
-						'recurringdate' => getDisplayDate($adb->query_result($res,$i,'recurringdate')),
+						'date_start' => $date->getDisplayDate(),
+						'due_date' => $endDate->getDisplayDate(),
+						'recurringdate' => $recurringDate->getDisplayDate(),
 						'priority' => $adb->query_result($res,$i,'priority'), // Armando L�scher 04.07.2005 -> �priority -> Desc: Get vtiger_priority from db
 						);
 			}
 		}
-	
+
 	$title=array();
 	$title[]=$view;
 	$title[]='myUpcoPendAct.gif';
 	$title[]='home_myact';
-	$title[]='showActivityView';		
+	$title[]='showActivityView';
 	$title[]='MyUpcumingFrm';
 	$title[]='activity_view';
 
@@ -162,28 +183,28 @@ function getPendingActivities($mode,$view=''){
 
 /**
  * Function creates HTML to display ActivityView selection box
- * @param string   $activity_view                 - activity view 
+ * @param string   $activity_view                 - activity view
  * return string   $ACTIVITY_VIEW_SELECT_OPTION   - HTML selection box
  */
-function getActivityview($activity_view)	
-{	
+function getActivityview($activity_view)
+{
 	global $log;
 	$log->debug("Entering getActivityview(".$activity_view.") method ...");
-	$today = date("Y-m-d", time());
+	$today = DateTimeField::convertToUserFormat(date("Y-m-d"));
 
 	if($activity_view == 'Today')
-	{	
+	{
 		$selected1 = 'selected';
-	}	
+	}
 	else if($activity_view == 'This Week')
 	{
 		$selected2 = 'selected';
 	}
 	else if($activity_view == 'This Month')
-	{	
+	{
 		$selected3 = 'selected';
-	}	
-	else if($activity_view == 'This Year')	
+	}
+	else if($activity_view == 'This Year')
 	{
 		$selected4 = 'selected';
 	}
@@ -203,7 +224,7 @@ function getActivityview($activity_view)
 	$ACTIVITY_VIEW_SELECT_OPTION .= 'This Year';
 	$ACTIVITY_VIEW_SELECT_OPTION .= '</option>';
 	$ACTIVITY_VIEW_SELECT_OPTION .= '</select>';
-	
+
 	$log->debug("Exiting getActivityview method ...");
 	return $ACTIVITY_VIEW_SELECT_OPTION;
 }

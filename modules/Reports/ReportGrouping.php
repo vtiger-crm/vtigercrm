@@ -36,28 +36,35 @@ if(isset($_REQUEST["record"]) && $_REQUEST['record']!='')
 	$oRep = new Reports();
 	$secondarymodule = '';
 	$secondarymodules =Array();
-	
+
 	if(!empty($oRep->related_modules[$oReport->primodule])) {
 		foreach($oRep->related_modules[$oReport->primodule] as $key=>$value){
 			if(isset($_REQUEST["secondarymodule_".$value]))$secondarymodules []= vtlib_purify($_REQUEST["secondarymodule_".$value]);
 		}
 	}
 	$secondarymodule = implode(":",$secondarymodules);
-	
+
 	if($secondarymodule!='')
 		$oReport->secmodule = $secondarymodule;
-		
+
 	$BLOCK1 = getPrimaryColumns_GroupingHTML($oReport->primodule,$list_array[0]);
 	$BLOCK1 .= getSecondaryColumns_GroupingHTML($oReport->secmodule,$list_array[0]);
 	$report_group->assign("BLOCK1",$BLOCK1);
+	$GROUPBYTIME1 = getGroupByTimeDiv(1,$reportid);
+	$report_group->assign("GROUPBYTIME1",$GROUPBYTIME1);
 
 	$BLOCK2 = getPrimaryColumns_GroupingHTML($oReport->primodule,$list_array[1]);
 	$BLOCK2 .= getSecondaryColumns_GroupingHTML($oReport->secmodule,$list_array[1]);
 	$report_group->assign("BLOCK2",$BLOCK2);
 
+	$GROUPBYTIME2 = getGroupByTimeDiv(2,$reportid);
+	$report_group->assign("GROUPBYTIME2",$GROUPBYTIME2);
+
 	$BLOCK3 = getPrimaryColumns_GroupingHTML($oReport->primodule,$list_array[2]);
 	$BLOCK3 .= getSecondaryColumns_GroupingHTML($oReport->secmodule,$list_array[2]);
 	$report_group->assign("BLOCK3",$BLOCK3);
+	$GROUPBYTIME3 = getGroupByTimeDiv(3,$reportid);
+	$report_group->assign("GROUPBYTIME3",$GROUPBYTIME3);
 
 	$sortorder = $oReport->ascdescorder;
 
@@ -74,14 +81,22 @@ if(isset($_REQUEST["record"]) && $_REQUEST['record']!='')
 	$report_group->assign("BLOCK1",$BLOCK1);
 	$report_group->assign("BLOCK2",$BLOCK1);
 	$report_group->assign("BLOCK3",$BLOCK1);
+	$GROUPBYTIME1 = getGroupByTimeDiv(1);
+	$report_group->assign("GROUPBYTIME1",$GROUPBYTIME1);
+
+	$GROUPBYTIME2 = getGroupByTimeDiv(2);
+	$report_group->assign("GROUPBYTIME2",$GROUPBYTIME2);
+
+	$GROUPBYTIME3 = getGroupByTimeDiv(3);
+	$report_group->assign("GROUPBYTIME3",$GROUPBYTIME3);
 }
 
 
-	/** Function to get the combo values for the Primary module Columns 
+	/** Function to get the combo values for the Primary module Columns
 	 *  @ param $module(module name) :: Type String
 	 *  @ param $selected (<selected or ''>) :: Type String
-	 *  This function generates the combo values for the columns  for the given module 
-	 *  and return a HTML string 
+	 *  This function generates the combo values for the columns  for the given module
+	 *  and return a HTML string
 	 */
 
 function getPrimaryColumns_GroupingHTML($module,$selected="")
@@ -97,13 +112,15 @@ function getPrimaryColumns_GroupingHTML($module,$selected="")
         if(isset($ogReport->pri_module_columnslist[$module][$value]) && !$block_listed[$value])
         {
 			$block_listed[$value] = true;
-			$shtml .= "<optgroup label=\"".$app_list_strings['moduleList'][$module]." ".getTranslatedString($value)."\" class=\"select\" style=\"border:none\">";
+			$shtml .= "<optgroup label=\"".$app_list_strings['moduleList'][$module]." ".getTranslatedString($value, $module)."\" class=\"select\" style=\"border:none\">";
 			if($id_added==false){
 				$is_selected ='';
 				if($selected == "vtiger_crmentity:crmid:".$module."_ID:crmid:I"){
 					$is_selected = 'selected';
 				}
-				$shtml .= "<option value=\"vtiger_crmentity:crmid:".$module."_ID:crmid:I\" {$is_selected}>".getTranslatedString(getTranslatedString($module).' ID')."</option>";
+				$shtml .= "<option value=\"vtiger_crmentity:crmid:".$module."_ID:crmid:I\" {$is_selected}>".
+							getTranslatedString($module, $module).' '.getTranslatedString('ID', $module).
+						"</option>";
 				$id_added=true;
 			}
 			foreach($ogReport->pri_module_columnslist[$module][$value] as $field=>$fieldlabel)
@@ -126,7 +143,7 @@ function getPrimaryColumns_GroupingHTML($module,$selected="")
 					{
 						$shtml .= "<option value=\"".$field."\">".$fieldlabel."</option>";
 					}
-	
+
 				}
 			}
        }
@@ -134,18 +151,18 @@ function getPrimaryColumns_GroupingHTML($module,$selected="")
     return $shtml;
 }
 
-	/** Function to get the combo values for the Secondary module Columns 
+	/** Function to get the combo values for the Secondary module Columns
 	 *  @ param $module(module name) :: Type String
 	 *  @ param $selected (<selected or ''>) :: Type String
-	 *  This function generates the combo values for the columns for the given module 
-	 *  and return a HTML string 
+	 *  This function generates the combo values for the columns for the given module
+	 *  and return a HTML string
 	 */
 function getSecondaryColumns_GroupingHTML($module,$selected="")
 {
 	global $ogReport;
 	global $app_list_strings;
 	global $current_language;
-	
+
  	$selected = decode_html($selected);
 	if($module != "")
 	{
@@ -184,6 +201,48 @@ function getSecondaryColumns_GroupingHTML($module,$selected="")
 	return $shtml;
 }
 
+function getGroupByTimeDiv($sortid,$reportid=''){
+	require_once 'include/utils/CommonUtils.php';
+	global $adb, $mod_strings;
+	$query = "select * from vtiger_reportgroupbycolumn where reportid=? and sortid=?";
+	$result = $adb->pquery($query,array($reportid,$sortid));
+	$rows = $adb->num_rows($result);
+	$yearselected = '';
+	$monthselected = '';
+	$quarterselected = '';
+    $noneselected='';
+	if($rows > 0){
+		$displaystyle = 'inline';
+		$selected_groupby = $adb->query_result($result,0,'dategroupbycriteria');
+		if($selected_groupby == 'Year'){
+			$yearselected = 'selected';
+		}
+		elseif($selected_groupby == 'Month'){
+			$monthselected = 'selected';
+		}
+		else if($selected_groupby == 'Quarter'){
+			$quarterselected = 'selected';
+		}
+		else if(strtolower($selected_groupby)=='none'){
+			$noneselected='selected';
+		}
+	}
+	else{
+		$displaystyle = 'none';
+		$noneselected = 'selected';
+	}
+	$divid = 'Group'.$sortid.'time';
+	$selectid = 'groupbytime'.$sortid;
+	$div = '';
+	$div .= "<div id=$divid style='display:$displaystyle'>".$mod_strings['LBL_GROUPING_TIME']."<br>";
+	$div .= "<select id=$selectid name=$selectid  class='txtBox'>";
+	$div .= "<option value='None' $noneselected>".$mod_strings['LBL_NONE']."</option>";
+	$div .= "<option value='Year' $yearselected>".$mod_strings['LBL_YEAR']."</option>";
+	$div .= "<option value='Month' $monthselected>".$mod_strings['LBL_MONTH']."</option>";
+	$div .= "<option value='Quarter' $quarterselected>".$mod_strings['LBL_QUARTER']."</option>";
+	$div .= "</select></div>";
+	return $div;
+}
 if($sortorder[0] != "Descending")
 {
 $shtml = "<option selected value='Ascending'>".$app_strings['Ascending']."</option>

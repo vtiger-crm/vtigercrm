@@ -45,13 +45,12 @@ function getTopSalesOrder($maxval,$calCnt)
 			$viewid = "0";
 		}
 	}
-	
+
 	$theme_path="themes/".$theme."/";
 	$image_path=$theme_path."images/";
 
 	//Retreive the list from Database
 	//<<<<<<<<<customview>>>>>>>>>
-	$date_var = date('Y-m-d');
 	$currentModule = 'SalesOrder';
 	$viewId = getCvIdOfAll($currentModule);
 	$queryGenerator = new QueryGenerator($currentModule, $current_user);
@@ -73,22 +72,20 @@ function getTopSalesOrder($maxval,$calCnt)
 	}
 	$newFields = array_merge($newFields, $widgetSelectedFields);
 	$queryGenerator->setFields($newFields);
-	$_REQUEST = getTopSalesOrderSearch($_REQUEST, array(
-		'assigned_user_id'=>$current_user->column_fields['user_name'],
-		'duedate'=>$date_var));
+	$_REQUEST = getTopSalesOrderSearch($_REQUEST);
 	$queryGenerator->addUserSearchConditions($_REQUEST);
 	$search_qry = '&query=true'.getSearchURL($_REQUEST);
 	$query = $queryGenerator->getQuery();
 
 	//<<<<<<<<customview>>>>>>>>>
-	
+
 	$query .= " LIMIT " . $adb->sql_escape_string($maxval);
-	
+
 	if($calCnt == 'calculateCnt') {
 		$list_result_rows = $adb->query(mkCountQuery($query));
 		return $adb->query_result($list_result_rows, 0, 'count');
 	}
-	
+
 	$list_result = $adb->query($query);
 
 	//Retreiving the no of rows
@@ -145,23 +142,40 @@ function getTopSalesOrder($maxval,$calCnt)
 
 	$entries = $controller->getListViewEntries($focus,$currentModule,$list_result,
 	$navigation_array, true);
-	
+
 	$values=Array('ModuleName'=>'SalesOrder','Title'=>$title,'Header'=>$header,'Entries'=>$entries,'search_qry'=>$search_qry);
-	if ( ($display_empty_home_blocks && $noofrows == 0 ) || ($noofrows>0) )	
+	if ( ($display_empty_home_blocks && $noofrows == 0 ) || ($noofrows>0) )
 		return $values;
 }
 
-function getTopSalesOrderSearch($output, $input) {
+function getTopSalesOrderSearch($output) {
+	global $current_user;
+	$currentDateTime = new DateTimeField(date('Y-m-d H:i:s'));
+
 	$output['query'] = 'true';
-	$output['Fields0'] = 'duedate';
-	$output['Condition0'] = 'h';
-	$output['Srch_value0'] = $input['duedate'];
-	$output['Fields1'] = 'assigned_user_id';
-	$output['Condition1'] = 'e';
-	$output['Srch_value1'] = $input['assigned_user_id'];
 	$output['searchtype'] = 'advance';
-	$output['search_cnt'] = '2';
-	$output['matchtype'] = 'all';
+
+	$advft_criteria_groups = array('1' => array('groupcondition' => null));
+	$advft_criteria = array(
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_salesorder:duedate:duedate:SalesOrder_Due_Date:D',
+            'comparator' => 'h',
+            'value' => $currentDateTime->getDisplayDate(),
+            'columncondition' => 'and'
+        ),
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_crmentity:smownerid:assigned_user_id:SalesOrder_Assigned_To:V',
+            'comparator' => 'e',
+            'value' => getFullNameFromArray('Users', $current_user->column_fields),
+            'columncondition' => null
+        )
+	);
+
+	$output['advft_criteria'] = Zend_Json::encode($advft_criteria);
+	$output['advft_criteria_groups'] = Zend_Json::encode($advft_criteria_groups);
+
 	return $output;
 }
 

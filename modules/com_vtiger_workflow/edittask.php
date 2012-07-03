@@ -24,7 +24,7 @@ require_once("VTWorkflowUtils.php");
 
 		$module = new VTWorkflowApplication('edittask');
 
-		$mod = return_module_language($current_language, $module->name);		
+		$mod = return_module_language($current_language, $module->name);
 
 		if(!$util->checkAdminAccess()){
 			$errorUrl = $module->errorPageUrl($mod['LBL_ERROR_NOT_ADMIN']);
@@ -49,7 +49,7 @@ require_once("VTWorkflowUtils.php");
 			$util->redirectTo($errorUrl, $mod['LBL_ERROR_NO_TASK']);
 			return;
 		}
-		
+
 		$wm = new VTWorkflowManager($adb);
 		$workflow = $wm->retrieve($workflowId);
 		if($workflow==null){
@@ -58,7 +58,7 @@ require_once("VTWorkflowUtils.php");
 			return;
 		}
 
-		
+
 		$smarty->assign("workflow", $workflow);
 		$smarty->assign("returnUrl", $request["return_url"]);
 		$smarty->assign("task", $task);
@@ -70,7 +70,11 @@ require_once("VTWorkflowUtils.php");
 		$smarty->assign("entityType", $et);
 		$smarty->assign('entityName', $workflow->moduleName);
 		$smarty->assign("fieldNames", $et->getFieldNames());
-		
+		$repeat_date = $task->calendar_repeat_limit_date;
+		if(!empty ($repeat_date)){
+		    $repeat_date = DateTimeField::convertToUserFormat($repeat_date);
+		}
+		$smarty->assign('REPEAT_DATE',$repeat_date);
 		$dateFields = array();
 		$fieldTypes = $et->getFieldTypes();
 		$fieldLabels = $et->getFieldLabels();
@@ -79,10 +83,10 @@ require_once("VTWorkflowUtils.php");
 				$dateFields[$name] = $fieldLabels[$name];
 			}
 		}
-		
+
 		$smarty->assign('dateFields', $dateFields);
-		
-		
+
+
 		if($task->trigger!=null){
 			$trigger = $task->trigger;
 			$days = $trigger['days'];
@@ -92,14 +96,17 @@ require_once("VTWorkflowUtils.php");
 			}else{
 				$direction = 'after';
 			}
-			$smarty->assign('trigger', array('days'=>$days, 'direction'=>$direction, 
+			$smarty->assign('trigger', array('days'=>$days, 'direction'=>$direction,
 			  'field'=>$trigger['field']));
 		}
-		$curr_date="(general : (__VtigerMeta__) date)";
-		$curr_time='(general : (__VtigerMeta__) time)';
-				
-		$smarty->assign("DATE",$curr_date);
-		$smarty->assign("TIME",$curr_time);
+		$metaVariables = $task->getMetaVariables();
+
+		$date = new DateTimeField(null);
+		$time = substr($date->getDisplayTime(), 0, 5);
+		$smarty->assign("META_VARIABLES",$metaVariables);
+		$smarty->assign("SYSTEM_TIMEZONE",$db_timezone);
+		$smarty->assign("USER_TIME",$task->formatTimeForTimePicker($time));
+		$smarty->assign("USER_DATE", $date->getDisplayDate());
 		$smarty->assign("MOD", array_merge(
 			return_module_language($current_language,'Settings'),
 			return_module_language($current_language, 'Calendar'),
@@ -111,7 +118,7 @@ require_once("VTWorkflowUtils.php");
 		$smarty->assign("MODULE_NAME", $module->label);
 		$smarty->assign("PAGE_NAME", $mod['LBL_EDIT_TASK']);
 		$smarty->assign("PAGE_TITLE", $mod['LBL_EDIT_TASK_TITLE']);
-		
+
 		$smarty->assign("module", $module);
 		$smarty->display("{$module->name}/EditTask.tpl");
 	}

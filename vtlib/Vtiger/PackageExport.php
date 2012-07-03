@@ -11,7 +11,7 @@ include_once('vtlib/Vtiger/Module.php');
 include_once('vtlib/Vtiger/Menu.php');
 include_once('vtlib/Vtiger/Event.php');
 include_once('vtlib/Vtiger/Zip.php');
-
+include_once('vtlib/Vtiger/Cron.php');
 /**
  * Provides API to package vtiger CRM module and associated files.
  * @package vtlib
@@ -71,7 +71,7 @@ class Vtiger_PackageExport {
 	function __initExport($module, $moduleInstance) {
 		if($moduleInstance->isentitytype) {
 			// We will be including the file, so do a security check.
-			Vtiger_Utils::checkFileAccess("modules/$module/$module.php");
+			Vtiger_Utils::checkFileAccessForInclusion("modules/$module/$module.php");
 		}
 		$this->_export_modulexml_file = fopen($this->__getManifestFilePath(), 'w');
 		$this->__write("<?xml version='1.0'?>\n");
@@ -233,7 +233,10 @@ class Vtiger_PackageExport {
 		// Export Custom Links
 		$this->export_CustomLinks($moduleInstance);
 
-		$this->closeNode('module');
+		//Export cronTasks
+        $this->export_CronTasks($moduleInstance);
+
+        $this->closeNode('module');
 	}
 
 	/**
@@ -347,7 +350,7 @@ class Vtiger_PackageExport {
 			$this->outputNode($fieldresultrow['fieldlabel'],    'fieldlabel');
 			$this->outputNode($fieldresultrow['readonly'],      'readonly');
 			$this->outputNode($fieldresultrow['presence'],      'presence');
-			$this->outputNode($fieldresultrow['selected'],      'selected');
+			$this->outputNode($fieldresultrow['defaultvalue'],  'defaultvalue');
 			$this->outputNode($fieldresultrow['sequence'],      'sequence');
 			$this->outputNode($fieldresultrow['maximumlength'], 'maximumlength');
 			$this->outputNode($fieldresultrow['typeofdata'],    'typeofdata');
@@ -606,11 +609,34 @@ class Vtiger_PackageExport {
 				$this->outputNode("<![CDATA[$customlink->linkurl]]>", 'linkurl');
 				$this->outputNode("<![CDATA[$customlink->linkicon]]>", 'linkicon');
 				$this->outputNode($customlink->sequence, 'sequence');
+				$this->outputNode("<![CDATA[$customlink->handler_path]]>", 'handler_path');
+				$this->outputNode("<![CDATA[$customlink->handler_class]]>", 'handler_class');
+				$this->outputNode("<![CDATA[$customlink->handler]]>", 'handler');
 				$this->closeNode('customlink');
 			}
 			$this->closeNode('customlinks');
 		}
 	}
+
+	/**
+	 * Export cron tasks for the module.
+	 * @access private
+	 */        
+	function export_CronTasks($moduleInstance){
+        $cronTasks = Vtiger_Cron::listAllInstancesByModule($moduleInstance->name);
+        $this->openNode('crons');
+        foreach($cronTasks as $cronTask){
+            $this->openNode('cron');
+            $this->outputNode($cronTask->getName(),'name');
+            $this->outputNode($cronTask->getFrequency(),'frequency');
+            $this->outputNode($cronTask->getStatus(),'status');
+            $this->outputNode($cronTask->getHandlerFile(),'handler');
+            $this->outputNode($cronTask->getSequence(),'sequence');
+            $this->outputNode($cronTask->getDescription(),'description');
+            $this->closeNode('cron');
+        }
+      $this->closeNode('crons');
+    }
 
 	/**
 	 * Helper function to log messages

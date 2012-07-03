@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * The contents of this file are subject to the SugarCRM Public License Version 1.1.2
- * ("License"); You may not use this file except in compliance with the 
+ * ("License"); You may not use this file except in compliance with the
  * License. You may obtain a copy of the License at http://www.sugarcrm.com/SPL
  * Software distributed under the License is distributed on an  "AS IS"  basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
@@ -59,46 +59,70 @@ function getTopPotentials($maxval,$calCnt)
 	$list_query .= getNonAdminAccessControlQuery('Potentials',$current_user);
 	$list_query .= "WHERE vtiger_crmentity.deleted = 0 ".$where;
 	$list_query .=" ORDER BY amount DESC";
-	
+
 	$list_query .=" LIMIT " . $adb->sql_escape_string($maxval);
-	
+
 	if($calCnt == 'calculateCnt') {
 		$list_result_rows = $adb->query(mkCountQuery($list_query));
 		return $adb->query_result($list_result_rows, 0, 'count');
 	}
-	
-	$list_result = $adb->query($list_query);	
-	
+
+	$list_result = $adb->query($list_query);
+
 	$open_potentials_list = array();
 	$noofrows = $adb->num_rows($list_result);
 
 	$entries=array();
 	if ($noofrows) {
-		for($i=0;$i<$noofrows;$i++) 
+		for($i=0;$i<$noofrows;$i++)
 		{
 			$open_potentials_list[] = Array('name' => $adb->query_result($list_result,$i,'potentialname'),
 					'id' => $adb->query_result($list_result,$i,'potentialid'),
 					'amount' => $adb->query_result($list_result,$i,'amount'),
 					);
-			$potentialid=$adb->query_result($list_result,$i,'potentialid');                                  
+			$potentialid=$adb->query_result($list_result,$i,'potentialid');
 			$potentialname = $adb->query_result($list_result,$i,'potentialname');
 			$Top_Potential = (strlen($potentialname) > 20) ? (substr($potentialname,0,20).'...') : $potentialname;
 			$value=array();
 			$value[]='<a href="index.php?action=DetailView&module=Potentials&record='.$potentialid.'">'.$Top_Potential.'</a>';
 
-			$value[]=convertFromDollar($adb->query_result($list_result,$i,'amount'),$rate);
+			$value[] = CurrencyField::convertToUserFormat($adb->query_result($list_result,$i,'amount'));
 			$entries[$potentialid]=$value;
 		}
 	}
-	
-	$search_qry = "&query=true&Fields0=assigned_user_id&Condition0=e&Srch_value0=".$current_user->column_fields['user_name']."&Fields1=sales_stage&Condition1=k&Srch_value1=closed&searchtype=advance&search_cnt=2&matchtype=all";
-			
+
+	$advft_criteria_groups = array('1' => array('groupcondition' => null));
+	$advft_criteria = array(
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_potential:sales_stage:sales_stage:Potentials_Sales_Stage:V',
+            'comparator' => 'k',
+            'value' => 'closed',
+            'columncondition' => 'and'
+        ),
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_potential:amount:amount:Potentials_Amount:N',
+            'comparator' => 'g',
+            'value' => '0',
+            'columncondition' => 'and'
+        ),
+		array (
+            'groupid' => 1,
+            'columnname' => 'vtiger_crmentity:smownerid:assigned_user_id:Leads_Assigned_To:V',
+            'comparator' => 'e',
+            'value' => getFullNameFromArray('Users', $current_user->column_fields),
+            'columncondition' => null
+        )
+	);
+	$search_qry = '&advft_criteria='.Zend_Json::encode($advft_criteria).'&advft_criteria_groups='.Zend_Json::encode($advft_criteria_groups).'&searchtype=advance&query=true';
+
 	$values=Array('ModuleName'=>'Potentials','Title'=>$title,'Header'=>$header,'Entries'=>$entries,'search_qry'=>$search_qry);
 
-	if ( ($display_empty_home_blocks && count($open_potentials_list) == 0 ) || (count($open_potentials_list)>0) )
+	if ( (count($open_potentials_list) == 0 ) || (count($open_potentials_list)>0) )
 	{
 		$log->debug("Exiting getTopPotentials method ...");
-		return $values;		
+		return $values;
 	}
 }
 ?>

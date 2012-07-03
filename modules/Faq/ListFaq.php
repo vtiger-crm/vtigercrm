@@ -25,15 +25,12 @@ function getMyFaq($maxval,$calCnt)
 	require_once('include/utils/utils.php');
 	require_once('modules/CustomView/CustomView.php');
 
-	global $current_language,$current_user,$list_max_entries_per_page,$theme,$adb;
+	global $current_language,$current_user,$list_max_entries_per_page,$adb;
 	$current_module_strings = return_module_language($current_language, 'Faq');
-
-	$log = LoggerManager::getLogger('faq_list');
 
 	$url_string = '';
 	$sorder = '';
 	$oCustomView = new CustomView("Faq");
-	$customviewcombo_html = $oCustomView->getCustomViewCombo();
 	if(isset($_REQUEST['viewname']) == false || $_REQUEST['viewname']=='')
 	{
 		if($oCustomView->setdefaultviewid != "")
@@ -45,9 +42,6 @@ function getMyFaq($maxval,$calCnt)
 		}
 	}
 	$focus = new Faq();
-
-	$theme_path="themes/".$theme."/";
-	$image_path=$theme_path."images/";
 
 	//Retreive the list from Database
 	//<<<<<<<<<customview>>>>>>>>>
@@ -78,9 +72,9 @@ function getMyFaq($maxval,$calCnt)
 	$query = $queryGenerator->getQuery();
 
 	//<<<<<<<<customview>>>>>>>>>
-	
+
 	$query .= " LIMIT 0," . $adb->sql_escape_string($maxval);
-	
+
 	if($calCnt == 'calculateCnt') {
 		$list_result_rows = $adb->query(mkCountQuery($query));
 		return $adb->query_result($list_result_rows, 0, 'count');
@@ -145,20 +139,30 @@ function getMyFaq($maxval,$calCnt)
 
 	$entries = $controller->getListViewEntries($focus,$currentModule,$list_result,
 	$navigation_array, true);
-	
+
 	$values=Array('ModuleName'=>'Faq','Title'=>$title,'Header'=>$header,'Entries'=>$entries,'search_qry'=>$search_qry);
-	if ( ($display_empty_home_blocks && $noofrows == 0 ) || ($noofrows>0) )	
+	if ( ($noofrows == 0 ) || ($noofrows>0) )
 		return $values;
 }
 
 function getMyFaqSearch($output) {
-	$output['&query'] = 'true';
-	$output['&Fields0'] = 'faqstatus';
-	$output['&Condition0'] = 'n';
-	$output['&Srch_value0'] = 'Obsolete';
-	$output['&searchtype'] = 'advance';
-	$output['&search_cnt'] = '1';
-	$output['matchtype'] = 'any';
+	$output['query'] = 'true';
+	$output['searchtype'] = 'advance';
+
+	$advft_criteria_groups = array('1' => array('groupcondition' => null));
+	$advft_criteria = array(
+		array (
+			'groupid' => 1,
+			'columnname' => 'vtiger_faq:status:faqstatus:Faq_Status:V',
+			'comparator' => 'n',
+			'value' => 'Obsolete',
+			'columncondition' => null
+		)
+	);
+
+	$output['advft_criteria'] = Zend_Json::encode($advft_criteria);
+	$output['advft_criteria_groups'] = Zend_Json::encode($advft_criteria_groups);
+
 	return $output;
 }
 

@@ -107,7 +107,7 @@ class Vtiger_Unzip extends dUnzip2 {
 						$this->debugMsg(1, "Creating folder: $targetDir/$str");
 						mkdir("$targetDir/$str");
 						if($applyChmod)
-							chmod("$targetDir/$str", $applyChmod);
+							@chmod("$targetDir/$str", $applyChmod);
 					}
 				}
 			}
