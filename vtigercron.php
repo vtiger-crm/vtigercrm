@@ -15,7 +15,13 @@
  */
 include_once 'vtlib/Vtiger/Cron.php';
 require_once 'config.inc.php';
-if(PHP_SAPI === "cli" || (isset($_SESSION["authenticated_user_id"]) &&	isset($_SESSION["app_unique_key"]) && $_SESSION["app_unique_key"] == $application_unique_key)){
+
+$clientcomesfromshell = false;
+if (PHP_SAPI === "cli" || isset($_SERVER["SHELL"]) && ( $_SERVER['SHELL'] == '/bin/bash' || $_SERVER['SHELL'] == '/bin/sh' )){
+    $clientcomesfromshell = true;
+}
+
+if ($clientcomesfromshell === true || (isset($_SESSION["authenticated_user_id"]) &&	isset($_SESSION["app_unique_key"]) && $_SESSION["app_unique_key"] == $application_unique_key)){
 
 $cronTasks = false;
 if (isset($_REQUEST['service'])) {
