@@ -1,0 +1,50 @@
+# Use an official PHP image with Apache
+FROM php:7.4-apache
+
+# Set environment variables for non-interactive installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update package list and install required packages
+RUN apt-get update && apt-get install -y \
+    unzip \
+    wget \
+    git \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    mariadb-client \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+        gd \
+        mysqli \
+        pdo_mysql \
+        zip \
+        soap \
+        intl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Enable Apache modules
+RUN a2enmod rewrite
+
+# Set up Vtiger CRM
+WORKDIR /var/www/html
+
+# Download Vtiger Open Source CRM
+RUN wget https://sourceforge.net/projects/vtigercrm/files/vtiger%20CRM%207.5.0/Core%20Product/vtigercrm7.5.0.tar.gz -O vtigercrm.tar.gz \
+    && tar -xzf vtigercrm.tar.gz --strip-components=1 \
+    && rm vtigercrm.tar.gz
+
+# Set file permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
+
+# Expose the Apache port
+EXPOSE 80
+
+# Start Apache server
+CMD ["apache2-foreground"]
+
